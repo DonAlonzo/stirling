@@ -5,6 +5,7 @@
 #include <vector>
 
 namespace stirling {
+
 class VulkanInstance {
 public:
 	VulkanInstance(const std::vector<const char*>& extensions);
@@ -19,4 +20,5 @@ public:
 private:
 	VkInstance m_instance;
 };
+
 }

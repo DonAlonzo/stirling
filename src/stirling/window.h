@@ -18,7 +18,7 @@ public:
 	Window(Window&& rhs) = default;
 	Window& operator=(Window&& rhs) = default;
 
-	bool isRunning();
+	bool isRunning() const;
 	void update();
 
 private:

@@ -50,7 +50,7 @@ Window::~Window() {
 	glfwTerminate();
 }
 
-bool Window::isRunning() {
+bool Window::isRunning() const {
 	return !glfwWindowShouldClose(m_window);
 }
 
