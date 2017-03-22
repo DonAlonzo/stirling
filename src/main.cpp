@@ -1,4 +1,5 @@
-#include "stirling/vulkan/window.h"
+#include "stirling/vulkan/instance.h"
+#include "stirling/window.h"
 
 #include <iostream>
 
@@ -15,10 +16,10 @@ public:
 	}
 
 private:
-	stirling::vulkan::Window m_window;
+	stirling::Window m_window;
 
-	stirling::vulkan::Window initWindow() {
-		return stirling::vulkan::Window(800, 600);
+	stirling::Window initWindow() {
+		return stirling::Window(800, 600);
 	}
 };
 
