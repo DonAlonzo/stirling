@@ -1,7 +1,6 @@
 #pragma once
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+typedef struct GLFWwindow GLFWwindow;
 
 namespace stirling {
 	namespace vulkan {
@@ -11,7 +10,17 @@ namespace stirling {
 			
 			~Window();
 
+			Window(const Window& rhs) = delete;
+			Window& operator=(const Window& rhs) = delete;
+
+			Window(Window&& rhs) = default;
+			Window& operator=(Window&& rhs) = default;
+
 			bool isRunning();
+			void update();
+
+		private:
+			GLFWwindow* m_window;
 		};
 	}
 }

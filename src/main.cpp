@@ -10,6 +10,7 @@ public:
 
 	void run() {
 		while (m_window.isRunning()) {
+			m_window.update();
 		}
 	}
 
