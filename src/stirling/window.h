@@ -1,8 +1,8 @@
 #pragma once
 
-typedef struct GLFWwindow GLFWwindow;
-
 #include "vulkan/instance.h"
+
+typedef struct GLFWwindow GLFWwindow;
 
 namespace stirling {
 
@@ -22,13 +22,13 @@ public:
 	void update();
 
 private:
-	GLFWwindow* createWindow(int width, int height);
-	VulkanInstance createInstance();
+	GLFWwindow*    m_window;
+	VulkanInstance m_instance;
+
+	GLFWwindow*    initWindow(int width, int height);
+	VulkanInstance initInstance();
 
 	std::vector<const char*> getRequiredExtensions();
-
-	GLFWwindow* m_window;
-	VulkanInstance m_instance;
 };
 
 }

@@ -17,8 +17,16 @@ public:
 	VulkanInstance(VulkanInstance&& rhs) = default;
 	VulkanInstance& operator=(VulkanInstance&& rhs) = default;
 
+	std::vector<VkLayerProperties> getLayerProperties();
+
 private:
-	VkInstance m_instance;
+	VkInstance               m_instance;
+	VkDebugReportCallbackEXT m_debug_callback;
+
+	VkInstance               initInstance(std::vector<const char*> extensions);
+	VkDebugReportCallbackEXT initDebugCallback(VkInstance instance);
+
+	bool checkValidationLayerSupport();
 };
 
 }
