@@ -15,17 +15,16 @@ const std::vector<const char*> g_validation_layers = {
 
 namespace stirling {
 
-	VulkanDevice::VulkanDevice(const VulkanPhysicalDevice& physical_device) :
-		m_device         (initDevice(physical_device)) {
-
+	VulkanDevice::VulkanDevice(const VulkanPhysicalDevice& physical_device, const QueueFamilyIndices& indices) :
+		m_device         (initDevice(physical_device, indices)) {
 	}
 
-	VkDevice VulkanDevice::initDevice(const VulkanPhysicalDevice& physical_device) {
+	VkDevice VulkanDevice::initDevice(const VulkanPhysicalDevice& physical_device, const QueueFamilyIndices& indices) {
 		float queue_priority = 1.0f;
 
 		VkDeviceQueueCreateInfo queue_create_info = {};
 		queue_create_info.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-		queue_create_info.queueFamilyIndex = physical_device.getGraphicsFamilyIndex();
+		queue_create_info.queueFamilyIndex = indices.graphics_family_index;
 		queue_create_info.queueCount       = 1;
 		queue_create_info.pQueuePriorities = &queue_priority;
 

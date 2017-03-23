@@ -10,7 +10,9 @@ namespace stirling {
 	Window::Window(int width, int height) :
 		m_window          (initWindow(width, height)),
 		m_instance        (initInstance()),
-		m_physical_device (choosePhysicalDevice(m_instance.getPhysicalDevices())) {
+		m_surface         (initSurface()),
+		m_physical_device (choosePhysicalDevice(m_instance.getPhysicalDevices())),
+		m_device          (initDevice()) {
 	}
 
 	GLFWwindow* Window::initWindow(int width, int height) const {
@@ -20,10 +22,18 @@ namespace stirling {
 		return glfwCreateWindow(width, height, "Stirling Engine", nullptr, nullptr);
 	}
 
+	VkSurfaceKHR Window::initSurface() const {
+		VkSurfaceKHR surface;
+		if (glfwCreateWindowSurface(m_instance, m_window, nullptr, &surface) != VK_SUCCESS) {
+			throw std::runtime_error("Failed to create window surface.");
+		}
+		return surface;
+	}
+
 	VulkanInstance Window::initInstance() const {
 		return VulkanInstance(getRequiredExtensions());
 	}
-
+	
 	VulkanPhysicalDevice Window::choosePhysicalDevice(const std::vector<VulkanPhysicalDevice>& physical_devices) const {
 		for (const auto& physical_device : physical_devices) {
 			if (isPhysicalDeviceSuitable(physical_device)) {
@@ -34,7 +44,17 @@ namespace stirling {
 	}
 
 	bool Window::isPhysicalDeviceSuitable(const VulkanPhysicalDevice& physical_device) const {
-		return physical_device.hasAllQueueFamilies();
+		return physical_device.findQueueFamilies(m_surface).isComplete();
+	}
+
+	VulkanDevice Window::initDevice() const {
+		return VulkanDevice(m_physical_device, m_physical_device.findQueueFamilies(m_surface));
+	}
+
+	Window::~Window() {
+		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+		glfwDestroyWindow(m_window);
+		glfwTerminate();
 	}
 
 	std::vector<const char*> Window::getRequiredExtensions() const {
@@ -49,11 +69,6 @@ namespace stirling {
 		}
 
 		return extensions;
-	}
-
-	Window::~Window() {
-		glfwDestroyWindow(m_window);
-		glfwTerminate();
 	}
 
 	bool Window::isRunning() const {

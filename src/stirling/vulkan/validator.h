@@ -21,9 +21,9 @@ namespace stirling {
 		VkInstance               m_instance;
 		VkDebugReportCallbackEXT m_debug_callback;
 
-		VkDebugReportCallbackEXT initDebugCallback(VkInstance instance) const;
-
 		VulkanValidator();
+
+		VkDebugReportCallbackEXT initDebugCallback(VkInstance instance) const;
 	};
 	
 }

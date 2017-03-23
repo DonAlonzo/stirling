@@ -2,7 +2,16 @@
 
 #include "vulkan/vulkan.h"
 
+#include <vector>
+
 namespace stirling {
+
+	struct QueueFamilyIndices {
+		int graphics_family_index;
+		int present_family_index;
+
+		bool isComplete();
+	};
 
 	class VulkanPhysicalDevice {
 	public:
@@ -10,14 +19,10 @@ namespace stirling {
 		
 		operator VkPhysicalDevice() const;
 
-		bool hasAllQueueFamilies() const;
-		int getGraphicsFamilyIndex() const;
+		QueueFamilyIndices findQueueFamilies(VkSurfaceKHR surface) const;
 
 	private:
 		VkPhysicalDevice m_physical_device;
-		int              m_graphics_family_index;
-
-		void initQueueFamilyIndices();
 	};
 
 }

@@ -4,11 +4,12 @@
 
 namespace stirling {
 
+	class QueueFamilyIndices;
 	class VulkanPhysicalDevice;
 
 	class VulkanDevice {
 	public:
-		VulkanDevice(const VulkanPhysicalDevice& physical_device);
+		VulkanDevice(const VulkanPhysicalDevice& physical_device, const QueueFamilyIndices& indices);
 		~VulkanDevice();
 
 		VulkanDevice(const VulkanDevice& rhs) = delete;
@@ -20,7 +21,7 @@ namespace stirling {
 	private:
 		VkDevice m_device;
 
-		VkDevice initDevice(const VulkanPhysicalDevice& physical_device);
+		VkDevice initDevice(const VulkanPhysicalDevice& physical_device, const QueueFamilyIndices& indices);
 	};
 
 }
