@@ -24,13 +24,19 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\stirling\vulkan\window.cpp">
+    <ClCompile Include="src\stirling\vulkan\instance.cpp">
       <Filter>Source Files\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stirling\window.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\stirling\vulkan\window.h">
+    <ClInclude Include="src\stirling\vulkan\instance.h">
       <Filter>Header Files\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stirling\window.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
