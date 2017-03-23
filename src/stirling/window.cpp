@@ -34,7 +34,7 @@ namespace stirling {
 	}
 
 	bool Window::isPhysicalDeviceSuitable(const VulkanPhysicalDevice& physical_device) const {
-		return physical_device.findQueueFamilies().isComplete();
+		return physical_device.hasAllQueueFamilies();
 	}
 
 	std::vector<const char*> Window::getRequiredExtensions() const {
