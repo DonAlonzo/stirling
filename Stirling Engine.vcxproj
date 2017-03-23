@@ -149,11 +149,13 @@
     <ClCompile Include="src\stirling\vulkan\instance.cpp" />
     <ClCompile Include="src\stirling\vulkan\physical_device.cpp" />
     <ClCompile Include="src\stirling\window.cpp" />
+    <ClCompile Include="src\stirling\vulkan\validator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\stirling\vulkan\instance.h" />
     <ClInclude Include="src\stirling\vulkan\physical_device.h" />
     <ClInclude Include="src\stirling\window.h" />
+    <ClInclude Include="src\stirling\vulkan\validator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,6 +2,8 @@
 
 #include "vulkan/vulkan.h"
 
+#include "validator.h"
+
 #include <vector>
 
 namespace stirling {
@@ -19,16 +21,18 @@ namespace stirling {
 		VulkanInstance(VulkanInstance&& rhs) = default;
 		VulkanInstance& operator=(VulkanInstance&& rhs) = default;
 
+		operator VkInstance() const;
+
 		std::vector<VkLayerProperties> getLayerProperties() const;
 		std::vector<VulkanPhysicalDevice> getPhysicalDevices() const;
 
 	private:
-		VkInstance               m_instance;
-		VkDebugReportCallbackEXT m_debug_callback;
+		VkInstance      m_instance;
+		VulkanValidator m_validator;
 
-		VkInstance               initInstance(std::vector<const char*> extensions) const;
-		VkDebugReportCallbackEXT initDebugCallback(VkInstance instance) const;
-
+		VkInstance      initInstance(std::vector<const char*> extensions) const;
+		VulkanValidator initValidator() const;
+		
 		bool checkValidationLayerSupport() const;
 	};
 
