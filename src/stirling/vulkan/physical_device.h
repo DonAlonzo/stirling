@@ -26,7 +26,9 @@ namespace stirling {
 
 		QueueFamilyIndices findQueueFamilies(VkSurfaceKHR surface) const;
 
-		VulkanDevice createDevice(VkSurfaceKHR surface) const;
+		VulkanDevice createDevice(VkSurfaceKHR surface, const std::vector<const char*> extensions) const;
+
+		std::vector<VkExtensionProperties> getExtensions() const;
 
 	private:
 		VkPhysicalDevice m_physical_device;

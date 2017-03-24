@@ -33,14 +33,10 @@ namespace stirling {
 		VulkanDevice         m_device;
 
 		GLFWwindow*          initWindow(int width, int height) const;
-		
 		VulkanInstance       initInstance() const;
-		
 		VkSurfaceKHR         initSurface() const;
-
 		VulkanPhysicalDevice choosePhysicalDevice(const std::vector<VulkanPhysicalDevice>& physical_devices) const;
 		bool                 isPhysicalDeviceSuitable(const VulkanPhysicalDevice& physical_device) const;
-		
 		VulkanDevice         initDevice() const;
 
 		std::vector<const char*> getRequiredExtensions() const;

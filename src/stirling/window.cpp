@@ -5,6 +5,12 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include <set>
+
+const std::vector<const char*> g_device_extensions = {
+	VK_KHR_SWAPCHAIN_EXTENSION_NAME
+};
+
 namespace stirling {
 
 	Window::Window(int width, int height) :
@@ -44,11 +50,18 @@ namespace stirling {
 	}
 
 	bool Window::isPhysicalDeviceSuitable(const VulkanPhysicalDevice& physical_device) const {
-		return physical_device.findQueueFamilies(m_surface).isComplete();
+		auto indices = physical_device.findQueueFamilies(m_surface);
+
+		std::set<std::string> required_extensions(g_device_extensions.begin(), g_device_extensions.end());
+		for (const auto& available_extension : physical_device.getExtensions()) {
+			required_extensions.erase(available_extension.extensionName);
+		}
+
+		return indices.isComplete() && required_extensions.empty();
 	}
 
 	VulkanDevice Window::initDevice() const {
-		return m_physical_device.createDevice(m_surface);
+		return m_physical_device.createDevice(m_surface, g_device_extensions);
 	}
 
 	Window::~Window() {

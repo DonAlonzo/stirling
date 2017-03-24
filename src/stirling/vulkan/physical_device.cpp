@@ -50,7 +50,7 @@ namespace stirling {
 		return indices;
 	}
 
-	VulkanDevice VulkanPhysicalDevice::createDevice(VkSurfaceKHR surface) const {
+	VulkanDevice VulkanPhysicalDevice::createDevice(VkSurfaceKHR surface, const std::vector<const char*> extensions) const {
 		QueueFamilyIndices indices = findQueueFamilies(surface);
 
 		std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
@@ -76,8 +76,8 @@ namespace stirling {
 		create_info.pQueueCreateInfos       = queue_create_infos.data();
 		create_info.queueCreateInfoCount    = queue_create_infos.size();
 		create_info.pEnabledFeatures        = &device_features;
-		create_info.enabledExtensionCount   = 0;
-		create_info.ppEnabledExtensionNames = nullptr;
+		create_info.enabledExtensionCount   = extensions.size();
+		create_info.ppEnabledExtensionNames = extensions.data();
 		create_info.enabledLayerCount       = ENABLE_VALIDATION_LAYERS ? g_validation_layers.size() : 0;
 		create_info.ppEnabledLayerNames     = ENABLE_VALIDATION_LAYERS ? g_validation_layers.data() : nullptr;
 
@@ -87,6 +87,14 @@ namespace stirling {
 		}
 
 		return VulkanDevice(device, indices);
+	}
+
+	std::vector<VkExtensionProperties> VulkanPhysicalDevice::getExtensions() const {
+		uint32_t extension_count;
+		vkEnumerateDeviceExtensionProperties(m_physical_device, nullptr, &extension_count, nullptr);
+		std::vector<VkExtensionProperties> extensions{extension_count};
+		vkEnumerateDeviceExtensionProperties(m_physical_device, nullptr, &extension_count, extensions.data());
+		return extensions;
 	}
 
 	bool QueueFamilyIndices::isComplete() const {
