@@ -7,7 +7,6 @@
 #include "queue.h"
 namespace stirling {
 	class QueueFamilyIndices;
-	class VulkanPhysicalDevice;
 }
 
 namespace stirling {

@@ -1,5 +1,11 @@
 #pragma once
 
+// Vulkan
+#include "vulkan/vulkan.h"
+
+// GLFW
+#include <GLFW/glfw3.h>
+
 // Stirling
 #include "vulkan/device.h"
 #include "vulkan/instance.h"
@@ -8,10 +14,6 @@
 
 // std
 #include <vector>
-
-// GLFW
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 
 namespace stirling {
 
