@@ -5,6 +5,9 @@
 
 // Stirling
 #include "device.h"
+namespace stirling {
+	class VulkanSurface;
+}
 
 // std
 #include <vector>
@@ -24,9 +27,9 @@ namespace stirling {
 		
 		operator VkPhysicalDevice() const;
 
-		QueueFamilyIndices findQueueFamilies(VkSurfaceKHR surface) const;
+		QueueFamilyIndices findQueueFamilies(const VulkanSurface& surface) const;
 
-		VulkanDevice createDevice(VkSurfaceKHR surface, const std::vector<const char*> extensions) const;
+		VulkanDevice createDevice(const VulkanSurface& surface, const std::vector<const char*> extensions) const;
 
 		std::vector<VkExtensionProperties> getExtensions() const;
 

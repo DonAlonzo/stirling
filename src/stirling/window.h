@@ -4,6 +4,7 @@
 #include "vulkan/device.h"
 #include "vulkan/instance.h"
 #include "vulkan/physical_device.h"
+#include "vulkan/surface.h"
 
 // std
 #include <vector>
@@ -28,13 +29,13 @@ namespace stirling {
 	private:
 		GLFWwindow*          m_window;
 		VulkanInstance       m_instance;
-		VkSurfaceKHR         m_surface;
+		VulkanSurface        m_surface;
 		VulkanPhysicalDevice m_physical_device;
 		VulkanDevice         m_device;
 
 		GLFWwindow*          initWindow(int width, int height) const;
 		VulkanInstance       initInstance() const;
-		VkSurfaceKHR         initSurface() const;
+		VulkanSurface        initSurface() const;
 		VulkanPhysicalDevice choosePhysicalDevice(const std::vector<VulkanPhysicalDevice>& physical_devices) const;
 		bool                 isPhysicalDeviceSuitable(const VulkanPhysicalDevice& physical_device) const;
 		VulkanDevice         initDevice() const;

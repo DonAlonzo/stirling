@@ -150,6 +150,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\stirling\vulkan\instance.cpp" />
     <ClCompile Include="src\stirling\vulkan\physical_device.cpp" />
+    <ClCompile Include="src\stirling\vulkan\surface.cpp" />
     <ClCompile Include="src\stirling\window.cpp" />
     <ClCompile Include="src\stirling\vulkan\validator.cpp" />
   </ItemGroup>
@@ -158,6 +159,7 @@
     <ClInclude Include="src\stirling\vulkan\device.h" />
     <ClInclude Include="src\stirling\vulkan\instance.h" />
     <ClInclude Include="src\stirling\vulkan\physical_device.h" />
+    <ClInclude Include="src\stirling\vulkan\surface.h" />
     <ClInclude Include="src\stirling\window.h" />
     <ClInclude Include="src\stirling\vulkan\validator.h" />
   </ItemGroup>

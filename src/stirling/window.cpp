@@ -28,12 +28,12 @@ namespace stirling {
 		return glfwCreateWindow(width, height, "Stirling Engine", nullptr, nullptr);
 	}
 
-	VkSurfaceKHR Window::initSurface() const {
+	VulkanSurface Window::initSurface() const {
 		VkSurfaceKHR surface;
 		if (glfwCreateWindowSurface(m_instance, m_window, nullptr, &surface) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create window surface.");
 		}
-		return surface;
+		return VulkanSurface(surface);
 	}
 
 	VulkanInstance Window::initInstance() const {

@@ -1,5 +1,6 @@
 #include "physical_device.h"
 #include "device.h"
+#include "surface.h"
 
 #include <vector>
 #include <set>
@@ -24,7 +25,7 @@ namespace stirling {
 		return m_physical_device;
 	}
 
-	QueueFamilyIndices VulkanPhysicalDevice::findQueueFamilies(VkSurfaceKHR surface) const {
+	QueueFamilyIndices VulkanPhysicalDevice::findQueueFamilies(const VulkanSurface& surface) const {
 		uint32_t queue_family_count = 0;
 		vkGetPhysicalDeviceQueueFamilyProperties(m_physical_device, &queue_family_count, nullptr);
 		std::vector<VkQueueFamilyProperties> queue_families{ queue_family_count };
@@ -50,7 +51,7 @@ namespace stirling {
 		return indices;
 	}
 
-	VulkanDevice VulkanPhysicalDevice::createDevice(VkSurfaceKHR surface, const std::vector<const char*> extensions) const {
+	VulkanDevice VulkanPhysicalDevice::createDevice(const VulkanSurface& surface, const std::vector<const char*> extensions) const {
 		QueueFamilyIndices indices = findQueueFamilies(surface);
 
 		std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
