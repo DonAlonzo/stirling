@@ -2,9 +2,6 @@
 #include "vulkan/instance.h"
 #include "vulkan/physical_device.h"
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-
 #include <set>
 
 const std::vector<const char*> g_device_extensions = {

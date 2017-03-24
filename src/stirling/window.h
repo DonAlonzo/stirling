@@ -10,7 +10,8 @@
 #include <vector>
 
 // GLFW
-typedef struct GLFWwindow GLFWwindow;
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
 
 namespace stirling {
 
