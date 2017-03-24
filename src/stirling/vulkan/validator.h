@@ -8,14 +8,12 @@ namespace stirling {
 	public:
 		VulkanValidator(VkInstance instance);
 		~VulkanValidator();
+		VulkanValidator(VulkanValidator&&) = default;
+		VulkanValidator(const VulkanValidator&) = delete;
+		VulkanValidator& operator=(VulkanValidator&&) = default;
+		VulkanValidator& operator=(const VulkanValidator&) = delete;
 
 		static VulkanValidator nullValidator();
-
-		VulkanValidator(const VulkanValidator& rhs) = delete;
-		VulkanValidator& operator=(const VulkanValidator& rhs) = delete;
-
-		VulkanValidator(VulkanValidator&& rhs) = default;
-		VulkanValidator& operator=(VulkanValidator && rhs) = default;
 
 	private:
 		VkInstance               m_instance;

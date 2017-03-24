@@ -11,12 +11,10 @@ namespace stirling {
 	public:
 		VulkanDevice(const VulkanPhysicalDevice& physical_device, const QueueFamilyIndices& indices);
 		~VulkanDevice();
-
-		VulkanDevice(const VulkanDevice& rhs) = delete;
-		VulkanDevice& operator=(const VulkanDevice& rhs) = delete;
-
-		VulkanDevice(VulkanDevice&& rhs) = default;
-		VulkanDevice& operator=(VulkanDevice&& rhs) = default;
+		VulkanDevice(VulkanDevice&&) = default;
+		VulkanDevice(const VulkanDevice&) = delete;
+		VulkanDevice& operator=(VulkanDevice&&) = default;
+		VulkanDevice& operator=(const VulkanDevice&) = delete;
 
 	private:
 		VkDevice m_device;

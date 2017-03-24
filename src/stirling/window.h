@@ -14,12 +14,10 @@ namespace stirling {
 	public:
 		Window(int width, int height);
 		~Window();
-
-		Window(const Window& rhs) = delete;
-		Window& operator=(const Window& rhs) = delete;
-
-		Window(Window&& rhs) = default;
-		Window& operator=(Window&& rhs) = default;
+		Window(Window&&) = default;
+		Window(const Window&) = delete;
+		Window& operator=(Window&&) = default;
+		Window& operator=(const Window&) = delete;
 
 		bool isRunning() const;
 		void update();

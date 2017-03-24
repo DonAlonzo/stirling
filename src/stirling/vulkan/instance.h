@@ -14,12 +14,10 @@ namespace stirling {
 	public:
 		VulkanInstance(const std::vector<const char*>& extensions);
 		~VulkanInstance();
-	
-		VulkanInstance(const VulkanInstance& rhs) = delete;
-		VulkanInstance& operator=(const VulkanInstance& rhs) = delete;
-
-		VulkanInstance(VulkanInstance&& rhs) = default;
-		VulkanInstance& operator=(VulkanInstance&& rhs) = default;
+		VulkanInstance(VulkanInstance&&) = default;
+		VulkanInstance(const VulkanInstance&) = delete;
+		VulkanInstance& operator=(VulkanInstance&&) = default;
+		VulkanInstance& operator=(const VulkanInstance&) = delete;
 
 		operator VkInstance() const;
 
