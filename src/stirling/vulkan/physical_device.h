@@ -1,7 +1,12 @@
 #pragma once
 
+// Vulkan
 #include "vulkan/vulkan.h"
 
+// Stirling
+#include "device.h"
+
+// std
 #include <vector>
 
 namespace stirling {
@@ -10,7 +15,7 @@ namespace stirling {
 		int graphics_family_index;
 		int present_family_index;
 
-		bool isComplete();
+		bool isComplete() const;
 	};
 
 	class VulkanPhysicalDevice {
@@ -20,6 +25,8 @@ namespace stirling {
 		operator VkPhysicalDevice() const;
 
 		QueueFamilyIndices findQueueFamilies(VkSurfaceKHR surface) const;
+
+		VulkanDevice createDevice(VkSurfaceKHR surface) const;
 
 	private:
 		VkPhysicalDevice m_physical_device;

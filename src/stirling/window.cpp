@@ -48,7 +48,7 @@ namespace stirling {
 	}
 
 	VulkanDevice Window::initDevice() const {
-		return VulkanDevice(m_physical_device, m_physical_device.findQueueFamilies(m_surface));
+		return m_physical_device.createDevice(m_surface);
 	}
 
 	Window::~Window() {

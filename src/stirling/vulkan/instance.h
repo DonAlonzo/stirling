@@ -1,14 +1,18 @@
 #pragma once
 
+// Vulkan
 #include "vulkan/vulkan.h"
 
+// Stirling
 #include "validator.h"
+namespace stirling {
+	class VulkanPhysicalDevice;
+}
 
+// std
 #include <vector>
 
 namespace stirling {
-
-	class VulkanPhysicalDevice;
 
 	class VulkanInstance {
 	public:

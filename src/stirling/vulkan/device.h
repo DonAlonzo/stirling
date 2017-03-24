@@ -1,15 +1,20 @@
 #pragma once
 
+// Vulkan
 #include "vulkan/vulkan.h"
+
+// Stirling
+#include "queue.h"
+namespace stirling {
+	class QueueFamilyIndices;
+	class VulkanPhysicalDevice;
+}
 
 namespace stirling {
 
-	class QueueFamilyIndices;
-	class VulkanPhysicalDevice;
-
 	class VulkanDevice {
 	public:
-		VulkanDevice(const VulkanPhysicalDevice& physical_device, const QueueFamilyIndices& indices);
+		VulkanDevice(VkDevice device, QueueFamilyIndices indices);
 		~VulkanDevice();
 		VulkanDevice(VulkanDevice&&) = default;
 		VulkanDevice(const VulkanDevice&) = delete;
@@ -17,9 +22,11 @@ namespace stirling {
 		VulkanDevice& operator=(const VulkanDevice&) = delete;
 
 	private:
-		VkDevice m_device;
+		VkDevice    m_device;
+		VulkanQueue m_graphics_queue;
+		VulkanQueue m_present_queue;
 
-		VkDevice initDevice(const VulkanPhysicalDevice& physical_device, const QueueFamilyIndices& indices);
+		VulkanQueue initQueue(int queue_family_index);
 	};
 
 }
