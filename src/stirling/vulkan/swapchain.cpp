@@ -149,5 +149,9 @@ namespace stirling {
 			return m_swapchain_extent;
 		}
 
+		const VkFormat& Swapchain::getImageFormat() const {
+			return m_swapchain_image_format;
+		}
+
 	}
 }

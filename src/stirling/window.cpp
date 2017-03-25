@@ -17,6 +17,7 @@ namespace stirling {
 		m_physical_device (choosePhysicalDevice(m_instance.getPhysicalDevices())),
 		m_device          (initDevice()),
 		m_swapchain       (initSwapchain()),
+		m_render_pass     (initRenderPass()),
 		m_pipeline        (initPipeline()) {
 	}
 
@@ -71,8 +72,12 @@ namespace stirling {
 		return vulkan::Swapchain(m_device, m_surface);
 	}
 
+	vulkan::RenderPass Window::initRenderPass() const {
+		return vulkan::RenderPass(m_device, m_swapchain.getImageFormat());
+	}
+
 	vulkan::Pipeline Window::initPipeline() const {
-		return vulkan::Pipeline(m_device, m_swapchain.getExtent());
+		return vulkan::Pipeline(m_device, m_render_pass, m_swapchain.getExtent());
 	}
 
 	Window::~Window() {

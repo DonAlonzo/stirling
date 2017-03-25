@@ -34,6 +34,7 @@ namespace stirling {
 			Swapchain& operator=(const Swapchain&) = delete;
 
 			const VkExtent2D& getExtent() const;
+			const VkFormat&   getImageFormat() const;
 
 		private:
 			const Device&           m_device;

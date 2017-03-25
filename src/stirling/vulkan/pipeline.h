@@ -5,6 +5,7 @@
 namespace stirling {
 	namespace vulkan {
 		class Device;
+		class RenderPass;
 	}
 }
 #include "shader_module.h"
@@ -13,7 +14,7 @@ namespace stirling {
 	namespace vulkan {
 		class Pipeline {
 		public:
-			Pipeline(const Device& device, const VkExtent2D& extent);
+			Pipeline(const Device& device, const RenderPass& render_pass, const VkExtent2D& extent);
 			~Pipeline();
 			Pipeline(Pipeline&&) = default;
 			Pipeline(const Pipeline&) = delete;
@@ -26,10 +27,10 @@ namespace stirling {
 			const Device&    m_device;
 
 			VkPipelineLayout m_pipeline_layout;
-			ShaderModule     m_vertex_shader;
-			ShaderModule     m_fragment_shader;
+			VkPipeline       m_pipeline;
 
-			VkPipelineLayout initPipelineLayout(const Device& device, const VkExtent2D& extent);
+			VkPipelineLayout initPipelineLayout() const;
+			VkPipeline       initPipeline(const RenderPass& render_pass, const VkExtent2D& extent) const;
 		};
 	}
 }

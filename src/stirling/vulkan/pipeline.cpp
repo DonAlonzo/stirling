@@ -1,29 +1,47 @@
 #include "pipeline.h"
 #include "device.h"
+#include "render_pass.h"
 
 namespace stirling {
 	namespace vulkan {
 
-		Pipeline::Pipeline(const Device& device, const VkExtent2D& extent) :
+		Pipeline::Pipeline(const Device& device, const RenderPass& render_pass, const VkExtent2D& extent) :
 			m_device          (device),
-			m_vertex_shader   (ShaderModule(*this, "shaders/vert.spv")),
-			m_fragment_shader (ShaderModule(*this, "shaders/frag.spv")),
-			m_pipeline_layout (initPipelineLayout(device, extent)) {
+			m_pipeline_layout (initPipelineLayout()),
+			m_pipeline        (initPipeline(render_pass, extent)) {
 		}
 
-		VkPipelineLayout Pipeline::initPipelineLayout(const Device& device, const VkExtent2D& extent) {
+		VkPipelineLayout Pipeline::initPipelineLayout() const {
+			VkPipelineLayoutCreateInfo pipeline_layout_info = {};
+			pipeline_layout_info.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+			pipeline_layout_info.setLayoutCount         = 0;
+			pipeline_layout_info.pSetLayouts            = nullptr;
+			pipeline_layout_info.pushConstantRangeCount = 0;
+			pipeline_layout_info.pPushConstantRanges    = 0;
+
+			VkPipelineLayout pipeline_layout;
+			if (vkCreatePipelineLayout(m_device, &pipeline_layout_info, nullptr, &pipeline_layout) != VK_SUCCESS) {
+				throw std::runtime_error("Failed to create pipeline layout.");
+			}
+			return pipeline_layout;
+		}
+
+		VkPipeline Pipeline::initPipeline(const RenderPass& render_pass, const VkExtent2D& extent) const {
+			ShaderModule vertex_shader(*this, "shaders/vert.spv");
+			ShaderModule fragment_shader(*this, "shaders/frag.spv");
+
 			VkPipelineShaderStageCreateInfo vertex_shader_stage_info = {};
 			vertex_shader_stage_info.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 			vertex_shader_stage_info.stage  = VK_SHADER_STAGE_VERTEX_BIT;
-			vertex_shader_stage_info.module = m_vertex_shader;
+			vertex_shader_stage_info.module = vertex_shader;
 			vertex_shader_stage_info.pName  = "main";
 
 			VkPipelineShaderStageCreateInfo fragment_shader_stage_info = {};
 			fragment_shader_stage_info.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 			fragment_shader_stage_info.stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
-			fragment_shader_stage_info.module = m_fragment_shader;
+			fragment_shader_stage_info.module = fragment_shader;
 			fragment_shader_stage_info.pName  = "main";
-			
+
 			VkPipelineShaderStageCreateInfo shader_stages[] = {
 				vertex_shader_stage_info,
 				fragment_shader_stage_info
@@ -73,6 +91,11 @@ namespace stirling {
 			rasterizer.depthBiasClamp          = 0.0f;
 			rasterizer.depthBiasSlopeFactor    = 0.0f;
 
+			VkPipelineMultisampleStateCreateInfo multisampling = {};
+			multisampling.sType                = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+			multisampling.sampleShadingEnable  = VK_FALSE;
+			multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+
 			// TODO: Depth and stencil testing
 
 			VkPipelineColorBlendAttachmentState color_blend_attachment = {};
@@ -96,21 +119,33 @@ namespace stirling {
 			color_blending.blendConstants[2] = 0.0f;
 			color_blending.blendConstants[3] = 0.0f;
 
-			VkPipelineLayoutCreateInfo pipeline_layout_info = {};
-			pipeline_layout_info.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-			pipeline_layout_info.setLayoutCount         = 0;
-			pipeline_layout_info.pSetLayouts            = nullptr;
-			pipeline_layout_info.pushConstantRangeCount = 0;
-			pipeline_layout_info.pPushConstantRanges    = 0;
+			VkGraphicsPipelineCreateInfo create_info = {};
+			create_info.sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+			create_info.stageCount          = 2;
+			create_info.pStages             = shader_stages;
+			create_info.pVertexInputState   = &vertex_input_info;
+			create_info.pInputAssemblyState = &input_assembly;
+			create_info.pViewportState      = &viewport_state;
+			create_info.pRasterizationState = &rasterizer;
+			create_info.pMultisampleState   = &multisampling;
+			create_info.pDepthStencilState  = nullptr;
+			create_info.pColorBlendState    = &color_blending;
+			create_info.pDynamicState       = nullptr;
+			create_info.layout              = m_pipeline_layout;
+			create_info.renderPass          = render_pass;
+			create_info.subpass             = 0;
+			create_info.basePipelineHandle  = VK_NULL_HANDLE;
+			create_info.basePipelineIndex   = -1;
 
-			VkPipelineLayout pipeline_layout;
-			if (vkCreatePipelineLayout(device, &pipeline_layout_info, nullptr, &pipeline_layout) != VK_SUCCESS) {
-				throw std::runtime_error("Failed to create pipeline layout.");
+			VkPipeline pipeline;
+			if (vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, 1, &create_info, nullptr, &pipeline) != VK_SUCCESS) {
+				throw std::runtime_error("Failed to create graphics pipeline.");
 			}
-			return pipeline_layout;
+			return pipeline;
 		}
 
 		Pipeline::~Pipeline() {
+			vkDestroyPipeline(m_device, m_pipeline, nullptr);
 			vkDestroyPipelineLayout(m_device, m_pipeline_layout, nullptr);
 		}
 
