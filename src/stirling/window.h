@@ -9,6 +9,7 @@
 // Stirling
 #include "vulkan/device.h"
 #include "vulkan/instance.h"
+#include "vulkan/pipeline.h"
 #include "vulkan/physical_device.h"
 #include "vulkan/surface.h"
 #include "vulkan/swapchain.h"
@@ -37,6 +38,7 @@ namespace stirling {
 		vulkan::PhysicalDevice m_physical_device;
 		vulkan::Device         m_device;
 		vulkan::Swapchain      m_swapchain;
+		vulkan::Pipeline       m_pipeline;
 
 		GLFWwindow*            initWindow(int width, int height) const;
 		vulkan::Instance       initInstance() const;
@@ -45,6 +47,7 @@ namespace stirling {
 		bool                   isPhysicalDeviceSuitable(const vulkan::PhysicalDevice& physical_device) const;
 		vulkan::Device         initDevice() const;
 		vulkan::Swapchain      initSwapchain() const;
+		vulkan::Pipeline       initPipeline() const;
 
 		std::vector<const char*> getRequiredExtensions() const;
 	};

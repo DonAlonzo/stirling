@@ -52,7 +52,10 @@ namespace stirling {
 			create_info.clipped          = VK_TRUE;
 			create_info.oldSwapchain     = VK_NULL_HANDLE;
 
-			m_swapchain              = device.createSwapchain(create_info);
+
+			if (vkCreateSwapchainKHR(m_device, &create_info, nullptr, &m_swapchain) != VK_SUCCESS) {
+				throw std::runtime_error("Failed to create swap chain.");
+			}
 			m_swapchain_images       = device.getSwapchainImages(m_swapchain, image_count);
 			m_swapchain_image_format = surface_format.format;
 		}
@@ -140,6 +143,10 @@ namespace stirling {
 
 		Swapchain::~Swapchain() {
 			vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
+		}
+
+		const VkExtent2D& Swapchain::getExtent() const {
+			return m_swapchain_extent;
 		}
 
 	}

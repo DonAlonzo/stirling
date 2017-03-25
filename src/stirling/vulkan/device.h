@@ -29,9 +29,9 @@ namespace stirling {
 
 			const PhysicalDevice& getPhysicalDevice() const;
 
-			VkSwapchainKHR createSwapchain(VkSwapchainCreateInfoKHR create_info) const;
-
 			std::vector<VkImage> getSwapchainImages(VkSwapchainKHR swapchain, uint32_t count) const;
+
+			VkSwapchainKHR createSwapchain(VkSwapchainCreateInfoKHR create_info) const;
 
 		private:
 			const PhysicalDevice& m_physical_device;

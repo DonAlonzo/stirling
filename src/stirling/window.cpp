@@ -16,7 +16,8 @@ namespace stirling {
 		m_surface         (initSurface()),
 		m_physical_device (choosePhysicalDevice(m_instance.getPhysicalDevices())),
 		m_device          (initDevice()),
-		m_swapchain       (initSwapchain()) {
+		m_swapchain       (initSwapchain()),
+		m_pipeline        (initPipeline()) {
 	}
 
 	GLFWwindow* Window::initWindow(int width, int height) const {
@@ -68,6 +69,10 @@ namespace stirling {
 
 	vulkan::Swapchain Window::initSwapchain() const {
 		return vulkan::Swapchain(m_device, m_surface);
+	}
+
+	vulkan::Pipeline Window::initPipeline() const {
+		return vulkan::Pipeline(m_device, m_swapchain.getExtent());
 	}
 
 	Window::~Window() {

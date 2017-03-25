@@ -33,6 +33,8 @@ namespace stirling {
 			Swapchain& operator=(Swapchain&&) = default;
 			Swapchain& operator=(const Swapchain&) = delete;
 
+			const VkExtent2D& getExtent() const;
+
 		private:
 			const Device&           m_device;
 
