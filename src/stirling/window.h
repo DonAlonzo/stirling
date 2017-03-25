@@ -35,16 +35,16 @@ namespace stirling {
 
 	private:
 		GLFWwindow*                      m_window;
-		vulkan::Instance                 m_instance;
-		vulkan::Surface                  m_surface;
-		vulkan::PhysicalDevice           m_physical_device;
-		vulkan::Device                   m_device;
-		vulkan::Swapchain                m_swapchain;
-		vulkan::RenderPass               m_render_pass;
-		vulkan::Pipeline                 m_pipeline;
-		std::vector<vulkan::Framebuffer> m_framebuffers;
-		vulkan::CommandPool              m_command_pool;
-		std::vector<VkCommandBuffer>     m_command_buffers;
+		vulkan::Instance                 m_instance        = initInstance();
+		vulkan::Surface                  m_surface         = initSurface();
+		vulkan::PhysicalDevice           m_physical_device = choosePhysicalDevice(m_instance.getPhysicalDevices());
+		vulkan::Device                   m_device          = initDevice();
+		vulkan::Swapchain                m_swapchain       = initSwapchain();
+		vulkan::RenderPass               m_render_pass     = initRenderPass();
+		vulkan::Pipeline                 m_pipeline        = initPipeline();
+		std::vector<vulkan::Framebuffer> m_framebuffers    = initFramebuffers();
+		vulkan::CommandPool              m_command_pool    = initCommandPool();
+		std::vector<VkCommandBuffer>     m_command_buffers = initCommandBuffers();
 		
 		GLFWwindow*                      initWindow(int width, int height) const;
 		vulkan::Instance                 initInstance() const;

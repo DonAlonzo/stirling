@@ -11,17 +11,7 @@ const std::vector<const char*> g_device_extensions = {
 namespace stirling {
 
 	Window::Window(int width, int height) :
-		m_window          (initWindow(width, height)),
-		m_instance        (initInstance()),
-		m_surface         (initSurface()),
-		m_physical_device (choosePhysicalDevice(m_instance.getPhysicalDevices())),
-		m_device          (initDevice()),
-		m_swapchain       (initSwapchain()),
-		m_render_pass     (initRenderPass()),
-		m_pipeline        (initPipeline()),
-		m_framebuffers    (initFramebuffers()),
-		m_command_pool    (initCommandPool()),
-		m_command_buffers (initCommandBuffers()) {
+		m_window (initWindow(width, height)) {
 	}
 
 	GLFWwindow* Window::initWindow(int width, int height) const {

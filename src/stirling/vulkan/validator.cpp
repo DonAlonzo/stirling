@@ -29,26 +29,27 @@ namespace stirling {
 	namespace vulkan {
 
 		Validator::Validator(VkInstance instance) :
-			m_instance(instance),
-			m_debug_callback(initDebugCallback(instance)) {
+			m_instance (instance) {
 		}
 
 		Validator::Validator() :
-			m_debug_callback(VK_NULL_HANDLE) {
+			m_instance (m_instance) {
 		}
 
 		Validator Validator::nullValidator() {
 			return Validator();
 		}
 
-		VkDebugReportCallbackEXT Validator::initDebugCallback(VkInstance instance) const {
+		VkDebugReportCallbackEXT Validator::initDebugCallback() const {
+			if (m_instance == VK_NULL_HANDLE) return VK_NULL_HANDLE;
+
 			VkDebugReportCallbackCreateInfoEXT create_info = {};
 			create_info.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
 			create_info.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
 			create_info.pfnCallback = debugCallback;
 
 			VkDebugReportCallbackEXT debug_callback;
-			if (createDebugReportCallbackEXT(instance, &create_info, nullptr, &debug_callback) != VK_SUCCESS) {
+			if (createDebugReportCallbackEXT(m_instance, &create_info, nullptr, &debug_callback) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to set up debug callback.");
 			}
 			return debug_callback;

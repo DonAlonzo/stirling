@@ -19,11 +19,11 @@ namespace stirling {
 
 		private:
 			VkInstance               m_instance;
-			VkDebugReportCallbackEXT m_debug_callback;
+			VkDebugReportCallbackEXT m_debug_callback = initDebugCallback();
 
 			Validator();
 
-			VkDebugReportCallbackEXT initDebugCallback(VkInstance instance) const;
+			VkDebugReportCallbackEXT initDebugCallback() const;
 		};
 
 	}
