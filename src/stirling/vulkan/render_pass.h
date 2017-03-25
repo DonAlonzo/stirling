@@ -23,7 +23,6 @@ namespace stirling {
 
 		private:
 			const Device& m_device;
-
 			VkRenderPass  m_render_pass;
 
 			VkRenderPass  initRenderPass(const VkFormat& image_format) const;

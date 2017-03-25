@@ -23,7 +23,6 @@ namespace stirling {
 
 		private:
 			const Device& m_device;
-
 			int           m_family_index;
 			VkQueue       m_queue;
 

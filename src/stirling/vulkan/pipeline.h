@@ -27,7 +27,6 @@ namespace stirling {
 
 		private:
 			const Device&    m_device;
-
 			VkPipelineLayout m_pipeline_layout;
 			VkPipeline       m_pipeline;
 

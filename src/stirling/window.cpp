@@ -101,8 +101,8 @@ namespace stirling {
 			render_pass_info.pClearValues      = &clear_color;
 
 			vkCmdBeginRenderPass(command_buffers[i], &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
-			vkCmdBindPipeline(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
-			vkCmdDraw(command_buffers[i], 3, 1, 0, 0);
+				vkCmdBindPipeline(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
+				vkCmdDraw(command_buffers[i], 3, 1, 0, 0);
 			vkCmdEndRenderPass(command_buffers[i]);
 
 			if (vkEndCommandBuffer(command_buffers[i]) != VK_SUCCESS) {
