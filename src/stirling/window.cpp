@@ -127,10 +127,10 @@ namespace stirling {
 	void Window::onResized(GLFWwindow* window, int width, int height) {
 		if (width == 0 || height == 0) return;
 
-		reinterpret_cast<Window*>(glfwGetWindowUserPointer(window))->recreateSwapChain();
+		reinterpret_cast<Window*>(glfwGetWindowUserPointer(window))->recreateSwapchain();
 	}
 
-	void Window::recreateSwapChain() {
+	void Window::recreateSwapchain() {
 		vkDeviceWaitIdle(m_device);
 
 		m_swapchain.reset(getSize());
@@ -170,7 +170,16 @@ namespace stirling {
 
 	void Window::update() {
 		uint32_t image_index;
-		vkAcquireNextImageKHR(m_device, m_swapchain, std::numeric_limits<uint64_t>::max(), m_image_available_semaphore, VK_NULL_HANDLE, &image_index);
+		switch (vkAcquireNextImageKHR(m_device, m_swapchain, std::numeric_limits<uint64_t>::max(), m_image_available_semaphore, VK_NULL_HANDLE, &image_index)) {
+		case VK_ERROR_OUT_OF_DATE_KHR:
+			recreateSwapchain();
+			return;
+		case VK_SUBOPTIMAL_KHR:
+		case VK_SUCCESS:
+			break;
+		default:
+			throw std::runtime_error("Failed to acquire swapchain image.");
+		}
 
 		VkSemaphore wait_semaphores[] = {
 			m_image_available_semaphore
@@ -211,7 +220,16 @@ namespace stirling {
 		present_info.pImageIndices      = &image_index;
 		present_info.pResults           = nullptr;
 
-		vkQueuePresentKHR(m_device.getPresentQueue(), &present_info);
+		switch (vkQueuePresentKHR(m_device.getPresentQueue(), &present_info)) {
+		case VK_ERROR_OUT_OF_DATE_KHR:
+		case VK_SUBOPTIMAL_KHR:
+			recreateSwapchain();
+			return;
+		case VK_SUCCESS:
+			break;
+		default:
+			throw std::runtime_error("Failed to present swapchain image.");
+		}
 	}
 
 }

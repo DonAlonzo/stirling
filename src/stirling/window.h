@@ -62,7 +62,7 @@ namespace stirling {
 		vulkan::CommandPool              initCommandPool() const;
 		std::vector<VkCommandBuffer>     initCommandBuffers() const;
 
-		void                             recreateSwapChain();
+		void                             recreateSwapchain();
 		std::vector<const char*>         getRequiredExtensions() const;
 		VkExtent2D                       getSize() const;
 
