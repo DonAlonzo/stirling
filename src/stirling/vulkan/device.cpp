@@ -14,9 +14,7 @@ namespace stirling {
 		}
 
 		Queue Device::initQueue(int queue_family_index) {
-			VkQueue queue;
-			vkGetDeviceQueue(m_device, queue_family_index, 0, &queue);
-			return Queue(*this, queue);
+			return Queue(*this, queue_family_index);
 		}
 
 		Device::~Device() {
@@ -31,20 +29,27 @@ namespace stirling {
 			return m_physical_device;
 		}
 
+		Queue Device::getGraphicsQueue() const {
+			return m_graphics_queue;
+		}
+
+		Queue Device::getPresentQueue() const {
+			return m_present_queue;
+		}
+
+		std::vector<VkImage> Device::getSwapchainImages(VkSwapchainKHR swapchain, uint32_t image_count) const {
+			vkGetSwapchainImagesKHR(m_device, swapchain, &image_count, nullptr);
+			std::vector<VkImage> images{ image_count };
+			vkGetSwapchainImagesKHR(m_device, swapchain, &image_count, images.data());
+			return images;
+		}
+
 		VkSwapchainKHR Device::createSwapchain(VkSwapchainCreateInfoKHR create_info) const {
 			VkSwapchainKHR swapchain;
 			if (vkCreateSwapchainKHR(m_device, &create_info, nullptr, &swapchain) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to create swap chain.");
 			}
 			return swapchain;
-		}
-
-		std::vector<VkImage> Device::getSwapchainImages(VkSwapchainKHR swapchain, uint32_t image_count) const {
-			vkGetSwapchainImagesKHR(m_device, swapchain, &image_count, nullptr);
-			std::vector<VkImage> images{image_count};
-			vkGetSwapchainImagesKHR(m_device, swapchain, &image_count, images.data());
-			return images;
-
 		}
 
 	}

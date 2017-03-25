@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 
 // Stirling
+#include "vulkan/command_pool.h"
 #include "vulkan/device.h"
 #include "vulkan/instance.h"
 #include "vulkan/pipeline.h"
@@ -42,6 +43,7 @@ namespace stirling {
 		vulkan::RenderPass               m_render_pass;
 		vulkan::Pipeline                 m_pipeline;
 		std::vector<vulkan::Framebuffer> m_framebuffers;
+		vulkan::CommandPool              m_command_pool;
 
 		GLFWwindow*                      initWindow(int width, int height) const;
 		vulkan::Instance                 initInstance() const;
@@ -53,6 +55,8 @@ namespace stirling {
 		vulkan::RenderPass               initRenderPass() const;
 		vulkan::Pipeline                 initPipeline() const;
 		std::vector<vulkan::Framebuffer> initFramebuffers() const;
+		vulkan::CommandPool              initCommandPool() const;
+		std::vector<VkCommandBuffer>     initCommandBuffers() const;
 
 		std::vector<const char*> getRequiredExtensions() const;
 	};

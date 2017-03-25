@@ -5,6 +5,7 @@
 
 namespace stirling {
 	namespace vulkan {
+		class CommandPool;
 		class Device;
 	}
 }
@@ -14,12 +15,17 @@ namespace stirling {
 
 		class Queue {
 		public:
-			Queue(const Device& device, VkQueue queue);
+			Queue(const Device& device, int family_index);
+
+			CommandPool createCommandPool() const;
 
 		private:
 			const Device& m_device;
 
-			VkQueue             m_queue;
+			int           m_family_index;
+			VkQueue       m_queue;
+
+			VkQueue       initQueue() const;
 		};
 
 	}

@@ -28,8 +28,9 @@ namespace stirling {
 			operator VkDevice() const;
 
 			const PhysicalDevice& getPhysicalDevice() const;
-
 			std::vector<VkImage> getSwapchainImages(VkSwapchainKHR swapchain, uint32_t count) const;
+			Queue getGraphicsQueue() const;
+			Queue getPresentQueue() const;
 
 			VkSwapchainKHR createSwapchain(VkSwapchainCreateInfoKHR create_info) const;
 
