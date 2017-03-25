@@ -18,7 +18,7 @@ namespace stirling {
 			~CommandPool();
 			CommandPool(CommandPool&&) = default;
 			CommandPool(const CommandPool&) = delete;
-			CommandPool& operator=(CommandPool&&) = default;
+			CommandPool& operator=(CommandPool&&) = delete;
 			CommandPool& operator=(const CommandPool&) = delete;
 
 			operator VkCommandPool() const;

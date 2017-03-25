@@ -22,7 +22,7 @@ namespace stirling {
 			~Device();
 			Device(Device&&) = default;
 			Device(const Device&) = delete;
-			Device& operator=(Device&&) = default;
+			Device& operator=(Device&&) = delete;
 			Device& operator=(const Device&) = delete;
 
 			operator VkDevice() const;

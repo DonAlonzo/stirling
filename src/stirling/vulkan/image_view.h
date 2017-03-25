@@ -14,15 +14,16 @@ namespace stirling {
 		public:
 			ImageView(const Device& device, VkImageView);
 			~ImageView();
-			ImageView(ImageView&&) = default;
+			ImageView(ImageView&& rhs);
 			ImageView(const ImageView&) = delete;
-			ImageView& operator=(ImageView&&) = default;
+			ImageView& operator=(ImageView&&) = delete;
 			ImageView& operator=(const ImageView&) = delete;
 
 			operator VkImageView() const;
 
 		private:
 			const Device& m_device;
+
 			VkImageView   m_image_view;
 		};
 	}

@@ -20,7 +20,8 @@ namespace stirling {
 		m_render_pass     (initRenderPass()),
 		m_pipeline        (initPipeline()),
 		m_framebuffers    (initFramebuffers()),
-		m_command_pool    (initCommandPool()) {
+		m_command_pool    (initCommandPool()),
+		m_command_buffers (initCommandBuffers()) {
 	}
 
 	GLFWwindow* Window::initWindow(int width, int height) const {
@@ -91,7 +92,34 @@ namespace stirling {
 	}
 	
 	std::vector<VkCommandBuffer> Window::initCommandBuffers() const {
-		return m_command_pool.allocateCommandBuffers(m_framebuffers.size());
+		auto command_buffers = m_command_pool.allocateCommandBuffers(m_framebuffers.size());
+		for (int i = 0; i < command_buffers.size(); ++i) {
+			VkCommandBufferBeginInfo begin_info = {};
+			begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+			begin_info.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+			vkBeginCommandBuffer(command_buffers[i], &begin_info);
+
+			VkClearValue clear_color = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+			VkRenderPassBeginInfo render_pass_info = {};
+			render_pass_info.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+			render_pass_info.renderPass        = m_render_pass;
+			render_pass_info.framebuffer       = m_framebuffers[i];
+			render_pass_info.renderArea.offset = { 0, 0 };
+			render_pass_info.renderArea.extent = m_swapchain.getExtent();
+			render_pass_info.clearValueCount   = 1;
+			render_pass_info.pClearValues      = &clear_color;
+
+			vkCmdBeginRenderPass(command_buffers[i], &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
+			vkCmdBindPipeline(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
+			vkCmdDraw(command_buffers[i], 3, 1, 0, 0);
+			vkCmdEndRenderPass(command_buffers[i]);
+
+			if (vkEndCommandBuffer(command_buffers[i]) != VK_SUCCESS) {
+				throw std::runtime_error("Failed to record command buffer.");
+			}
+		}
+		return command_buffers;
 	}
 
 	Window::~Window() {
@@ -115,11 +143,11 @@ namespace stirling {
 	}
 
 	bool Window::isRunning() const {
+		glfwPollEvents();
 		return !glfwWindowShouldClose(m_window);
 	}
 
 	void Window::update() {
-		glfwPollEvents();
 	}
 
 }

@@ -22,7 +22,7 @@ namespace stirling {
 			~Instance();
 			Instance(Instance&&) = default;
 			Instance(const Instance&) = delete;
-			Instance& operator=(Instance&&) = default;
+			Instance& operator=(Instance&&) = delete;
 			Instance& operator=(const Instance&) = delete;
 
 			operator VkInstance() const;

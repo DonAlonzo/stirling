@@ -16,10 +16,12 @@ namespace stirling {
 		public:
 			Framebuffer(const Device& device, VkFramebuffer);
 			~Framebuffer();
-			Framebuffer(Framebuffer&&) = default;
+			Framebuffer(Framebuffer&&);
 			Framebuffer(const Framebuffer&) = delete;
-			Framebuffer& operator=(Framebuffer&&) = default;
+			Framebuffer& operator=(Framebuffer&&) = delete;
 			Framebuffer& operator=(const Framebuffer&) = delete;
+
+			operator VkFramebuffer() const;
 
 		private:
 			const Device& m_device;

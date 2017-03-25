@@ -10,8 +10,16 @@ namespace stirling {
 			m_image_view (image_view) {
 		}
 
+		ImageView::ImageView(ImageView&& rhs) :
+			m_device     (std::move(rhs.m_device)),
+			m_image_view (std::move(rhs.m_image_view)) {
+			rhs.m_image_view = VK_NULL_HANDLE;
+		}
+
 		ImageView::~ImageView() {
-			vkDestroyImageView(m_device, m_image_view, nullptr);
+			if (m_image_view != VK_NULL_HANDLE) {
+				vkDestroyImageView(m_device, m_image_view, nullptr);
+			}
 		}
 
 		ImageView::operator VkImageView() const {

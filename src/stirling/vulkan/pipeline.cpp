@@ -149,6 +149,10 @@ namespace stirling {
 			vkDestroyPipelineLayout(m_device, m_pipeline_layout, nullptr);
 		}
 
+		Pipeline::operator VkPipeline() const {
+			return m_pipeline;
+		}
+
 		const Device& Pipeline::getDevice() const {
 			return m_device;
 		}

@@ -27,7 +27,7 @@ namespace stirling {
 		~Window();
 		Window(Window&&) = default;
 		Window(const Window&) = delete;
-		Window& operator=(Window&&) = default;
+		Window& operator=(Window&&) = delete;
 		Window& operator=(const Window&) = delete;
 
 		bool isRunning() const;
@@ -44,7 +44,8 @@ namespace stirling {
 		vulkan::Pipeline                 m_pipeline;
 		std::vector<vulkan::Framebuffer> m_framebuffers;
 		vulkan::CommandPool              m_command_pool;
-
+		std::vector<VkCommandBuffer>     m_command_buffers;
+		
 		GLFWwindow*                      initWindow(int width, int height) const;
 		vulkan::Instance                 initInstance() const;
 		vulkan::Surface                  initSurface() const;

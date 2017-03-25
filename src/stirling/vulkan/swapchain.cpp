@@ -16,7 +16,7 @@ namespace stirling {
 			m_swapchain_extent (chooseSwapExtent(m_support_details.capabilities)) {
 
 			auto surface_format = chooseSwapSurfaceFormat(device.getPhysicalDevice().getSurfaceFormats(surface));
-			auto present_mode   = chooseSwapPresentMode(device.getPhysicalDevice().getSurfacePresentModes(surface));
+			auto present_mode = chooseSwapPresentMode(device.getPhysicalDevice().getSurfacePresentModes(surface));
 
 			uint32_t image_count = m_support_details.capabilities.minImageCount + 1;
 			if (m_support_details.capabilities.maxImageCount > 0 && image_count > m_support_details.capabilities.maxImageCount) {
@@ -47,18 +47,18 @@ namespace stirling {
 				create_info.imageSharingMode      = VK_SHARING_MODE_EXCLUSIVE;
 			}
 
-			create_info.preTransform     = m_support_details.capabilities.currentTransform;
-			create_info.compositeAlpha   = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-			create_info.presentMode      = present_mode;
-			create_info.clipped          = VK_TRUE;
-			create_info.oldSwapchain     = VK_NULL_HANDLE;
+			create_info.preTransform   = m_support_details.capabilities.currentTransform;
+			create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+			create_info.presentMode    = present_mode;
+			create_info.clipped        = VK_TRUE;
+			create_info.oldSwapchain   = VK_NULL_HANDLE;
 
-
-			if (vkCreateSwapchainKHR(m_device, &create_info, nullptr, &m_swapchain) != VK_SUCCESS) {
+			if (vkCreateSwapchainKHR(m_device, &create_info, nullptr, m_swapchain.replace()) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to create swap chain.");
 			}
-			m_swapchain_images       = device.getSwapchainImages(m_swapchain, image_count);
+			m_swapchain_images = device.getSwapchainImages(m_swapchain, image_count);
 			m_swapchain_image_format = surface_format.format;
+			m_swapchain_image_views = initImageViews(image_count);
 		}
 
 		SwapchainSupportDetails Swapchain::fetchSupportDetails(const PhysicalDevice& physical_device, const Surface& surface) const {
@@ -113,8 +113,9 @@ namespace stirling {
 			}
 		}
 
-		std::vector<ImageView> Swapchain::initImageViews() const {
+		std::vector<ImageView> Swapchain::initImageViews(uint32_t image_count) const {
 			std::vector<ImageView> image_views;
+			image_views.reserve(m_swapchain_images.size());
 
 			for (uint32_t i = 0; i < m_swapchain_images.size(); ++i) {
 				VkImageViewCreateInfo create_info = {};
@@ -136,14 +137,10 @@ namespace stirling {
 				if (vkCreateImageView(m_device, &create_info, nullptr, &image_view) != VK_SUCCESS) {
 					throw std::runtime_error("Failed to create image views.");
 				}
-				image_views.emplace_back(ImageView(m_device, image_view));
+				image_views.push_back(ImageView(m_device, image_view));
 			}
 
 			return image_views;
-		}
-
-		Swapchain::~Swapchain() {
-			vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
 		}
 
 		const VkExtent2D& Swapchain::getExtent() const {
@@ -156,6 +153,8 @@ namespace stirling {
 
 		std::vector<Framebuffer> Swapchain::createFramebuffers(const RenderPass& render_pass) const {
 			std::vector<Framebuffer> framebuffers;
+			framebuffers.reserve(m_swapchain_image_views.size());
+
 			for (size_t i = 0; i < m_swapchain_image_views.size(); ++i) {
 				VkImageView attachments[] = {
 					m_swapchain_image_views[i]
@@ -174,7 +173,7 @@ namespace stirling {
 				if (vkCreateFramebuffer(m_device, &create_info, nullptr, &framebuffer) != VK_SUCCESS) {
 					throw std::runtime_error("Failed to create framebuffer.");
 				}
-				framebuffers.emplace_back(Framebuffer(m_device, framebuffer));
+				framebuffers.push_back(Framebuffer(m_device, framebuffer));
 			}
 			return framebuffers;
 		}

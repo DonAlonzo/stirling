@@ -11,6 +11,7 @@ namespace stirling {
 		class Surface;
 	}
 }
+#include "deleter.h"
 #include "device.h"
 #include "framebuffer.h"
 #include "image_view.h"
@@ -29,10 +30,10 @@ namespace stirling {
 		class Swapchain {
 		public:
 			Swapchain(const Device& device, const Surface& surface);
-			~Swapchain();
+			~Swapchain() = default;
 			Swapchain(Swapchain&&) = default;
 			Swapchain(const Swapchain&) = delete;
-			Swapchain& operator=(Swapchain&&) = default;
+			Swapchain& operator=(Swapchain&&) = delete;
 			Swapchain& operator=(const Swapchain&) = delete;
 
 			const VkExtent2D& getExtent() const;
@@ -44,17 +45,17 @@ namespace stirling {
 			const Device&            m_device;
 
 			SwapchainSupportDetails  m_support_details;
-			VkSwapchainKHR           m_swapchain;
+			Deleter<VkSwapchainKHR>  m_swapchain{m_device, vkDestroySwapchainKHR};
+			VkExtent2D               m_swapchain_extent;
 			std::vector<VkImage>     m_swapchain_images;
 			VkFormat                 m_swapchain_image_format;
-			VkExtent2D               m_swapchain_extent;
 			std::vector<ImageView>   m_swapchain_image_views;
 
 			SwapchainSupportDetails  fetchSupportDetails(const PhysicalDevice& physical_device, const Surface& surface) const;
 			VkSurfaceFormatKHR       chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const;
 			VkPresentModeKHR         chooseSwapPresentMode(const std::vector<VkPresentModeKHR> available_present_modes) const;
 			VkExtent2D               chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) const;
-			std::vector<ImageView>   initImageViews() const;
+			std::vector<ImageView>   initImageViews(uint32_t image_count) const;
 		};
 
 	}

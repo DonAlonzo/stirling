@@ -39,7 +39,7 @@ namespace stirling {
 
 		std::vector<VkImage> Device::getSwapchainImages(VkSwapchainKHR swapchain, uint32_t image_count) const {
 			vkGetSwapchainImagesKHR(m_device, swapchain, &image_count, nullptr);
-			std::vector<VkImage> images{ image_count };
+			std::vector<VkImage> images{image_count};
 			vkGetSwapchainImagesKHR(m_device, swapchain, &image_count, images.data());
 			return images;
 		}

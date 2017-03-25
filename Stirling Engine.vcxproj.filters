@@ -110,5 +110,8 @@
     <ClInclude Include="src\stirling\vulkan\command_pool.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="src\stirling\vulkan\deleter.h">
+      <Filter>Header Files\vulkan</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

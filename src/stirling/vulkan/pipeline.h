@@ -18,8 +18,10 @@ namespace stirling {
 			~Pipeline();
 			Pipeline(Pipeline&&) = default;
 			Pipeline(const Pipeline&) = delete;
-			Pipeline& operator=(Pipeline&&) = default;
+			Pipeline& operator=(Pipeline&&) = delete;
 			Pipeline& operator=(const Pipeline&) = delete;
+
+			operator VkPipeline() const;
 
 			const Device& getDevice() const;
 

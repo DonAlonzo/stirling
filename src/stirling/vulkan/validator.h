@@ -12,7 +12,7 @@ namespace stirling {
 			~Validator();
 			Validator(Validator&&) = default;
 			Validator(const Validator&) = delete;
-			Validator& operator=(Validator&&) = default;
+			Validator& operator=(Validator&&) = delete;
 			Validator& operator=(const Validator&) = delete;
 
 			static Validator nullValidator();

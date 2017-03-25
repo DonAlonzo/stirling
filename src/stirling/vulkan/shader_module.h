@@ -19,7 +19,7 @@ namespace stirling {
 			~ShaderModule();
 			ShaderModule(ShaderModule&&) = default;
 			ShaderModule(const ShaderModule&) = delete;
-			ShaderModule& operator=(ShaderModule&&) = default;
+			ShaderModule& operator=(ShaderModule&&) = delete;
 			ShaderModule& operator=(const ShaderModule&) = delete;
 
 			operator VkShaderModule() const;
