@@ -33,24 +33,26 @@ namespace stirling {
 		void update();
 
 	private:
-		GLFWwindow*            m_window;
-		vulkan::Instance       m_instance;
-		vulkan::Surface        m_surface;
-		vulkan::PhysicalDevice m_physical_device;
-		vulkan::Device         m_device;
-		vulkan::Swapchain      m_swapchain;
-		vulkan::RenderPass     m_render_pass;
-		vulkan::Pipeline       m_pipeline;
+		GLFWwindow*                      m_window;
+		vulkan::Instance                 m_instance;
+		vulkan::Surface                  m_surface;
+		vulkan::PhysicalDevice           m_physical_device;
+		vulkan::Device                   m_device;
+		vulkan::Swapchain                m_swapchain;
+		vulkan::RenderPass               m_render_pass;
+		vulkan::Pipeline                 m_pipeline;
+		std::vector<vulkan::Framebuffer> m_framebuffers;
 
-		GLFWwindow*            initWindow(int width, int height) const;
-		vulkan::Instance       initInstance() const;
-		vulkan::Surface        initSurface() const;
-		vulkan::PhysicalDevice choosePhysicalDevice(const std::vector<vulkan::PhysicalDevice>& physical_devices) const;
-		bool                   isPhysicalDeviceSuitable(const vulkan::PhysicalDevice& physical_device) const;
-		vulkan::Device         initDevice() const;
-		vulkan::Swapchain      initSwapchain() const;
-		vulkan::RenderPass     initRenderPass() const;
-		vulkan::Pipeline       initPipeline() const;
+		GLFWwindow*                      initWindow(int width, int height) const;
+		vulkan::Instance                 initInstance() const;
+		vulkan::Surface                  initSurface() const;
+		vulkan::PhysicalDevice           choosePhysicalDevice(const std::vector<vulkan::PhysicalDevice>& physical_devices) const;
+		bool                             isPhysicalDeviceSuitable(const vulkan::PhysicalDevice& physical_device) const;
+		vulkan::Device                   initDevice() const;
+		vulkan::Swapchain                initSwapchain() const;
+		vulkan::RenderPass               initRenderPass() const;
+		vulkan::Pipeline                 initPipeline() const;
+		std::vector<vulkan::Framebuffer> initFramebuffers() const;
 
 		std::vector<const char*> getRequiredExtensions() const;
 	};

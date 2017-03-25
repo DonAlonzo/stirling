@@ -19,6 +19,8 @@ namespace stirling {
 			ImageView& operator=(ImageView&&) = default;
 			ImageView& operator=(const ImageView&) = delete;
 
+			operator VkImageView() const;
+
 		private:
 			const Device& m_device;
 			VkImageView   m_image_view;

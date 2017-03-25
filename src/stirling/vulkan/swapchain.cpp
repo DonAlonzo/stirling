@@ -2,6 +2,7 @@
 
 #include "device.h"
 #include "physical_device.h"
+#include "render_pass.h"
 #include "surface.h"
 
 #include <algorithm>
@@ -112,7 +113,7 @@ namespace stirling {
 			}
 		}
 
-		std::vector<ImageView> Swapchain::createImageViews() const {
+		std::vector<ImageView> Swapchain::initImageViews() const {
 			std::vector<ImageView> image_views;
 
 			for (uint32_t i = 0; i < m_swapchain_images.size(); ++i) {
@@ -151,6 +152,31 @@ namespace stirling {
 
 		const VkFormat& Swapchain::getImageFormat() const {
 			return m_swapchain_image_format;
+		}
+
+		std::vector<Framebuffer> Swapchain::createFramebuffers(const RenderPass& render_pass) const {
+			std::vector<Framebuffer> framebuffers;
+			for (size_t i = 0; i < m_swapchain_image_views.size(); ++i) {
+				VkImageView attachments[] = {
+					m_swapchain_image_views[i]
+				};
+
+				VkFramebufferCreateInfo create_info = {};
+				create_info.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+				create_info.renderPass      = render_pass;
+				create_info.attachmentCount = 1;
+				create_info.pAttachments    = attachments;
+				create_info.width           = m_swapchain_extent.width;
+				create_info.height          = m_swapchain_extent.height;
+				create_info.layers          = 1;
+
+				VkFramebuffer framebuffer;
+				if (vkCreateFramebuffer(m_device, &create_info, nullptr, &framebuffer) != VK_SUCCESS) {
+					throw std::runtime_error("Failed to create framebuffer.");
+				}
+				framebuffers.emplace_back(Framebuffer(m_device, framebuffer));
+			}
+			return framebuffers;
 		}
 
 	}

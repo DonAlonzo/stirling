@@ -7,10 +7,12 @@
 namespace stirling {
 	namespace vulkan {
 		class Device;
+		class RenderPass;
 		class Surface;
 	}
 }
 #include "device.h"
+#include "framebuffer.h"
 #include "image_view.h"
 
 #include <vector>
@@ -36,21 +38,23 @@ namespace stirling {
 			const VkExtent2D& getExtent() const;
 			const VkFormat&   getImageFormat() const;
 
+			std::vector<Framebuffer> createFramebuffers(const RenderPass& render_pass) const;
+
 		private:
-			const Device&           m_device;
+			const Device&            m_device;
 
-			SwapchainSupportDetails m_support_details;
-			VkSwapchainKHR          m_swapchain;
-			std::vector<VkImage>    m_swapchain_images;
-			VkFormat                m_swapchain_image_format;
-			VkExtent2D              m_swapchain_extent;
-			std::vector<ImageView>  m_swapchain_image_views;
+			SwapchainSupportDetails  m_support_details;
+			VkSwapchainKHR           m_swapchain;
+			std::vector<VkImage>     m_swapchain_images;
+			VkFormat                 m_swapchain_image_format;
+			VkExtent2D               m_swapchain_extent;
+			std::vector<ImageView>   m_swapchain_image_views;
 
-			SwapchainSupportDetails fetchSupportDetails(const PhysicalDevice& physical_device, const Surface& surface) const;
-			VkSurfaceFormatKHR      chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const;
-			VkPresentModeKHR        chooseSwapPresentMode(const std::vector<VkPresentModeKHR> available_present_modes) const;
-			VkExtent2D              chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) const;
-			std::vector<ImageView>  createImageViews() const;
+			SwapchainSupportDetails  fetchSupportDetails(const PhysicalDevice& physical_device, const Surface& surface) const;
+			VkSurfaceFormatKHR       chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) const;
+			VkPresentModeKHR         chooseSwapPresentMode(const std::vector<VkPresentModeKHR> available_present_modes) const;
+			VkExtent2D               chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) const;
+			std::vector<ImageView>   initImageViews() const;
 		};
 
 	}

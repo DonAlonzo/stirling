@@ -18,7 +18,8 @@ namespace stirling {
 		m_device          (initDevice()),
 		m_swapchain       (initSwapchain()),
 		m_render_pass     (initRenderPass()),
-		m_pipeline        (initPipeline()) {
+		m_pipeline        (initPipeline()),
+		m_framebuffers    (initFramebuffers()) {
 	}
 
 	GLFWwindow* Window::initWindow(int width, int height) const {
@@ -78,6 +79,10 @@ namespace stirling {
 
 	vulkan::Pipeline Window::initPipeline() const {
 		return vulkan::Pipeline(m_device, m_render_pass, m_swapchain.getExtent());
+	}
+
+	std::vector<vulkan::Framebuffer> Window::initFramebuffers() const {
+		return m_swapchain.createFramebuffers(m_render_pass);
 	}
 
 	Window::~Window() {

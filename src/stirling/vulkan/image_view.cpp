@@ -14,5 +14,9 @@ namespace stirling {
 			vkDestroyImageView(m_device, m_image_view, nullptr);
 		}
 
+		ImageView::operator VkImageView() const {
+			return m_image_view;
+		}
+
 	}
 }
