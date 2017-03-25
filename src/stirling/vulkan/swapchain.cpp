@@ -178,5 +178,9 @@ namespace stirling {
 			return framebuffers;
 		}
 
+		Swapchain::operator VkSwapchainKHR() const {
+			return m_swapchain;
+		}
+
 	}
 }

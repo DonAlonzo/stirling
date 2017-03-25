@@ -33,12 +33,22 @@ namespace stirling {
 			subpass.colorAttachmentCount = 1;
 			subpass.pColorAttachments    = &color_attachment_reference;
 
+			VkSubpassDependency dependency = {};
+			dependency.srcSubpass    = VK_SUBPASS_EXTERNAL;
+			dependency.dstSubpass    = 0;
+			dependency.srcStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			dependency.srcAccessMask = 0;
+			dependency.dstStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
 			VkRenderPassCreateInfo create_info = {};
 			create_info.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 			create_info.attachmentCount = 1;
 			create_info.pAttachments    = &color_attachment;
 			create_info.subpassCount    = 1;
 			create_info.pSubpasses      = &subpass;
+			create_info.dependencyCount = 1;
+			create_info.pDependencies   = &dependency;
 
 			VkRenderPass render_pass;
 			if (vkCreateRenderPass(m_device, &create_info, nullptr, &render_pass) != VK_SUCCESS) {

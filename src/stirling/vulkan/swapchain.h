@@ -36,6 +36,8 @@ namespace stirling {
 			Swapchain& operator=(Swapchain&&) = delete;
 			Swapchain& operator=(const Swapchain&) = delete;
 
+			operator VkSwapchainKHR() const;
+
 			const VkExtent2D& getExtent() const;
 			const VkFormat&   getImageFormat() const;
 

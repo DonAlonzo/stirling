@@ -17,6 +17,10 @@ namespace stirling {
 			return queue;
 		}
 
+		Queue::operator VkQueue() const {
+			return m_queue;
+		}
+
 		CommandPool Queue::createCommandPool() const {
 			return CommandPool(m_device, m_family_index);
 		}

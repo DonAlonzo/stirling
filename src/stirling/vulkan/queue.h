@@ -17,6 +17,8 @@ namespace stirling {
 		public:
 			Queue(const Device& device, int family_index);
 
+			operator VkQueue() const;
+
 			CommandPool createCommandPool() const;
 
 		private:

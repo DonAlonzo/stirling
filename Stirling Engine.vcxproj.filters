@@ -66,6 +66,9 @@
     <ClCompile Include="src\stirling\vulkan\command_pool.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\stirling\vulkan\semaphore.cpp">
+      <Filter>Source Files\vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\stirling\vulkan\instance.h">
@@ -111,6 +114,9 @@
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\stirling\vulkan\deleter.h">
+      <Filter>Header Files\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stirling\vulkan\semaphore.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
   </ItemGroup>

@@ -13,6 +13,7 @@
 #include "vulkan/pipeline.h"
 #include "vulkan/physical_device.h"
 #include "vulkan/render_pass.h"
+#include "vulkan/semaphore.h"
 #include "vulkan/surface.h"
 #include "vulkan/swapchain.h"
 
@@ -35,16 +36,18 @@ namespace stirling {
 
 	private:
 		GLFWwindow*                      m_window;
-		vulkan::Instance                 m_instance        = initInstance();
-		vulkan::Surface                  m_surface         = initSurface();
-		vulkan::PhysicalDevice           m_physical_device = choosePhysicalDevice(m_instance.getPhysicalDevices());
-		vulkan::Device                   m_device          = initDevice();
-		vulkan::Swapchain                m_swapchain       = initSwapchain();
-		vulkan::RenderPass               m_render_pass     = initRenderPass();
-		vulkan::Pipeline                 m_pipeline        = initPipeline();
-		std::vector<vulkan::Framebuffer> m_framebuffers    = initFramebuffers();
-		vulkan::CommandPool              m_command_pool    = initCommandPool();
-		std::vector<VkCommandBuffer>     m_command_buffers = initCommandBuffers();
+		vulkan::Instance                 m_instance                  = initInstance();
+		vulkan::Surface                  m_surface                   = initSurface();
+		vulkan::PhysicalDevice           m_physical_device           = choosePhysicalDevice(m_instance.getPhysicalDevices());
+		vulkan::Device                   m_device                    = initDevice();
+		vulkan::Swapchain                m_swapchain                 = initSwapchain();
+		vulkan::RenderPass               m_render_pass               = initRenderPass();
+		vulkan::Pipeline                 m_pipeline                  = initPipeline();
+		std::vector<vulkan::Framebuffer> m_framebuffers              = initFramebuffers();
+		vulkan::CommandPool              m_command_pool              = initCommandPool();
+		std::vector<VkCommandBuffer>     m_command_buffers           = initCommandBuffers();
+		vulkan::Semaphore                m_image_available_semaphore   {m_device};
+		vulkan::Semaphore                m_render_finished_semaphore   {m_device};
 		
 		GLFWwindow*                      initWindow(int width, int height) const;
 		vulkan::Instance                 initInstance() const;

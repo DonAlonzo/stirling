@@ -26,7 +26,7 @@ namespace stirling {
 		if (glfwCreateWindowSurface(m_instance, m_window, nullptr, &surface) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create window surface.");
 		}
-		return vulkan::Surface(surface);
+		return vulkan::Surface(m_instance, surface);
 	}
 
 	vulkan::Instance Window::initInstance() const {
@@ -113,7 +113,8 @@ namespace stirling {
 	}
 
 	Window::~Window() {
-		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+		vkDeviceWaitIdle(m_device);
+
 		glfwDestroyWindow(m_window);
 		glfwTerminate();
 	}
@@ -138,6 +139,49 @@ namespace stirling {
 	}
 
 	void Window::update() {
+		uint32_t image_index;
+		vkAcquireNextImageKHR(m_device, m_swapchain, std::numeric_limits<uint64_t>::max(), m_image_available_semaphore, VK_NULL_HANDLE, &image_index);
+
+		VkSemaphore wait_semaphores[] = {
+			m_image_available_semaphore
+		};
+
+		VkPipelineStageFlags wait_stages[] = {
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+		};
+
+		VkSemaphore signal_semaphores[] = {
+			m_render_finished_semaphore
+		};
+
+		VkSubmitInfo submit_info = {};
+		submit_info.sType                = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submit_info.waitSemaphoreCount   = 1;
+		submit_info.pWaitSemaphores      = wait_semaphores;
+		submit_info.pWaitDstStageMask    = wait_stages;
+		submit_info.commandBufferCount   = 1;
+		submit_info.pCommandBuffers      = &m_command_buffers[image_index];
+		submit_info.signalSemaphoreCount = 1;
+		submit_info.pSignalSemaphores    = signal_semaphores;
+
+		if (vkQueueSubmit(m_device.getGraphicsQueue(), 1, &submit_info, VK_NULL_HANDLE) != VK_SUCCESS) {
+			throw std::runtime_error("Failed to submit draw command buffer.");
+		}
+
+		VkSwapchainKHR swap_chains[] = {
+			m_swapchain
+		};
+
+		VkPresentInfoKHR present_info = {};
+		present_info.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		present_info.waitSemaphoreCount = 1;
+		present_info.pWaitSemaphores    = signal_semaphores;
+		present_info.swapchainCount     = 1;
+		present_info.pSwapchains        = swap_chains;
+		present_info.pImageIndices      = &image_index;
+		present_info.pResults           = nullptr;
+
+		vkQueuePresentKHR(m_device.getPresentQueue(), &present_info);
 	}
 
 }

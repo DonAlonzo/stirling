@@ -149,6 +149,7 @@
     <ClCompile Include="src\stirling\vulkan\framebuffer.cpp" />
     <ClCompile Include="src\stirling\vulkan\render_pass.cpp" />
     <ClCompile Include="src\stirling\vulkan\pipeline.cpp" />
+    <ClCompile Include="src\stirling\vulkan\semaphore.cpp" />
     <ClCompile Include="src\stirling\vulkan\shader_module.cpp" />
     <ClCompile Include="src\stirling\vulkan\image_view.cpp" />
     <ClCompile Include="src\stirling\vulkan\queue.cpp" />
@@ -167,6 +168,7 @@
     <ClInclude Include="src\stirling\vulkan\framebuffer.h" />
     <ClInclude Include="src\stirling\vulkan\render_pass.h" />
     <ClInclude Include="src\stirling\vulkan\pipeline.h" />
+    <ClInclude Include="src\stirling\vulkan\semaphore.h" />
     <ClInclude Include="src\stirling\vulkan\shader_module.h" />
     <ClInclude Include="src\stirling\vulkan\image_view.h" />
     <ClInclude Include="src\stirling\vulkan\queue.h" />
