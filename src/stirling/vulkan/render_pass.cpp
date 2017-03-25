@@ -9,6 +9,11 @@ namespace stirling {
 			m_render_pass (initRenderPass(image_format)) {
 		}
 
+		void RenderPass::reset(const VkFormat& image_format) {
+			vkDestroyRenderPass(m_device, m_render_pass, nullptr);
+			m_render_pass = initRenderPass(image_format);
+		}
+
 		RenderPass::~RenderPass() {
 			vkDestroyRenderPass(m_device, m_render_pass, nullptr);
 		}

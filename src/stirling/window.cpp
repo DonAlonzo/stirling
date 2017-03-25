@@ -14,11 +14,16 @@ namespace stirling {
 		m_window (initWindow(width, height)) {
 	}
 
-	GLFWwindow* Window::initWindow(int width, int height) const {
+	GLFWwindow* Window::initWindow(int width, int height) {
 		glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-		return glfwCreateWindow(width, height, "Stirling Engine", nullptr, nullptr);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+		
+		auto window = glfwCreateWindow(width, height, "Stirling Engine", nullptr, nullptr);
+		glfwSetWindowUserPointer(window, this);
+		glfwSetWindowSizeCallback(window, Window::onResized);
+		
+		return window;
 	}
 
 	vulkan::Surface Window::initSurface() const {
@@ -62,7 +67,7 @@ namespace stirling {
 	}
 
 	vulkan::Swapchain Window::initSwapchain() const {
-		return vulkan::Swapchain(m_device, m_surface);
+		return vulkan::Swapchain(m_device, m_surface, getSize());
 	}
 
 	vulkan::RenderPass Window::initRenderPass() const {
@@ -119,6 +124,24 @@ namespace stirling {
 		glfwTerminate();
 	}
 
+	void Window::onResized(GLFWwindow* window, int width, int height) {
+		if (width == 0 || height == 0) return;
+
+		reinterpret_cast<Window*>(glfwGetWindowUserPointer(window))->recreateSwapChain();
+	}
+
+	void Window::recreateSwapChain() {
+		vkDeviceWaitIdle(m_device);
+
+		m_swapchain.reset(getSize());
+		m_render_pass.reset(m_swapchain.getImageFormat());
+		m_pipeline.reset(m_render_pass, m_swapchain.getExtent());
+		m_framebuffers    = initFramebuffers();
+
+		vkFreeCommandBuffers(m_device, m_command_pool, m_command_buffers.size(), m_command_buffers.data());
+		m_command_buffers = initCommandBuffers();
+	}
+
 	std::vector<const char*> Window::getRequiredExtensions() const {
 		std::vector<const char*> extensions;
 
@@ -132,6 +155,13 @@ namespace stirling {
 
 		return extensions;
 	}
+
+	VkExtent2D Window::getSize() const {
+		int width, height;
+		glfwGetWindowSize(m_window, &width, &height);
+		return VkExtent2D { (uint32_t) width, (uint32_t) height };
+	}
+
 
 	bool Window::isRunning() const {
 		glfwPollEvents();

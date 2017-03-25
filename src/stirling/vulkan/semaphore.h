@@ -23,7 +23,7 @@ namespace stirling {
 			
 		private:
 			const Device& m_device;
-			VkSemaphore   m_semaphore = initSemaphore();
+			VkSemaphore   m_semaphore;
 
 			VkSemaphore   initSemaphore() const;
 		};

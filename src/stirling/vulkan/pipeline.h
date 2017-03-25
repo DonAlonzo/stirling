@@ -21,6 +21,8 @@ namespace stirling {
 			Pipeline& operator=(Pipeline&&) = delete;
 			Pipeline& operator=(const Pipeline&) = delete;
 
+			void reset(const RenderPass& render_pass, const VkExtent2D& extent);
+
 			operator VkPipeline() const;
 
 			const Device& getDevice() const;

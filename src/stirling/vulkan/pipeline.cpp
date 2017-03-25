@@ -11,6 +11,11 @@ namespace stirling {
 			m_pipeline        (initPipeline(render_pass, extent)) {
 		}
 
+		void Pipeline::reset(const RenderPass& render_pass, const VkExtent2D& extent) {
+			vkDestroyPipeline(m_device, m_pipeline, nullptr);
+			m_pipeline = initPipeline(render_pass, extent);
+		}
+
 		VkPipelineLayout Pipeline::initPipelineLayout() const {
 			VkPipelineLayoutCreateInfo pipeline_layout_info = {};
 			pipeline_layout_info.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;

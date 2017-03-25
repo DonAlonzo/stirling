@@ -164,7 +164,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\stirling\vulkan\command_pool.h" />
-    <ClInclude Include="src\stirling\vulkan\deleter.h" />
     <ClInclude Include="src\stirling\vulkan\framebuffer.h" />
     <ClInclude Include="src\stirling\vulkan\render_pass.h" />
     <ClInclude Include="src\stirling\vulkan\pipeline.h" />

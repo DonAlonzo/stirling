@@ -5,7 +5,8 @@ namespace stirling {
 	namespace vulkan {
 
 		Semaphore::Semaphore(const Device& device) :
-			m_device (device) {
+			m_device    (device),
+			m_semaphore (initSemaphore()) {
 		}
 
 		VkSemaphore Semaphore::initSemaphore() const {

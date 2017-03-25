@@ -29,11 +29,13 @@ namespace stirling {
 	namespace vulkan {
 
 		Validator::Validator(VkInstance instance) :
-			m_instance (instance) {
+			m_instance       (instance),
+			m_debug_callback (initDebugCallback()) {
 		}
 
 		Validator::Validator() :
-			m_instance (m_instance) {
+			m_instance       (m_instance),
+			m_debug_callback (VK_NULL_HANDLE) {
 		}
 
 		Validator Validator::nullValidator() {
@@ -41,8 +43,6 @@ namespace stirling {
 		}
 
 		VkDebugReportCallbackEXT Validator::initDebugCallback() const {
-			if (m_instance == VK_NULL_HANDLE) return VK_NULL_HANDLE;
-
 			VkDebugReportCallbackCreateInfoEXT create_info = {};
 			create_info.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
 			create_info.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;

@@ -49,7 +49,7 @@ namespace stirling {
 		vulkan::Semaphore                m_image_available_semaphore   {m_device};
 		vulkan::Semaphore                m_render_finished_semaphore   {m_device};
 		
-		GLFWwindow*                      initWindow(int width, int height) const;
+		GLFWwindow*                      initWindow(int width, int height);
 		vulkan::Instance                 initInstance() const;
 		vulkan::Surface                  initSurface() const;
 		vulkan::PhysicalDevice           choosePhysicalDevice(const std::vector<vulkan::PhysicalDevice>& physical_devices) const;
@@ -62,7 +62,11 @@ namespace stirling {
 		vulkan::CommandPool              initCommandPool() const;
 		std::vector<VkCommandBuffer>     initCommandBuffers() const;
 
-		std::vector<const char*> getRequiredExtensions() const;
+		void                             recreateSwapChain();
+		std::vector<const char*>         getRequiredExtensions() const;
+		VkExtent2D                       getSize() const;
+
+		static void                      onResized(GLFWwindow* window, int width, int height);
 	};
 
 }

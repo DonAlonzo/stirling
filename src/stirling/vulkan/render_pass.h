@@ -19,6 +19,8 @@ namespace stirling {
 			RenderPass& operator=(RenderPass&&) = delete;
 			RenderPass& operator=(const RenderPass&) = delete;
 
+			void reset(const VkFormat& image_format);
+
 			operator VkRenderPass() const;
 
 		private:

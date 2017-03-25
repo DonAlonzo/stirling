@@ -10,36 +10,66 @@
 namespace stirling {
 	namespace vulkan {
 
-		Swapchain::Swapchain(const Device& device, const Surface& surface) :
-			m_device           (device),
-			m_support_details  (fetchSupportDetails(device.getPhysicalDevice(), surface)),
-			m_swapchain_extent (chooseSwapExtent(m_support_details.capabilities)) {
+		Swapchain::Swapchain(const Device& device, const Surface& surface, const VkExtent2D& actual_extent) :
+			m_device                 (device),
+			m_surface                (surface),
+			m_support_details        (fetchSupportDetails(m_device.getPhysicalDevice(), m_surface)),
+			m_swapchain_extent       (chooseSwapExtent(m_support_details.capabilities, actual_extent)),
+			m_surface_format         (chooseSwapSurfaceFormat()),
+			m_swapchain              (initSwapchain(VK_NULL_HANDLE)),
+			m_swapchain_images       (m_device.getSwapchainImages(m_swapchain, getImageCount())),
+			m_swapchain_image_format (m_surface_format.format),
+			m_swapchain_image_views  (initImageViews(getImageCount())) {
+		}
 
-			auto surface_format = chooseSwapSurfaceFormat(device.getPhysicalDevice().getSurfaceFormats(surface));
-			auto present_mode = chooseSwapPresentMode(device.getPhysicalDevice().getSurfacePresentModes(surface));
+		Swapchain::Swapchain(Swapchain&& rhs) :
+			m_device                 (std::move(rhs.m_device)),
+			m_surface                (std::move(rhs.m_surface)),
+			m_support_details        (std::move(rhs.m_support_details)),
+			m_swapchain_extent       (std::move(rhs.m_swapchain_extent)),
+			m_surface_format         (std::move(rhs.m_surface_format)),
+			m_swapchain              (std::move(rhs.m_swapchain)),
+			m_swapchain_images       (std::move(rhs.m_swapchain_images)),
+			m_swapchain_image_format (std::move(rhs.m_swapchain_image_format)),
+			m_swapchain_image_views  (std::move(rhs.m_swapchain_image_views)) {
+			rhs.m_swapchain = VK_NULL_HANDLE;
+		}
 
-			uint32_t image_count = m_support_details.capabilities.minImageCount + 1;
-			if (m_support_details.capabilities.maxImageCount > 0 && image_count > m_support_details.capabilities.maxImageCount) {
-				image_count = m_support_details.capabilities.maxImageCount;
-			}
+		void Swapchain::reset(const VkExtent2D& actual_extent) {
+			m_support_details        = fetchSupportDetails(m_device.getPhysicalDevice(), m_surface);
+			m_surface_format         = chooseSwapSurfaceFormat();
+			m_swapchain_extent       = chooseSwapExtent(m_support_details.capabilities, actual_extent);
 
+			auto new_swapchain       = initSwapchain(m_swapchain);
+			vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
+
+			m_swapchain              = new_swapchain;
+			m_swapchain_images       = m_device.getSwapchainImages(m_swapchain, getImageCount());
+			m_swapchain_image_format = m_surface_format.format;
+			m_swapchain_image_views  = initImageViews(getImageCount());
+		}
+
+		Swapchain::~Swapchain() {
+			vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
+		}
+
+		VkSwapchainKHR Swapchain::initSwapchain(VkSwapchainKHR old_swapchain) {
 			VkSwapchainCreateInfoKHR create_info = {};
 			create_info.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-			create_info.surface          = surface;
-			create_info.minImageCount    = image_count;
-			create_info.imageFormat      = surface_format.format;
-			create_info.imageColorSpace  = surface_format.colorSpace;
+			create_info.surface          = m_surface;
+			create_info.minImageCount    = getImageCount();
+			create_info.imageFormat      = m_surface_format.format;
+			create_info.imageColorSpace  = m_surface_format.colorSpace;
 			create_info.imageExtent      = m_swapchain_extent;
 			create_info.imageArrayLayers = 1;
 			create_info.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-			auto indices = device.getPhysicalDevice().findQueueFamilies(surface);
+			auto indices = m_device.getPhysicalDevice().findQueueFamilies(m_surface);
 			if (indices.graphics_family_index != indices.present_family_index) {
 				uint32_t queue_family_indices[] = {
 					(uint32_t)indices.graphics_family_index,
 					(uint32_t)indices.present_family_index
 				};
-
 				create_info.imageSharingMode      = VK_SHARING_MODE_CONCURRENT;
 				create_info.queueFamilyIndexCount = 2;
 				create_info.pQueueFamilyIndices   = queue_family_indices;
@@ -49,17 +79,18 @@ namespace stirling {
 
 			create_info.preTransform   = m_support_details.capabilities.currentTransform;
 			create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-			create_info.presentMode    = present_mode;
+			create_info.presentMode    = chooseSwapPresentMode(m_device.getPhysicalDevice().getSurfacePresentModes(m_surface));
 			create_info.clipped        = VK_TRUE;
-			create_info.oldSwapchain   = VK_NULL_HANDLE;
+			create_info.oldSwapchain   = old_swapchain;
 
-			if (vkCreateSwapchainKHR(m_device, &create_info, nullptr, m_swapchain.replace()) != VK_SUCCESS) {
+			VkSwapchainKHR swapchain;
+			if (vkCreateSwapchainKHR(m_device, &create_info, nullptr, &swapchain) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to create swap chain.");
 			}
-			m_swapchain_images = device.getSwapchainImages(m_swapchain, image_count);
-			m_swapchain_image_format = surface_format.format;
-			m_swapchain_image_views = initImageViews(image_count);
+			return swapchain;
 		}
+
+
 
 		SwapchainSupportDetails Swapchain::fetchSupportDetails(const PhysicalDevice& physical_device, const Surface& surface) const {
 			SwapchainSupportDetails support_details = {};
@@ -69,7 +100,9 @@ namespace stirling {
 			return support_details;
 		}
 	
-		VkSurfaceFormatKHR Swapchain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& available_formats) const {
+		VkSurfaceFormatKHR Swapchain::chooseSwapSurfaceFormat() const {
+			auto available_formats = m_device.getPhysicalDevice().getSurfaceFormats(m_surface);
+
 			if (available_formats.size() == 1 && available_formats[0].format == VK_FORMAT_UNDEFINED) {
 				return {
 					VK_FORMAT_B8G8R8A8_UNORM,
@@ -100,12 +133,10 @@ namespace stirling {
 			return bestMode;
 		}
 
-		VkExtent2D Swapchain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) const {
+		VkExtent2D Swapchain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, VkExtent2D actual_extent) const {
 			if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
 				return capabilities.currentExtent;
 			} else {
-				VkExtent2D actual_extent = { 800, 600 };
-
 				actual_extent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actual_extent.width));
 				actual_extent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actual_extent.height));
 
@@ -149,6 +180,14 @@ namespace stirling {
 
 		const VkFormat& Swapchain::getImageFormat() const {
 			return m_swapchain_image_format;
+		}
+
+		uint32_t Swapchain::getImageCount() const {
+			uint32_t image_count = m_support_details.capabilities.minImageCount + 1;
+			if (m_support_details.capabilities.maxImageCount > 0 && image_count > m_support_details.capabilities.maxImageCount) {
+				image_count = m_support_details.capabilities.maxImageCount;
+			}
+			return image_count;
 		}
 
 		std::vector<Framebuffer> Swapchain::createFramebuffers(const RenderPass& render_pass) const {
