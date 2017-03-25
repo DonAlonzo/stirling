@@ -6,36 +6,38 @@
 // Stirling
 #include "validator.h"
 namespace stirling {
-	class VulkanPhysicalDevice;
+	namespace vulkan {
+		class PhysicalDevice;
+	}
 }
 
 // std
 #include <vector>
 
 namespace stirling {
+	namespace vulkan {
+		class Instance {
+		public:
+			Instance(const std::vector<const char*>& extensions);
+			~Instance();
+			Instance(Instance&&) = default;
+			Instance(const Instance&) = delete;
+			Instance& operator=(Instance&&) = default;
+			Instance& operator=(const Instance&) = delete;
 
-	class VulkanInstance {
-	public:
-		VulkanInstance(const std::vector<const char*>& extensions);
-		~VulkanInstance();
-		VulkanInstance(VulkanInstance&&) = default;
-		VulkanInstance(const VulkanInstance&) = delete;
-		VulkanInstance& operator=(VulkanInstance&&) = default;
-		VulkanInstance& operator=(const VulkanInstance&) = delete;
+			operator VkInstance() const;
 
-		operator VkInstance() const;
+			std::vector<VkLayerProperties> getLayerProperties() const;
+			std::vector<PhysicalDevice> getPhysicalDevices() const;
 
-		std::vector<VkLayerProperties> getLayerProperties() const;
-		std::vector<VulkanPhysicalDevice> getPhysicalDevices() const;
+		private:
+			VkInstance m_instance;
+			Validator  m_validator;
 
-	private:
-		VkInstance      m_instance;
-		VulkanValidator m_validator;
+			VkInstance initInstance(std::vector<const char*> extensions) const;
+			Validator  initValidator() const;
 
-		VkInstance      initInstance(std::vector<const char*> extensions) const;
-		VulkanValidator initValidator() const;
-		
-		bool checkValidationLayerSupport() const;
-	};
-
+			bool checkValidationLayerSupport() const;
+		};
+	}
 }

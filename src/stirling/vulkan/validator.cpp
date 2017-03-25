@@ -26,37 +26,39 @@ void destroyDebugReportCallbackEXT(VkInstance instance, VkDebugReportCallbackEXT
 }
 
 namespace stirling {
+	namespace vulkan {
 
-	VulkanValidator::VulkanValidator(VkInstance instance) :
-		m_instance       (instance),
-		m_debug_callback (initDebugCallback(instance)) {
-	}
-
-	VulkanValidator::VulkanValidator() :
-		m_debug_callback (VK_NULL_HANDLE) {
-	}
-
-	VulkanValidator VulkanValidator::nullValidator() {
-		return VulkanValidator();
-	}
-
-	VkDebugReportCallbackEXT VulkanValidator::initDebugCallback(VkInstance instance) const {
-		VkDebugReportCallbackCreateInfoEXT create_info = {};
-		create_info.sType       = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
-		create_info.flags       = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
-		create_info.pfnCallback = debugCallback;
-
-		VkDebugReportCallbackEXT debug_callback;
-		if (createDebugReportCallbackEXT(instance, &create_info, nullptr, &debug_callback) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to set up debug callback.");
+		Validator::Validator(VkInstance instance) :
+			m_instance(instance),
+			m_debug_callback(initDebugCallback(instance)) {
 		}
-		return debug_callback;
-	}
 
-	VulkanValidator::~VulkanValidator() {
-		if (m_debug_callback != VK_NULL_HANDLE) {
-			destroyDebugReportCallbackEXT(m_instance, m_debug_callback, nullptr);
+		Validator::Validator() :
+			m_debug_callback(VK_NULL_HANDLE) {
 		}
-	}
 
+		Validator Validator::nullValidator() {
+			return Validator();
+		}
+
+		VkDebugReportCallbackEXT Validator::initDebugCallback(VkInstance instance) const {
+			VkDebugReportCallbackCreateInfoEXT create_info = {};
+			create_info.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+			create_info.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
+			create_info.pfnCallback = debugCallback;
+
+			VkDebugReportCallbackEXT debug_callback;
+			if (createDebugReportCallbackEXT(instance, &create_info, nullptr, &debug_callback) != VK_SUCCESS) {
+				throw std::runtime_error("Failed to set up debug callback.");
+			}
+			return debug_callback;
+		}
+
+		Validator::~Validator() {
+			if (m_debug_callback != VK_NULL_HANDLE) {
+				destroyDebugReportCallbackEXT(m_instance, m_debug_callback, nullptr);
+			}
+		}
+
+	}
 }

@@ -1,13 +1,15 @@
 #include "surface.h"
 
 namespace stirling {
+	namespace vulkan {
 
-	VulkanSurface::VulkanSurface(VkSurfaceKHR surface) :
-		m_surface (surface) {
+		Surface::Surface(VkSurfaceKHR surface) :
+			m_surface(surface) {
+		}
+
+		Surface::operator VkSurfaceKHR() const {
+			return m_surface;
+		}
+
 	}
-
-	VulkanSurface::operator VkSurfaceKHR() const {
-		return m_surface;
-	}
-
 }

@@ -1,9 +1,14 @@
 #include "queue.h"
 
+#include "device.h"
+
 namespace stirling {
+	namespace vulkan {
 
-	VulkanQueue::VulkanQueue(VkQueue queue) :
-		m_queue (queue) {
+		Queue::Queue(const Device& device, VkQueue queue) :
+			m_device (device),
+			m_queue  (queue) {
+		}
+
 	}
-
 }

@@ -45,6 +45,12 @@
     <ClCompile Include="src\stirling\vulkan\surface.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\stirling\vulkan\swapchain.cpp">
+      <Filter>Source Files\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stirling\vulkan\image_view.cpp">
+      <Filter>Source Files\vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\stirling\vulkan\instance.h">
@@ -66,6 +72,12 @@
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\stirling\vulkan\surface.h">
+      <Filter>Header Files\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stirling\vulkan\swapchain.h">
+      <Filter>Header Files\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stirling\vulkan\image_view.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
   </ItemGroup>

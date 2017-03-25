@@ -4,15 +4,17 @@
 #include "vulkan/vulkan.h"
 
 namespace stirling {
+	namespace vulkan {
 
-	class VulkanSurface {
-	public:
-		VulkanSurface(VkSurfaceKHR);
+		class Surface {
+		public:
+			Surface(VkSurfaceKHR);
 
-		operator VkSurfaceKHR() const;
+			operator VkSurfaceKHR() const;
 
-	private:
-		VkSurfaceKHR m_surface;
-	};
+		private:
+			VkSurfaceKHR m_surface;
+		};
 
+	}
 }

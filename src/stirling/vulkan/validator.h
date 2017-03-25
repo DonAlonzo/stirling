@@ -4,25 +4,27 @@
 #include "vulkan/vulkan.h"
 
 namespace stirling {
+	namespace vulkan {
 
-	class VulkanValidator {
-	public:
-		VulkanValidator(VkInstance instance);
-		~VulkanValidator();
-		VulkanValidator(VulkanValidator&&) = default;
-		VulkanValidator(const VulkanValidator&) = delete;
-		VulkanValidator& operator=(VulkanValidator&&) = default;
-		VulkanValidator& operator=(const VulkanValidator&) = delete;
+		class Validator {
+		public:
+			Validator(VkInstance instance);
+			~Validator();
+			Validator(Validator&&) = default;
+			Validator(const Validator&) = delete;
+			Validator& operator=(Validator&&) = default;
+			Validator& operator=(const Validator&) = delete;
 
-		static VulkanValidator nullValidator();
+			static Validator nullValidator();
 
-	private:
-		VkInstance               m_instance;
-		VkDebugReportCallbackEXT m_debug_callback;
+		private:
+			VkInstance               m_instance;
+			VkDebugReportCallbackEXT m_debug_callback;
 
-		VulkanValidator();
+			Validator();
 
-		VkDebugReportCallbackEXT initDebugCallback(VkInstance instance) const;
-	};
-	
+			VkDebugReportCallbackEXT initDebugCallback(VkInstance instance) const;
+		};
+
+	}
 }

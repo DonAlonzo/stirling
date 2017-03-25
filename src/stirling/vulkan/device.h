@@ -4,28 +4,43 @@
 #include "vulkan/vulkan.h"
 
 // Stirling
-#include "queue.h"
 namespace stirling {
-	class QueueFamilyIndices;
+	namespace vulkan {
+		class PhysicalDevice;
+		struct QueueFamilyIndices;
+	}
 }
+#include "queue.h"
+
+#include <vector>
 
 namespace stirling {
+	namespace vulkan {
+		class Device {
+		public:
+			Device(const PhysicalDevice& physical_device, VkDevice device, QueueFamilyIndices indices);
+			~Device();
+			Device(Device&&) = default;
+			Device(const Device&) = delete;
+			Device& operator=(Device&&) = default;
+			Device& operator=(const Device&) = delete;
 
-	class VulkanDevice {
-	public:
-		VulkanDevice(VkDevice device, QueueFamilyIndices indices);
-		~VulkanDevice();
-		VulkanDevice(VulkanDevice&&) = default;
-		VulkanDevice(const VulkanDevice&) = delete;
-		VulkanDevice& operator=(VulkanDevice&&) = default;
-		VulkanDevice& operator=(const VulkanDevice&) = delete;
+			operator VkDevice() const;
 
-	private:
-		VkDevice    m_device;
-		VulkanQueue m_graphics_queue;
-		VulkanQueue m_present_queue;
+			const PhysicalDevice& getPhysicalDevice() const;
 
-		VulkanQueue initQueue(int queue_family_index);
-	};
+			VkSwapchainKHR createSwapchain(VkSwapchainCreateInfoKHR create_info) const;
 
+			std::vector<VkImage> getSwapchainImages(VkSwapchainKHR swapchain, uint32_t count) const;
+
+		private:
+			const PhysicalDevice& m_physical_device;
+
+			VkDevice              m_device;
+			Queue                 m_graphics_queue;
+			Queue                 m_present_queue;
+
+			Queue                 initQueue(int queue_family_index);
+		};
+	}
 }

@@ -4,37 +4,44 @@
 #include "vulkan/vulkan.h"
 
 // Stirling
-#include "device.h"
 namespace stirling {
-	class VulkanSurface;
+	namespace vulkan {
+		class Surface;
+	}
 }
+#include "device.h"
 
 // std
 #include <vector>
 
 namespace stirling {
+	namespace vulkan {
 
-	struct QueueFamilyIndices {
-		int graphics_family_index;
-		int present_family_index;
+		struct QueueFamilyIndices {
+			int graphics_family_index;
+			int present_family_index;
 
-		bool isComplete() const;
-	};
+			bool isComplete() const;
+		};
 
-	class VulkanPhysicalDevice {
-	public:
-		VulkanPhysicalDevice(VkPhysicalDevice physical_device);
+		class PhysicalDevice {
+		public:
+			PhysicalDevice(VkPhysicalDevice physical_device);
 		
-		operator VkPhysicalDevice() const;
+			operator VkPhysicalDevice() const;
 
-		QueueFamilyIndices findQueueFamilies(const VulkanSurface& surface) const;
+			QueueFamilyIndices findQueueFamilies(const Surface& surface) const;
 
-		VulkanDevice createDevice(const VulkanSurface& surface, const std::vector<const char*> extensions) const;
+			Device createDevice(const Surface& surface, const std::vector<const char*> extensions) const;
 
-		std::vector<VkExtensionProperties> getExtensions() const;
+			std::vector<VkExtensionProperties> getExtensions() const;
+			VkSurfaceCapabilitiesKHR getSurfaceCapabilities(const Surface& surface) const;
+			std::vector<VkSurfaceFormatKHR> getSurfaceFormats(const Surface& surface) const;
+			std::vector<VkPresentModeKHR> getSurfacePresentModes(const Surface& surface) const;
 
-	private:
-		VkPhysicalDevice m_physical_device;
-	};
+		private:
+			VkPhysicalDevice m_physical_device;
+		};
 
+	}
 }

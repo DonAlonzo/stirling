@@ -4,13 +4,23 @@
 #include "vulkan/vulkan.h"
 
 namespace stirling {
+	namespace vulkan {
+		class Device;
+	}
+}
 
-	class VulkanQueue {
-	public:
-		VulkanQueue(VkQueue);
+namespace stirling {
+	namespace vulkan {
 
-	private:
-		VkQueue m_queue;
-	};
+		class Queue {
+		public:
+			Queue(const Device& device, VkQueue queue);
 
+		private:
+			const Device& m_device;
+
+			VkQueue             m_queue;
+		};
+
+	}
 }

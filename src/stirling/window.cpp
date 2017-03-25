@@ -15,7 +15,8 @@ namespace stirling {
 		m_instance        (initInstance()),
 		m_surface         (initSurface()),
 		m_physical_device (choosePhysicalDevice(m_instance.getPhysicalDevices())),
-		m_device          (initDevice()) {
+		m_device          (initDevice()),
+		m_swapchain       (initSwapchain()) {
 	}
 
 	GLFWwindow* Window::initWindow(int width, int height) const {
@@ -25,19 +26,19 @@ namespace stirling {
 		return glfwCreateWindow(width, height, "Stirling Engine", nullptr, nullptr);
 	}
 
-	VulkanSurface Window::initSurface() const {
+	vulkan::Surface Window::initSurface() const {
 		VkSurfaceKHR surface;
 		if (glfwCreateWindowSurface(m_instance, m_window, nullptr, &surface) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create window surface.");
 		}
-		return VulkanSurface(surface);
+		return vulkan::Surface(surface);
 	}
 
-	VulkanInstance Window::initInstance() const {
-		return VulkanInstance(getRequiredExtensions());
+	vulkan::Instance Window::initInstance() const {
+		return vulkan::Instance(getRequiredExtensions());
 	}
 	
-	VulkanPhysicalDevice Window::choosePhysicalDevice(const std::vector<VulkanPhysicalDevice>& physical_devices) const {
+	vulkan::PhysicalDevice Window::choosePhysicalDevice(const std::vector<vulkan::PhysicalDevice>& physical_devices) const {
 		for (const auto& physical_device : physical_devices) {
 			if (isPhysicalDeviceSuitable(physical_device)) {
 				return physical_device;
@@ -46,19 +47,27 @@ namespace stirling {
 		throw std::runtime_error("Failed to find a suitable GPU.");
 	}
 
-	bool Window::isPhysicalDeviceSuitable(const VulkanPhysicalDevice& physical_device) const {
+	bool Window::isPhysicalDeviceSuitable(const vulkan::PhysicalDevice& physical_device) const {
 		auto indices = physical_device.findQueueFamilies(m_surface);
+		if (!indices.isComplete()) return false;
 
 		std::set<std::string> required_extensions(g_device_extensions.begin(), g_device_extensions.end());
 		for (const auto& available_extension : physical_device.getExtensions()) {
 			required_extensions.erase(available_extension.extensionName);
 		}
+		if (!required_extensions.empty()) return false;
 
-		return indices.isComplete() && required_extensions.empty();
+		auto formats = physical_device.getSurfaceFormats(m_surface);
+		auto present_modes = physical_device.getSurfacePresentModes(m_surface);
+		return !formats.empty() && !present_modes.empty();
 	}
 
-	VulkanDevice Window::initDevice() const {
+	vulkan::Device Window::initDevice() const {
 		return m_physical_device.createDevice(m_surface, g_device_extensions);
+	}
+
+	vulkan::Swapchain Window::initSwapchain() const {
+		return vulkan::Swapchain(m_device, m_surface);
 	}
 
 	Window::~Window() {

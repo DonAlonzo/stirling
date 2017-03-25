@@ -145,6 +145,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\stirling\vulkan\image_view.cpp" />
     <ClCompile Include="src\stirling\vulkan\queue.cpp" />
     <ClCompile Include="src\stirling\vulkan\device.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -153,8 +154,10 @@
     <ClCompile Include="src\stirling\vulkan\surface.cpp" />
     <ClCompile Include="src\stirling\window.cpp" />
     <ClCompile Include="src\stirling\vulkan\validator.cpp" />
+    <ClCompile Include="src\stirling\vulkan\swapchain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\stirling\vulkan\image_view.h" />
     <ClInclude Include="src\stirling\vulkan\queue.h" />
     <ClInclude Include="src\stirling\vulkan\device.h" />
     <ClInclude Include="src\stirling\vulkan\instance.h" />
@@ -162,6 +165,7 @@
     <ClInclude Include="src\stirling\vulkan\surface.h" />
     <ClInclude Include="src\stirling\window.h" />
     <ClInclude Include="src\stirling\vulkan\validator.h" />
+    <ClInclude Include="src\stirling\vulkan\swapchain.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
