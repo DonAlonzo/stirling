@@ -32,7 +32,7 @@ namespace stirling {
 			std::vector<VkQueueFamilyProperties> queue_families{ queue_family_count };
 			vkGetPhysicalDeviceQueueFamilyProperties(m_physical_device, &queue_family_count, queue_families.data());
 
-			QueueFamilyIndices indices;
+			QueueFamilyIndices indices = {};
 			for (int i = 0; i < queue_families.size(); ++i) {
 				if (queue_families[i].queueCount == 0) continue;
 

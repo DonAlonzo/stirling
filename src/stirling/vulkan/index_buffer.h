@@ -3,7 +3,6 @@
 #include "vulkan/vulkan.h"
 
 namespace stirling {
-	struct Vertex;
 	namespace vulkan {
 		class Device;
 	}

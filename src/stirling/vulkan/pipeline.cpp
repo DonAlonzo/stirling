@@ -5,9 +5,10 @@ namespace stirling {
 	namespace vulkan {
 
 		Pipeline::Pipeline(const Device& device, const RenderPass& render_pass, const VkExtent2D& extent) :
-			m_device          (device),
-			m_pipeline_layout (initPipelineLayout()),
-			m_pipeline        (initPipeline(render_pass, extent)) {
+			m_device                (device),
+			m_descriptor_set_layout (initDescriptorSetLayout()),
+			m_pipeline_layout       (initPipelineLayout()),
+			m_pipeline              (initPipeline(render_pass, extent)) {
 		}
 
 		void Pipeline::reset(const RenderPass& render_pass, const VkExtent2D& extent) {
@@ -15,11 +16,34 @@ namespace stirling {
 			m_pipeline = initPipeline(render_pass, extent);
 		}
 
+		VkDescriptorSetLayout Pipeline::initDescriptorSetLayout() const {
+			VkDescriptorSetLayoutBinding ubo_layout_binding = {};
+			ubo_layout_binding.binding         = 0;
+			ubo_layout_binding.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			ubo_layout_binding.descriptorCount = 1;
+			ubo_layout_binding.stageFlags      = VK_SHADER_STAGE_VERTEX_BIT;
+
+			VkDescriptorSetLayoutCreateInfo create_info = {};
+			create_info.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+			create_info.bindingCount = 1;
+			create_info.pBindings    = &ubo_layout_binding;
+
+			VkDescriptorSetLayout descriptor_set_layout;
+			if (vkCreateDescriptorSetLayout(m_device, &create_info, nullptr, &descriptor_set_layout) != VK_SUCCESS) {
+				throw std::runtime_error("Failed to create descriptor set layout.");
+			}
+			return descriptor_set_layout;
+		}
+
 		VkPipelineLayout Pipeline::initPipelineLayout() const {
+			VkDescriptorSetLayout descriptor_set_layouts[] = {
+				m_descriptor_set_layout
+			};
+
 			VkPipelineLayoutCreateInfo pipeline_layout_info = {};
 			pipeline_layout_info.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-			pipeline_layout_info.setLayoutCount         = 0;
-			pipeline_layout_info.pSetLayouts            = nullptr;
+			pipeline_layout_info.setLayoutCount         = 1;
+			pipeline_layout_info.pSetLayouts            = descriptor_set_layouts;
 			pipeline_layout_info.pushConstantRangeCount = 0;
 			pipeline_layout_info.pPushConstantRanges    = 0;
 
@@ -154,6 +178,7 @@ namespace stirling {
 		Pipeline::~Pipeline() {
 			vkDestroyPipeline(m_device, m_pipeline, nullptr);
 			vkDestroyPipelineLayout(m_device, m_pipeline_layout, nullptr);
+			vkDestroyDescriptorSetLayout(m_device, m_descriptor_set_layout, nullptr);
 		}
 
 		Pipeline::operator VkPipeline() const {

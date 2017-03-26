@@ -28,12 +28,14 @@ namespace stirling {
 			const Device& getDevice() const;
 
 		private:
-			const Device&    m_device;
-			VkPipelineLayout m_pipeline_layout;
-			VkPipeline       m_pipeline;
-
-			VkPipelineLayout initPipelineLayout() const;
-			VkPipeline       initPipeline(const RenderPass& render_pass, const VkExtent2D& extent) const;
+			const Device&         m_device;
+			VkDescriptorSetLayout m_descriptor_set_layout;
+			VkPipelineLayout      m_pipeline_layout;
+			VkPipeline            m_pipeline;
+			
+			VkDescriptorSetLayout initDescriptorSetLayout() const;
+			VkPipelineLayout      initPipelineLayout() const;
+			VkPipeline            initPipeline(const RenderPass& render_pass, const VkExtent2D& extent) const;
 		};
 	}
 }

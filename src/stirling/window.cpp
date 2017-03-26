@@ -2,6 +2,11 @@
 #include "vulkan/instance.h"
 #include "vulkan/physical_device.h"
 
+#define GLM_FORCE_RADIANS
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include <chrono>
 #include <set>
 
 const std::vector<const char*> g_device_extensions = {
@@ -105,6 +110,10 @@ namespace stirling {
 		return vulkan::IndexBuffer(m_device, indices);
 	}
 
+	vulkan::UniformBuffer Window::initUniformBuffer() const {
+		return vulkan::UniformBuffer(m_device);
+	}
+
 	std::vector<VkCommandBuffer> Window::initCommandBuffers() const {
 		auto command_buffers = m_command_pool.allocateCommandBuffers(m_framebuffers.size());
 		for (int i = 0; i < command_buffers.size(); ++i) {
@@ -194,7 +203,22 @@ namespace stirling {
 		return !glfwWindowShouldClose(m_window);
 	}
 
+
 	void Window::update() {
+		// Update uniform buffer
+		static auto start_time = std::chrono::high_resolution_clock::now();
+		auto current_time = std::chrono::high_resolution_clock::now();
+		float time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count() / 1000.0f;
+
+		vulkan::UniformBufferObject ubo = {};
+		ubo.model = glm::rotate(glm::mat4(), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		ubo.view  = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		ubo.proj  = glm::perspective(glm::radians(45.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.1f, 10.0f);
+		ubo.proj[1][1] *= -1;
+
+		m_uniform_buffer.update(ubo);
+		// TODO: Move this into a separate camera class
+
 		uint32_t image_index;
 		switch (vkAcquireNextImageKHR(m_device, m_swapchain, std::numeric_limits<uint64_t>::max(), m_image_available_semaphore, VK_NULL_HANDLE, &image_index)) {
 		case VK_ERROR_OUT_OF_DATE_KHR:
