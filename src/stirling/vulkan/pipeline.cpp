@@ -1,6 +1,5 @@
 #include "pipeline.h"
-#include "device.h"
-#include "render_pass.h"
+#include "../stirling.h"
 
 namespace stirling {
 	namespace vulkan {
@@ -52,12 +51,15 @@ namespace stirling {
 				fragment_shader_stage_info
 			};
 
+			auto binding_description = Vertex::getBindingDescription();
+			auto attribute_descriptions = Vertex::getAttributeDescriptions();
+
 			VkPipelineVertexInputStateCreateInfo vertex_input_info = {};
 			vertex_input_info.sType                           = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-			vertex_input_info.vertexBindingDescriptionCount   = 0;
-			vertex_input_info.pVertexBindingDescriptions      = nullptr;
-			vertex_input_info.vertexAttributeDescriptionCount = 0;
-			vertex_input_info.pVertexAttributeDescriptions    = nullptr;
+			vertex_input_info.vertexBindingDescriptionCount   = 1;
+			vertex_input_info.pVertexBindingDescriptions      = &binding_description;
+			vertex_input_info.vertexAttributeDescriptionCount = attribute_descriptions.size();
+			vertex_input_info.pVertexAttributeDescriptions    = attribute_descriptions.data();
 
 			VkPipelineInputAssemblyStateCreateInfo input_assembly = {};
 			input_assembly.sType                  = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -67,8 +69,8 @@ namespace stirling {
 			VkViewport viewport = {};
 			viewport.x        = 0.0f;
 			viewport.y        = 0.0f;
-			viewport.width    = (float)extent.width;
-			viewport.height   = (float)extent.height;
+			viewport.width    = (float) extent.width;
+			viewport.height   = (float) extent.height;
 			viewport.minDepth = 0.0f;
 			viewport.maxDepth = 1.0f;
 

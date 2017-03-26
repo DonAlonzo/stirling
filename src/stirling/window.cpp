@@ -8,6 +8,12 @@ const std::vector<const char*> g_device_extensions = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
+const std::vector<stirling::Vertex> g_vertices = {
+	{{ 0.0f, -0.5f }, { 1.0f, 0.0f, 0.0f }},
+	{{ 0.5f,  0.5f }, { 0.0f, 1.0f, 0.0f }},
+	{{ -0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f }}
+};
+
 namespace stirling {
 
 	Window::Window(int width, int height) :
@@ -85,6 +91,10 @@ namespace stirling {
 	vulkan::CommandPool Window::initCommandPool() const {
 		return m_device.getGraphicsQueue().createCommandPool();
 	}
+
+	vulkan::VertexBuffer Window::initVertexBuffer() const {
+		return vulkan::VertexBuffer(m_device, g_vertices);
+	}
 	
 	std::vector<VkCommandBuffer> Window::initCommandBuffers() const {
 		auto command_buffers = m_command_pool.allocateCommandBuffers(m_framebuffers.size());
@@ -107,7 +117,12 @@ namespace stirling {
 
 			vkCmdBeginRenderPass(command_buffers[i], &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
 				vkCmdBindPipeline(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
-				vkCmdDraw(command_buffers[i], 3, 1, 0, 0);
+
+				VkBuffer vertex_buffers[] = { m_vertex_buffer };
+				VkDeviceSize offsets[] = { 0 };
+				vkCmdBindVertexBuffers(command_buffers[i], 0, 1, vertex_buffers, offsets);
+
+				vkCmdDraw(command_buffers[i], g_vertices.size(), 1, 0, 0);
 			vkCmdEndRenderPass(command_buffers[i]);
 
 			if (vkEndCommandBuffer(command_buffers[i]) != VK_SUCCESS) {

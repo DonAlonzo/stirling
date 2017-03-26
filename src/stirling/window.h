@@ -7,15 +7,7 @@
 #include <GLFW/glfw3.h>
 
 // Stirling
-#include "vulkan/command_pool.h"
-#include "vulkan/device.h"
-#include "vulkan/instance.h"
-#include "vulkan/pipeline.h"
-#include "vulkan/physical_device.h"
-#include "vulkan/render_pass.h"
-#include "vulkan/semaphore.h"
-#include "vulkan/surface.h"
-#include "vulkan/swapchain.h"
+#include "stirling.h"
 
 // std
 #include <vector>
@@ -45,6 +37,7 @@ namespace stirling {
 		vulkan::Pipeline                 m_pipeline                  = initPipeline();
 		std::vector<vulkan::Framebuffer> m_framebuffers              = initFramebuffers();
 		vulkan::CommandPool              m_command_pool              = initCommandPool();
+		vulkan::VertexBuffer             m_vertex_buffer             = initVertexBuffer();
 		std::vector<VkCommandBuffer>     m_command_buffers           = initCommandBuffers();
 		vulkan::Semaphore                m_image_available_semaphore   {m_device};
 		vulkan::Semaphore                m_render_finished_semaphore   {m_device};
@@ -60,6 +53,7 @@ namespace stirling {
 		vulkan::Pipeline                 initPipeline() const;
 		std::vector<vulkan::Framebuffer> initFramebuffers() const;
 		vulkan::CommandPool              initCommandPool() const;
+		vulkan::VertexBuffer             initVertexBuffer() const;
 		std::vector<VkCommandBuffer>     initCommandBuffers() const;
 
 		void                             recreateSwapchain();

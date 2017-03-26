@@ -75,6 +75,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <CodeAnalysisRuleSet>C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Team Tools\Static Analysis Tools\Rule Sets\NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -102,6 +104,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\Program Files\GLFW\include;C:\VulkanSDK\1.0.42.1\Third-Party\Include;C:\VulkanSDK\1.0.42.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <EnablePREfast>true</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -158,6 +161,7 @@
     <ClCompile Include="src\stirling\vulkan\instance.cpp" />
     <ClCompile Include="src\stirling\vulkan\physical_device.cpp" />
     <ClCompile Include="src\stirling\vulkan\surface.cpp" />
+    <ClCompile Include="src\stirling\vulkan\vertex_buffer.cpp" />
     <ClCompile Include="src\stirling\window.cpp" />
     <ClCompile Include="src\stirling\vulkan\validator.cpp" />
     <ClCompile Include="src\stirling\vulkan\swapchain.cpp" />
@@ -174,7 +178,9 @@
     <ClInclude Include="src\stirling\vulkan\device.h" />
     <ClInclude Include="src\stirling\vulkan\instance.h" />
     <ClInclude Include="src\stirling\vulkan\physical_device.h" />
+    <ClInclude Include="src\stirling\stirling.h" />
     <ClInclude Include="src\stirling\vulkan\surface.h" />
+    <ClInclude Include="src\stirling\vulkan\vertex_buffer.h" />
     <ClInclude Include="src\stirling\window.h" />
     <ClInclude Include="src\stirling\vulkan\validator.h" />
     <ClInclude Include="src\stirling\vulkan\swapchain.h" />
