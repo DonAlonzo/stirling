@@ -88,14 +88,23 @@ namespace stirling {
 
 	vulkan::VertexBuffer Window::initVertexBuffer() const {
 		std::vector<stirling::Vertex> vertices = {
-			{ { 0.0f, -0.5f },{ 1.0f, 0.0f, 0.0f } },
-			{ { 0.5f,  0.5f },{ 0.0f, 1.0f, 0.0f } },
-			{ { -0.5f, 0.5f },{ 0.0f, 0.0f, 1.0f } }
+			{ { -0.5f, -0.5f },{ 1.0f, 0.0f, 0.0f } },
+			{ {  0.5f, -0.5f },{ 0.0f, 1.0f, 0.0f } },
+			{ {  0.5f,  0.5f },{ 0.0f, 0.0f, 1.0f } },
+			{ { -0.5f,  0.5f },{ 1.0f, 1.0f, 1.0f } }
 		};
 
 		return vulkan::VertexBuffer(m_device, vertices);
 	}
-	
+
+	vulkan::IndexBuffer Window::initIndexBuffer() const {
+		std::vector<uint16_t> indices = {
+			0, 1, 2, 2, 3, 0
+		};
+
+		return vulkan::IndexBuffer(m_device, indices);
+	}
+
 	std::vector<VkCommandBuffer> Window::initCommandBuffers() const {
 		auto command_buffers = m_command_pool.allocateCommandBuffers(m_framebuffers.size());
 		for (int i = 0; i < command_buffers.size(); ++i) {
@@ -122,7 +131,9 @@ namespace stirling {
 				VkDeviceSize offsets[] = { 0 };
 				vkCmdBindVertexBuffers(command_buffers[i], 0, 1, vertex_buffers, offsets);
 
-				vkCmdDraw(command_buffers[i], m_vertex_buffer.size(), 1, 0, 0);
+				vkCmdBindIndexBuffer(command_buffers[i], m_index_buffer, 0, VK_INDEX_TYPE_UINT16);
+
+				vkCmdDrawIndexed(command_buffers[i], m_index_buffer.size(), 1, 0, 0, 0);
 			vkCmdEndRenderPass(command_buffers[i]);
 
 			if (vkEndCommandBuffer(command_buffers[i]) != VK_SUCCESS) {

@@ -38,6 +38,7 @@ namespace stirling {
 // stirling::vulkan
 #include "vulkan/command_pool.h"
 #include "vulkan/device.h"
+#include "vulkan/index_buffer.h"
 #include "vulkan/instance.h"
 #include "vulkan/pipeline.h"
 #include "vulkan/physical_device.h"

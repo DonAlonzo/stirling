@@ -38,6 +38,7 @@ namespace stirling {
 		std::vector<vulkan::Framebuffer> m_framebuffers              = initFramebuffers();
 		vulkan::CommandPool              m_command_pool              = initCommandPool();
 		vulkan::VertexBuffer             m_vertex_buffer             = initVertexBuffer();
+		vulkan::IndexBuffer              m_index_buffer              = initIndexBuffer();
 		std::vector<VkCommandBuffer>     m_command_buffers           = initCommandBuffers();
 		vulkan::Semaphore                m_image_available_semaphore   {m_device};
 		vulkan::Semaphore                m_render_finished_semaphore   {m_device};
@@ -54,6 +55,7 @@ namespace stirling {
 		std::vector<vulkan::Framebuffer> initFramebuffers() const;
 		vulkan::CommandPool              initCommandPool() const;
 		vulkan::VertexBuffer             initVertexBuffer() const;
+		vulkan::IndexBuffer              initIndexBuffer() const;
 		std::vector<VkCommandBuffer>     initCommandBuffers() const;
 
 		void                             recreateSwapchain();

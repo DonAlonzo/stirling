@@ -14,9 +14,9 @@ namespace stirling {
 		}
 
 		Buffer::Buffer(Buffer&& rhs) :
-			m_device(std::move(rhs.m_device)),
-			m_buffer(std::move(rhs.m_buffer)),
-			m_memory(std::move(rhs.m_memory)) {
+			m_device (std::move(rhs.m_device)),
+			m_buffer (std::move(rhs.m_buffer)),
+			m_memory (std::move(rhs.m_memory)) {
 			rhs.m_buffer = VK_NULL_HANDLE;
 			rhs.m_memory = VK_NULL_HANDLE;
 		}
@@ -55,7 +55,7 @@ namespace stirling {
 			VkPhysicalDeviceMemoryProperties memory_properties;
 			vkGetPhysicalDeviceMemoryProperties(m_device.getPhysicalDevice(), &memory_properties);
 
-			for (uint32_t i = 0; i < memory_properties.memoryTypeCount; i++) {
+			for (uint32_t i = 0; i < memory_properties.memoryTypeCount; ++i) {
 				if ((type_filter & (1 << i)) && (memory_properties.memoryTypes[i].propertyFlags & properties) == properties) {
 					return i;
 				}
