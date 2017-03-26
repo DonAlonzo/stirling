@@ -8,12 +8,6 @@ const std::vector<const char*> g_device_extensions = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
-const std::vector<stirling::Vertex> g_vertices = {
-	{{ 0.0f, -0.5f }, { 1.0f, 0.0f, 0.0f }},
-	{{ 0.5f,  0.5f }, { 0.0f, 1.0f, 0.0f }},
-	{{ -0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f }}
-};
-
 namespace stirling {
 
 	Window::Window(int width, int height) :
@@ -93,7 +87,13 @@ namespace stirling {
 	}
 
 	vulkan::VertexBuffer Window::initVertexBuffer() const {
-		return vulkan::VertexBuffer(m_device, g_vertices);
+		std::vector<stirling::Vertex> vertices = {
+			{ { 0.0f, -0.5f },{ 1.0f, 0.0f, 0.0f } },
+			{ { 0.5f,  0.5f },{ 0.0f, 1.0f, 0.0f } },
+			{ { -0.5f, 0.5f },{ 0.0f, 0.0f, 1.0f } }
+		};
+
+		return vulkan::VertexBuffer(m_device, vertices);
 	}
 	
 	std::vector<VkCommandBuffer> Window::initCommandBuffers() const {
@@ -122,7 +122,7 @@ namespace stirling {
 				VkDeviceSize offsets[] = { 0 };
 				vkCmdBindVertexBuffers(command_buffers[i], 0, 1, vertex_buffers, offsets);
 
-				vkCmdDraw(command_buffers[i], g_vertices.size(), 1, 0, 0);
+				vkCmdDraw(command_buffers[i], m_vertex_buffer.size(), 1, 0, 0);
 			vkCmdEndRenderPass(command_buffers[i]);
 
 			if (vkEndCommandBuffer(command_buffers[i]) != VK_SUCCESS) {

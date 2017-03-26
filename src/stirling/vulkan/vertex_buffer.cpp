@@ -6,14 +6,15 @@ namespace stirling {
 	namespace vulkan {
 
 		VertexBuffer::VertexBuffer(const Device& device, const std::vector<Vertex>& vertices) :
-			m_device(device),
-			m_buffer(initBuffer(vertices)),
-			m_memory(allocateMemory()) {
+			m_device (device),
+			m_size   (vertices.size()),
+			m_buffer (initBuffer()),
+			m_memory (allocateMemory()) {
 
 			vkBindBufferMemory(device, m_buffer, m_memory, 0);
 			void* data;
-			vkMapMemory(device, m_memory, 0, sizeof(vertices[0]) * vertices.size(), 0, &data);
-			memcpy(data, vertices.data(), sizeof(vertices[0]) * vertices.size());
+			vkMapMemory(device, m_memory, 0, sizeof(Vertex) * m_size, 0, &data);
+			memcpy(data, vertices.data(), sizeof(Vertex) * m_size);
 			vkUnmapMemory(device, m_memory);
 		}
 
@@ -25,10 +26,10 @@ namespace stirling {
 			rhs.m_memory = VK_NULL_HANDLE;
 		}
 
-		VkBuffer VertexBuffer::initBuffer(const std::vector<Vertex>& vertices) const {
+		VkBuffer VertexBuffer::initBuffer() const {
 			VkBufferCreateInfo create_info = {};
 			create_info.sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-			create_info.size        = sizeof(vertices[0]) * vertices.size();
+			create_info.size        = sizeof(Vertex) * m_size;
 			create_info.usage       = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 			create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
@@ -76,6 +77,10 @@ namespace stirling {
 
 		VertexBuffer::operator VkBuffer() const {
 			return m_buffer;
+		}
+
+		int VertexBuffer::size() const {
+			return m_size;
 		}
 
 	}

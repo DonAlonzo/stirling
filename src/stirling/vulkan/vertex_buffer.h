@@ -24,12 +24,15 @@ namespace stirling {
 
 			operator VkBuffer() const;
 
+			int size() const;
+
 		private:
 			const Device&  m_device;
+			int            m_size;
 			VkBuffer       m_buffer;
 			VkDeviceMemory m_memory;
 
-			VkBuffer       initBuffer(const std::vector<Vertex>& vertices) const;
+			VkBuffer       initBuffer() const;
 			VkDeviceMemory allocateMemory() const;
 			uint32_t       findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
 		};
