@@ -148,6 +148,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\stirling\vulkan\descriptor_pool.cpp" />
     <ClCompile Include="src\stirling\vulkan\buffer.cpp" />
     <ClCompile Include="src\stirling\vulkan\command_pool.cpp" />
     <ClCompile Include="src\stirling\vulkan\framebuffer.cpp" />
@@ -170,6 +171,7 @@
     <ClCompile Include="src\stirling\vulkan\swapchain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\stirling\vulkan\descriptor_pool.h" />
     <ClInclude Include="src\stirling\vulkan\buffer.h" />
     <ClInclude Include="src\stirling\vulkan\command_pool.h" />
     <ClInclude Include="src\stirling\vulkan\framebuffer.h" />

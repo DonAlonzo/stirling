@@ -23,7 +23,7 @@ namespace stirling {
 
 			operator VkCommandPool() const;
 
-			std::vector<VkCommandBuffer> allocateCommandBuffers(uint32_t number) const;
+			std::vector<VkCommandBuffer> allocateCommandBuffers(uint32_t count) const;
 
 		private:
 			const Device& m_device;
