@@ -84,6 +84,9 @@
     <ClCompile Include="src\stirling\vulkan\descriptor_pool.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="DESCRIPTOR_SET.CPP">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\stirling\vulkan\instance.h">

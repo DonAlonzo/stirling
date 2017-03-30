@@ -40,6 +40,8 @@ namespace stirling {
 		vulkan::VertexBuffer             m_vertex_buffer             = initVertexBuffer();
 		vulkan::IndexBuffer              m_index_buffer              = initIndexBuffer();
 		vulkan::UniformBuffer            m_uniform_buffer            = initUniformBuffer();
+		vulkan::DescriptorPool           m_descriptor_pool           = initDescriptorPool();
+		VkDescriptorSet                  m_descriptor_set            = initDescriptorSet();
 		std::vector<VkCommandBuffer>     m_command_buffers           = initCommandBuffers();
 		vulkan::Semaphore                m_image_available_semaphore   {m_device};
 		vulkan::Semaphore                m_render_finished_semaphore   {m_device};
@@ -58,6 +60,8 @@ namespace stirling {
 		vulkan::VertexBuffer             initVertexBuffer() const;
 		vulkan::IndexBuffer              initIndexBuffer() const;
 		vulkan::UniformBuffer            initUniformBuffer() const;
+		vulkan::DescriptorPool           initDescriptorPool() const;
+		VkDescriptorSet                  initDescriptorSet() const;
 		std::vector<VkCommandBuffer>     initCommandBuffers() const;
 
 		void                             recreateSwapchain();

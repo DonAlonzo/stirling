@@ -31,6 +31,20 @@ namespace stirling {
 			return m_descriptor_pool;
 		}
 
+		VkDescriptorSet DescriptorPool::allocateDescriptorSet(const VkDescriptorSetLayout& set_layout) const {
+			VkDescriptorSetAllocateInfo allocate_info = {};
+			allocate_info.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+			allocate_info.descriptorPool     = m_descriptor_pool;
+			allocate_info.descriptorSetCount = 1;
+			allocate_info.pSetLayouts        = &set_layout;
+
+			VkDescriptorSet descriptor_set;
+			if (vkAllocateDescriptorSets(m_device, &allocate_info, &descriptor_set) != VK_SUCCESS) {
+				throw std::runtime_error("Failed to allocate descriptor sets.");
+			}
+			return descriptor_set;
+		}
+
 		std::vector<VkDescriptorSet> DescriptorPool::allocateDescriptorSets(const std::vector<VkDescriptorSetLayout>& set_layouts) const {
 			VkDescriptorSetAllocateInfo allocate_info = {};
 			allocate_info.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;

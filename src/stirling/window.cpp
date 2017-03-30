@@ -114,6 +114,39 @@ namespace stirling {
 		return vulkan::UniformBuffer(m_device);
 	}
 
+	vulkan::DescriptorPool Window::initDescriptorPool() const {
+		std::vector<VkDescriptorPoolSize> pool_sizes{1};
+
+		pool_sizes[0].type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		pool_sizes[0].descriptorCount = 1;
+
+		return vulkan::DescriptorPool(m_device, pool_sizes, 1);
+	}
+
+	VkDescriptorSet Window::initDescriptorSet() const {
+		auto descriptor_set = m_descriptor_pool.allocateDescriptorSet(m_pipeline.getDescriptorSetLayout());
+
+		VkDescriptorBufferInfo buffer_info = {};
+		buffer_info.buffer = m_uniform_buffer;
+		buffer_info.offset = 0;
+		buffer_info.range  = sizeof(vulkan::UniformBufferObject);
+
+		VkWriteDescriptorSet write_descriptor_set = {};
+		write_descriptor_set.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write_descriptor_set.dstSet           = descriptor_set;
+		write_descriptor_set.dstBinding       = 0;
+		write_descriptor_set.dstArrayElement  = 0;
+		write_descriptor_set.descriptorType   = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		write_descriptor_set.descriptorCount  = 1;
+		write_descriptor_set.pBufferInfo      = &buffer_info;
+		write_descriptor_set.pImageInfo       = nullptr;
+		write_descriptor_set.pTexelBufferView = nullptr;
+
+		vkUpdateDescriptorSets(m_device, 1, &write_descriptor_set, 0, nullptr);
+
+		return descriptor_set;
+	}
+
 	std::vector<VkCommandBuffer> Window::initCommandBuffers() const {
 		auto command_buffers = m_command_pool.allocateCommandBuffers(m_framebuffers.size());
 		for (int i = 0; i < command_buffers.size(); ++i) {
@@ -141,6 +174,8 @@ namespace stirling {
 				vkCmdBindVertexBuffers(command_buffers[i], 0, 1, vertex_buffers, offsets);
 
 				vkCmdBindIndexBuffer(command_buffers[i], m_index_buffer, 0, VK_INDEX_TYPE_UINT16);
+
+				vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.getLayout(), 0, 1, &m_descriptor_set, 0, nullptr);
 
 				vkCmdDrawIndexed(command_buffers[i], m_index_buffer.size(), 1, 0, 0, 0);
 			vkCmdEndRenderPass(command_buffers[i]);

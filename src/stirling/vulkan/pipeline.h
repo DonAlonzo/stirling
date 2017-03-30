@@ -26,6 +26,8 @@ namespace stirling {
 			operator VkPipeline() const;
 
 			const Device& getDevice() const;
+			const VkDescriptorSetLayout& getDescriptorSetLayout() const;
+			const VkPipelineLayout& getLayout() const;
 
 		private:
 			const Device&         m_device;
