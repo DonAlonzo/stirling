@@ -48,5 +48,17 @@ namespace stirling {
 			return Sampler(m_device, create_info);
 		}
 
+		const Image& Texture::getImage() const {
+			return m_image;
+		}
+
+		const ImageView& Texture::getImageView() const {
+			return m_image_view;
+		}
+
+		const Sampler& Texture::getSampler() const {
+			return m_sampler;
+		}
+
 	}
 }

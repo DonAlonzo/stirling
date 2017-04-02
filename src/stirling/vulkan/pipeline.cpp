@@ -23,10 +23,22 @@ namespace stirling {
 			ubo_layout_binding.descriptorCount = 1;
 			ubo_layout_binding.stageFlags      = VK_SHADER_STAGE_VERTEX_BIT;
 
+			VkDescriptorSetLayoutBinding sampler_layout_binding = {};
+			sampler_layout_binding.binding            = 1;
+			sampler_layout_binding.descriptorCount    = 1;
+			sampler_layout_binding.descriptorType     = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			sampler_layout_binding.pImmutableSamplers = nullptr;
+			sampler_layout_binding.stageFlags         = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+			std::array<VkDescriptorSetLayoutBinding, 2> bindings = {
+				ubo_layout_binding,
+				sampler_layout_binding
+			};
+
 			VkDescriptorSetLayoutCreateInfo create_info = {};
 			create_info.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-			create_info.bindingCount = 1;
-			create_info.pBindings    = &ubo_layout_binding;
+			create_info.bindingCount = bindings.size();
+			create_info.pBindings    = bindings.data();
 
 			VkDescriptorSetLayout descriptor_set_layout;
 			if (vkCreateDescriptorSetLayout(m_device, &create_info, nullptr, &descriptor_set_layout) != VK_SUCCESS) {

@@ -92,15 +92,15 @@ namespace stirling {
 	}
 
 	vulkan::Texture Window::initTexture() const {
-		return vulkan::Texture(m_device, vulkan::Image::loadFromFile(m_device, "textures/chalet.jpg"));
+		return vulkan::Texture(m_device, vulkan::Image::loadFromFile(m_device, "textures/texture.jpg"));
 	}
 
 	vulkan::VertexBuffer Window::initVertexBuffer() const {
 		std::vector<stirling::Vertex> vertices = {
-			{ { -0.5f, -0.5f },{ 1.0f, 0.0f, 0.0f } },
-			{ {  0.5f, -0.5f },{ 0.0f, 1.0f, 0.0f } },
-			{ {  0.5f,  0.5f },{ 0.0f, 0.0f, 1.0f } },
-			{ { -0.5f,  0.5f },{ 1.0f, 1.0f, 1.0f } }
+			{{ -0.5f, -0.5f },{ 1.0f, 0.0f, 0.0f },{ 0.0f, 0.0f }},
+			{{  0.5f, -0.5f },{ 0.0f, 1.0f, 0.0f },{ 1.0f, 0.0f }},
+			{{  0.5f,  0.5f },{ 0.0f, 0.0f, 1.0f },{ 1.0f, 1.0f }},
+			{{ -0.5f,  0.5f },{ 1.0f, 1.0f, 1.0f },{ 0.0f, 1.0f }}
 		};
 
 		return vulkan::VertexBuffer(m_device, vertices);
@@ -119,10 +119,13 @@ namespace stirling {
 	}
 
 	vulkan::DescriptorPool Window::initDescriptorPool() const {
-		std::vector<VkDescriptorPoolSize> pool_sizes{1};
+		std::vector<VkDescriptorPoolSize> pool_sizes{2};
 
 		pool_sizes[0].type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		pool_sizes[0].descriptorCount = 1;
+
+		pool_sizes[1].type            = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		pool_sizes[1].descriptorCount = 1;
 
 		return vulkan::DescriptorPool(m_device, pool_sizes, 1);
 	}
@@ -135,18 +138,30 @@ namespace stirling {
 		buffer_info.offset = 0;
 		buffer_info.range  = sizeof(vulkan::UniformBufferObject);
 
-		VkWriteDescriptorSet write_descriptor_set = {};
-		write_descriptor_set.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		write_descriptor_set.dstSet           = descriptor_set;
-		write_descriptor_set.dstBinding       = 0;
-		write_descriptor_set.dstArrayElement  = 0;
-		write_descriptor_set.descriptorType   = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		write_descriptor_set.descriptorCount  = 1;
-		write_descriptor_set.pBufferInfo      = &buffer_info;
-		write_descriptor_set.pImageInfo       = nullptr;
-		write_descriptor_set.pTexelBufferView = nullptr;
+		VkDescriptorImageInfo image_info = {};
+		image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		image_info.imageView   = m_texture.getImageView();
+		image_info.sampler     = m_texture.getSampler();
 
-		vkUpdateDescriptorSets(m_device, 1, &write_descriptor_set, 0, nullptr);
+		std::array<VkWriteDescriptorSet, 2> write_descriptor_sets = {};
+
+		write_descriptor_sets[0].sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write_descriptor_sets[0].dstSet           = descriptor_set;
+		write_descriptor_sets[0].dstBinding       = 0;
+		write_descriptor_sets[0].dstArrayElement  = 0;
+		write_descriptor_sets[0].descriptorType   = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		write_descriptor_sets[0].descriptorCount  = 1;
+		write_descriptor_sets[0].pBufferInfo      = &buffer_info;
+
+		write_descriptor_sets[1].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write_descriptor_sets[1].dstSet          = descriptor_set;
+		write_descriptor_sets[1].dstBinding      = 1;
+		write_descriptor_sets[1].dstArrayElement = 0;
+		write_descriptor_sets[1].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		write_descriptor_sets[1].descriptorCount = 1;
+		write_descriptor_sets[1].pImageInfo      = &image_info;
+
+		vkUpdateDescriptorSets(m_device, write_descriptor_sets.size(), write_descriptor_sets.data(), 0, nullptr);
 
 		return descriptor_set;
 	}

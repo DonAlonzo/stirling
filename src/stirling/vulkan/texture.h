@@ -17,6 +17,10 @@ namespace stirling {
 		public:
 			Texture(const Device& device, Image&& image);
 
+			const Image& getImage() const;
+			const ImageView& getImageView() const;
+			const Sampler& getSampler() const;
+
 		private:
 			const Device& m_device;
 			Image         m_image;
