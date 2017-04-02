@@ -30,8 +30,8 @@ namespace stirling {
 			create_info.tiling        = VK_IMAGE_TILING_LINEAR;
 			create_info.initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
 			create_info.usage         = VK_IMAGE_USAGE_SAMPLED_BIT;
-			create_info.sharingMode   = VK_SHARING_MODE_EXCLUSIVE;
 			create_info.samples       = VK_SAMPLE_COUNT_1_BIT;
+			create_info.sharingMode   = VK_SHARING_MODE_EXCLUSIVE;
 			create_info.flags         = 0;
 			
 			Image image(device, create_info, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
@@ -41,20 +41,22 @@ namespace stirling {
 			subresource.mipLevel = 0;
 			subresource.arrayLayer = 0;
 
-			VkSubresourceLayout staging_image_layout;
-			vkGetImageSubresourceLayout(device, image, &subresource, &staging_image_layout);
+			VkSubresourceLayout image_layout;
+			vkGetImageSubresourceLayout(device, image, &subresource, &image_layout);
 
 			void* data;
 			vkMapMemory(device, image.getMemory(), 0, image_size, 0, &data);
-			if (staging_image_layout.rowPitch == width * 4) {
+
+			if (image_layout.rowPitch == width * 4) {
 				memcpy(data, pixels, (size_t)image_size);
 			} else {
 				uint8_t* dataBytes = reinterpret_cast<uint8_t*>(data);
 
 				for (int y = 0; y < height; y++) {
-					memcpy(&dataBytes[y * staging_image_layout.rowPitch], &pixels[y * width * 4], width * 4);
+					memcpy(&dataBytes[y * image_layout.rowPitch], &pixels[y * width * 4], width * 4);
 				}
 			}
+
 			vkUnmapMemory(device, image.getMemory());
 
 			stbi_image_free(pixels);

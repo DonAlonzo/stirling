@@ -5,10 +5,12 @@
 #include <glm/glm.hpp>
 
 // stirling::vulkan
+#include "vulkan/command_buffer.h"
 #include "vulkan/command_pool.h"
 #include "vulkan/device.h"
 #include "vulkan/descriptor_pool.h"
 #include "vulkan/descriptor_set.h"
+#include "vulkan/image.h"
 #include "vulkan/index_buffer.h"
 #include "vulkan/instance.h"
 #include "vulkan/pipeline.h"

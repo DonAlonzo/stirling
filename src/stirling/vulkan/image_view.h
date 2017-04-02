@@ -13,6 +13,7 @@ namespace stirling {
 		class ImageView {
 		public:
 			ImageView(const Device& device, VkImageView);
+			ImageView(const Device& device, const VkImageViewCreateInfo& create_info);
 			~ImageView();
 			ImageView(ImageView&& rhs);
 			ImageView(const ImageView&) = delete;
@@ -25,6 +26,8 @@ namespace stirling {
 			const Device& m_device;
 
 			VkImageView   m_image_view;
+			
+			VkImageView   createImageView(const VkImageViewCreateInfo& create_info) const;
 		};
 	}
 }
