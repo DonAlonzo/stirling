@@ -3,6 +3,7 @@
 #include "vulkan/physical_device.h"
 
 #define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -97,10 +98,15 @@ namespace stirling {
 
 	vulkan::VertexBuffer Window::initVertexBuffer() const {
 		std::vector<stirling::Vertex> vertices = {
-			{{ -0.5f, -0.5f },{ 1.0f, 0.0f, 0.0f },{ 0.0f, 0.0f }},
-			{{  0.5f, -0.5f },{ 0.0f, 1.0f, 0.0f },{ 1.0f, 0.0f }},
-			{{  0.5f,  0.5f },{ 0.0f, 0.0f, 1.0f },{ 1.0f, 1.0f }},
-			{{ -0.5f,  0.5f },{ 1.0f, 1.0f, 1.0f },{ 0.0f, 1.0f }}
+			{{ -0.5f, -0.5f, 0.0f },{ 1.0f, 0.0f, 0.0f },{ 0.0f, 0.0f }},
+			{{  0.5f, -0.5f, 0.0f },{ 0.0f, 1.0f, 0.0f },{ 1.0f, 0.0f }},
+			{{  0.5f,  0.5f, 0.0f },{ 0.0f, 0.0f, 1.0f },{ 1.0f, 1.0f }},
+			{{ -0.5f,  0.5f, 0.0f },{ 1.0f, 1.0f, 1.0f },{ 0.0f, 1.0f }},
+
+			{{ -0.5f, -0.5f, -0.5f },{ 1.0f, 0.0f, 0.0f },{ 0.0f, 0.0f }},
+			{{  0.5f, -0.5f, -0.5f },{ 0.0f, 1.0f, 0.0f },{ 1.0f, 0.0f }},
+			{{  0.5f,  0.5f, -0.5f },{ 0.0f, 0.0f, 1.0f },{ 1.0f, 1.0f }},
+			{{ -0.5f,  0.5f, -0.5f },{ 1.0f, 1.0f, 1.0f },{ 0.0f, 1.0f }}
 		};
 
 		return vulkan::VertexBuffer(m_device, vertices);
@@ -108,7 +114,8 @@ namespace stirling {
 
 	vulkan::IndexBuffer Window::initIndexBuffer() const {
 		std::vector<uint16_t> indices = {
-			0, 1, 2, 2, 3, 0
+			0, 1, 2, 2, 3, 0,
+			4, 5, 6, 6, 7, 4
 		};
 
 		return vulkan::IndexBuffer(m_device, indices);
