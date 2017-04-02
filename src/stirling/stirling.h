@@ -19,6 +19,7 @@
 #include "vulkan/semaphore.h"
 #include "vulkan/surface.h"
 #include "vulkan/swapchain.h"
+#include "vulkan/texture.h"
 #include "vulkan/uniform_buffer.h"
 #include "vulkan/uniform_buffer_object.h"
 #include "vulkan/vertex.h"

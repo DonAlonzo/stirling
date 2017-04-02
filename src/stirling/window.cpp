@@ -91,23 +91,8 @@ namespace stirling {
 		return m_device.getGraphicsQueue().createCommandPool();
 	}
 
-	vulkan::Image Window::loadTextureImage() const {
-		return vulkan::Image::loadFromFile(m_device, "textures/chalet.jpg");
-	}
-
-	vulkan::ImageView Window::initTextureImageView() const {
-		VkImageViewCreateInfo create_info = {};
-		create_info.sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		create_info.image                           = m_texture_image;
-		create_info.viewType                        = VK_IMAGE_VIEW_TYPE_2D;
-		create_info.format                          = VK_FORMAT_R8G8B8A8_UNORM;
-		create_info.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
-		create_info.subresourceRange.baseMipLevel   = 0;
-		create_info.subresourceRange.levelCount     = 1;
-		create_info.subresourceRange.baseArrayLayer = 0;
-		create_info.subresourceRange.layerCount     = 1;
-
-		return vulkan::ImageView(m_device, create_info);
+	vulkan::Texture Window::initTexture() const {
+		return vulkan::Texture(m_device, vulkan::Image::loadFromFile(m_device, "textures/chalet.jpg"));
 	}
 
 	vulkan::VertexBuffer Window::initVertexBuffer() const {

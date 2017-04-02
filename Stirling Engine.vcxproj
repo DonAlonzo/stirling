@@ -149,6 +149,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DESCRIPTOR_SET.CPP" />
+    <ClCompile Include="src\stirling\vulkan\sampler.cpp" />
     <ClCompile Include="src\stirling\vulkan\image.cpp" />
     <ClCompile Include="src\stirling\vulkan\descriptor_pool.cpp" />
     <ClCompile Include="src\stirling\vulkan\buffer.cpp" />
@@ -171,8 +172,10 @@
     <ClCompile Include="src\stirling\window.cpp" />
     <ClCompile Include="src\stirling\vulkan\validator.cpp" />
     <ClCompile Include="src\stirling\vulkan\swapchain.cpp" />
+    <ClCompile Include="src\stirling\vulkan\texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\stirling\vulkan\sampler.h" />
     <ClInclude Include="src\stirling\vulkan\image.h" />
     <ClInclude Include="src\stirling\vulkan\descriptor_pool.h" />
     <ClInclude Include="src\stirling\vulkan\buffer.h" />
@@ -198,6 +201,7 @@
     <ClInclude Include="src\stirling\vulkan\validator.h" />
     <ClInclude Include="src\stirling\vulkan\swapchain.h" />
     <ClInclude Include="src\stirling\stb_image.h" />
+    <ClInclude Include="src\stirling\vulkan\texture.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

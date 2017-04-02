@@ -90,6 +90,12 @@
     <ClCompile Include="src\stirling\vulkan\image.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\stirling\vulkan\texture.cpp">
+      <Filter>Source Files\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stirling\vulkan\sampler.cpp">
+      <Filter>Source Files\vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\stirling\vulkan\instance.h">
@@ -165,6 +171,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\stirling\vulkan\image.h">
+      <Filter>Header Files\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stirling\vulkan\texture.h">
+      <Filter>Header Files\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stirling\vulkan\sampler.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
   </ItemGroup>
