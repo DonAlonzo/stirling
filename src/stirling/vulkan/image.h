@@ -20,7 +20,11 @@ namespace stirling {
 			Image& operator=(Image&&) = delete;
 			Image& operator=(const Image&) = delete;
 
-			static Image loadImage(const Device& device, const std::string& file_name);
+			static Image loadFromFile(const Device& device, const std::string& file_name);
+
+			operator VkImage() const;
+
+			VkDeviceMemory getMemory() const;
 
 		private:
 			const Device&  m_device;

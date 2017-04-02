@@ -9,7 +9,7 @@
 namespace stirling {
 	namespace vulkan {
 
-		Image Image::loadImage(const Device& device, const std::string& file_name) {
+		Image Image::loadFromFile(const Device& device, const std::string& file_name) {
 			int width, height, channels;
 			auto pixels = stbi_load(file_name.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 			VkDeviceSize image_size = width * height * 4;
@@ -34,7 +34,32 @@ namespace stirling {
 			create_info.samples       = VK_SAMPLE_COUNT_1_BIT;
 			create_info.flags         = 0;
 			
-			return Image(device, create_info, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+			Image image(device, create_info, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+			VkImageSubresource subresource = {};
+			subresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			subresource.mipLevel = 0;
+			subresource.arrayLayer = 0;
+
+			VkSubresourceLayout staging_image_layout;
+			vkGetImageSubresourceLayout(device, image, &subresource, &staging_image_layout);
+
+			void* data;
+			vkMapMemory(device, image.getMemory(), 0, image_size, 0, &data);
+			if (staging_image_layout.rowPitch == width * 4) {
+				memcpy(data, pixels, (size_t)image_size);
+			} else {
+				uint8_t* dataBytes = reinterpret_cast<uint8_t*>(data);
+
+				for (int y = 0; y < height; y++) {
+					memcpy(&dataBytes[y * staging_image_layout.rowPitch], &pixels[y * width * 4], width * 4);
+				}
+			}
+			vkUnmapMemory(device, image.getMemory());
+
+			stbi_image_free(pixels);
+
+			return image;
 		}
 
 		Image::Image(const Device& device, const VkImageCreateInfo& create_info, const VkMemoryPropertyFlags& properties) :
@@ -94,6 +119,14 @@ namespace stirling {
 				}
 			}
 			throw std::runtime_error("Failed to find suitable memory type.");
+		}
+
+		Image::operator VkImage() const {
+			return m_image;
+		}
+
+		VkDeviceMemory Image::getMemory() const {
+			return m_memory;
 		}
 
 	}
