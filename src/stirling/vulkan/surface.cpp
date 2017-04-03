@@ -5,7 +5,7 @@ namespace stirling {
 	namespace vulkan {
 
 		Surface::Surface(const Instance& instance, VkSurfaceKHR surface) :
-			m_instance (instance),
+			m_instance (&instance),
 			m_surface  (surface) {
 		}
 
@@ -17,7 +17,7 @@ namespace stirling {
 
 		Surface::~Surface() {
 			if (m_surface != VK_NULL_HANDLE) {
-				vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+				vkDestroySurfaceKHR(*m_instance, m_surface, nullptr);
 			}
 		}
 

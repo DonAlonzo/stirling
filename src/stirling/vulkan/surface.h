@@ -24,9 +24,8 @@ namespace stirling {
 			operator VkSurfaceKHR() const;
 
 		private:
-			const Instance& m_instance;
-
-			VkSurfaceKHR m_surface;
+			const Instance* m_instance;
+			VkSurfaceKHR    m_surface;
 		};
 
 	}

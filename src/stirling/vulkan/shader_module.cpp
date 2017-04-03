@@ -7,7 +7,7 @@
 namespace stirling {
 	namespace vulkan {
 		ShaderModule::ShaderModule(const Pipeline& pipeline, const std::string& file_name) :
-			m_pipeline      (pipeline),
+			m_pipeline      (&pipeline),
 			m_shader_module (createShaderModule(readFile(file_name))) {
 		}
 
@@ -18,14 +18,14 @@ namespace stirling {
 			create_info.pCode    = (uint32_t*) code.data();
 
 			VkShaderModule shader_module;
-			if (vkCreateShaderModule(m_pipeline.getDevice(), &create_info, nullptr, &shader_module) != VK_SUCCESS) {
+			if (vkCreateShaderModule(m_pipeline->getDevice(), &create_info, nullptr, &shader_module) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to create shader module.");
 			}
 			return shader_module;
 		}
 
 		ShaderModule::~ShaderModule() {
-			vkDestroyShaderModule(m_pipeline.getDevice(), m_shader_module, nullptr);
+			vkDestroyShaderModule(m_pipeline->getDevice(), m_shader_module, nullptr);
 		}
 
 		ShaderModule::operator VkShaderModule() const {

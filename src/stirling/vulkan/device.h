@@ -35,7 +35,7 @@ namespace stirling {
 			VkSwapchainKHR createSwapchain(VkSwapchainCreateInfoKHR create_info) const;
 
 		private:
-			const PhysicalDevice& m_physical_device;
+			const PhysicalDevice* m_physical_device;
 
 			VkDevice              m_device;
 			Queue                 m_graphics_queue;

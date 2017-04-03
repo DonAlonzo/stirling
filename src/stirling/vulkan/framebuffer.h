@@ -24,7 +24,7 @@ namespace stirling {
 			operator VkFramebuffer() const;
 
 		private:
-			const Device& m_device;
+			const Device* m_device;
 
 			VkFramebuffer m_framebuffer;
 		};

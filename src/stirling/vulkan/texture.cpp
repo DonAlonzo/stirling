@@ -5,7 +5,7 @@ namespace stirling {
 	namespace vulkan {
 
 		Texture::Texture(const Device& device, Image&& image) :
-			m_device     (device),
+			m_device     (&device),
 			m_image      (std::move(image)),
 			m_image_view (initImageView()),
 			m_sampler    (initSampler()) {
@@ -23,7 +23,7 @@ namespace stirling {
 			create_info.subresourceRange.baseArrayLayer = 0;
 			create_info.subresourceRange.layerCount     = 1;
 
-			return ImageView(m_device, create_info);
+			return ImageView(*m_device, create_info);
 		}
 
 		Sampler Texture::initSampler() const {
@@ -45,7 +45,7 @@ namespace stirling {
 			create_info.minLod                  = 0.0f;
 			create_info.maxLod                  = 0.0f;
 
-			return Sampler(m_device, create_info);
+			return Sampler(*m_device, create_info);
 		}
 
 		const Image& Texture::getImage() const {

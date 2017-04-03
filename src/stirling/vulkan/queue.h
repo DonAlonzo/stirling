@@ -22,7 +22,7 @@ namespace stirling {
 			CommandPool createCommandPool() const;
 
 		private:
-			const Device& m_device;
+			const Device* m_device;
 			int           m_family_index;
 			VkQueue       m_queue;
 

@@ -33,6 +33,7 @@ namespace stirling {
 		vulkan::PhysicalDevice             m_physical_device           = choosePhysicalDevice(m_instance.getPhysicalDevices());
 		vulkan::Device                     m_device                    = initDevice();
 		vulkan::Swapchain                  m_swapchain                 = initSwapchain();
+		vulkan::DepthImage                 m_depth_image               = initDepthImage();
 		vulkan::RenderPass                 m_render_pass               = initRenderPass();
 		vulkan::Pipeline                   m_pipeline                  = initPipeline();
 		std::vector<vulkan::Framebuffer>   m_framebuffers              = initFramebuffers();
@@ -54,6 +55,7 @@ namespace stirling {
 		bool                               isPhysicalDeviceSuitable(const vulkan::PhysicalDevice& physical_device) const;
 		vulkan::Device                     initDevice() const;
 		vulkan::Swapchain                  initSwapchain() const;
+		vulkan::DepthImage                 initDepthImage() const;
 		vulkan::RenderPass                 initRenderPass() const;
 		vulkan::Pipeline                   initPipeline() const;
 		std::vector<vulkan::Framebuffer>   initFramebuffers() const;

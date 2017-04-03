@@ -12,22 +12,20 @@ namespace stirling {
 	namespace vulkan {
 		class RenderPass {
 		public:
-			RenderPass(const Device& device, const VkFormat& image_format);
+			RenderPass(const Device& device, const VkFormat& image_format, const VkFormat& depth_format);
 			~RenderPass();
-			RenderPass(RenderPass&&) = default;
+			RenderPass(RenderPass&&);
 			RenderPass(const RenderPass&) = delete;
-			RenderPass& operator=(RenderPass&&) = delete;
+			RenderPass& operator=(RenderPass&&);
 			RenderPass& operator=(const RenderPass&) = delete;
-
-			void reset(const VkFormat& image_format);
 
 			operator VkRenderPass() const;
 
 		private:
-			const Device& m_device;
+			const Device* m_device;
 			VkRenderPass  m_render_pass;
 
-			VkRenderPass  initRenderPass(const VkFormat& image_format) const;
+			VkRenderPass  initRenderPass(const VkFormat& image_format, const VkFormat& depth_format) const;
 		};
 	}
 }

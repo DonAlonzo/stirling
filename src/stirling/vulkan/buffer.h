@@ -15,13 +15,13 @@ namespace stirling {
 			~Buffer();
 			Buffer(Buffer&&);
 			Buffer(const Buffer&) = delete;
-			Buffer& operator=(Buffer&&) = delete;
+			Buffer& operator=(Buffer&&);
 			Buffer& operator=(const Buffer&) = delete;
 
 			operator VkBuffer() const;
 
 		protected:
-			const Device&  m_device;
+			const Device*  m_device;
 			VkBuffer       m_buffer;
 			VkDeviceMemory m_memory;
 

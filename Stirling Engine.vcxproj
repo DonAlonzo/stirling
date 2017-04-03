@@ -148,6 +148,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\stirling\vulkan\depth_image.cpp" />
     <ClCompile Include="DESCRIPTOR_SET.CPP" />
     <ClCompile Include="src\stirling\vulkan\sampler.cpp" />
     <ClCompile Include="src\stirling\vulkan\image.cpp" />
@@ -175,6 +176,7 @@
     <ClCompile Include="src\stirling\vulkan\texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\stirling\vulkan\depth_image.h" />
     <ClInclude Include="src\stirling\vulkan\sampler.h" />
     <ClInclude Include="src\stirling\vulkan\image.h" />
     <ClInclude Include="src\stirling\vulkan\descriptor_pool.h" />

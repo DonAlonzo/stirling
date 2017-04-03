@@ -6,7 +6,7 @@ namespace stirling {
 	namespace vulkan {
 		
 		Framebuffer::Framebuffer(const Device& device, VkFramebuffer framebuffer) :
-			m_device      (device),
+			m_device      (&device),
 			m_framebuffer (framebuffer) {
 		}
 
@@ -18,7 +18,7 @@ namespace stirling {
 
 		Framebuffer::~Framebuffer() {
 			if (m_framebuffer != VK_NULL_HANDLE) {
-				vkDestroyFramebuffer(m_device, m_framebuffer, nullptr);
+				vkDestroyFramebuffer(*m_device, m_framebuffer, nullptr);
 			}
 		}
 

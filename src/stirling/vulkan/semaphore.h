@@ -16,13 +16,13 @@ namespace stirling {
 			~Semaphore();
 			Semaphore(Semaphore&&);
 			Semaphore(const Semaphore&) = delete;
-			Semaphore& operator=(Semaphore&&) = delete;
+			Semaphore& operator=(Semaphore&&);
 			Semaphore& operator=(const Semaphore&) = delete;
 
 			operator VkSemaphore() const;
 			
 		private:
-			const Device& m_device;
+			const Device* m_device;
 			VkSemaphore   m_semaphore;
 
 			VkSemaphore   initSemaphore() const;

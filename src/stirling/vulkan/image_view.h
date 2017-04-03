@@ -17,13 +17,13 @@ namespace stirling {
 			~ImageView();
 			ImageView(ImageView&& rhs);
 			ImageView(const ImageView&) = delete;
-			ImageView& operator=(ImageView&&) = delete;
+			ImageView& operator=(ImageView&&);
 			ImageView& operator=(const ImageView&) = delete;
 
 			operator VkImageView() const;
 
 		private:
-			const Device& m_device;
+			const Device* m_device;
 
 			VkImageView   m_image_view;
 			

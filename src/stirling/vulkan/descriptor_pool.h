@@ -27,7 +27,7 @@ namespace stirling {
 			std::vector<VkDescriptorSet> allocateDescriptorSets(const std::vector<VkDescriptorSetLayout>& set_layouts) const;
 
 		private:
-			const Device& m_device;
+			const Device* m_device;
 
 			VkDescriptorPool m_descriptor_pool;
 

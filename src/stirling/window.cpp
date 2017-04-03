@@ -76,8 +76,12 @@ namespace stirling {
 		return vulkan::Swapchain(m_device, m_surface, getSize());
 	}
 
+	vulkan::DepthImage Window::initDepthImage() const {
+		return vulkan::DepthImage(m_device, m_swapchain.getExtent());
+	}
+
 	vulkan::RenderPass Window::initRenderPass() const {
-		return vulkan::RenderPass(m_device, m_swapchain.getImageFormat());
+		return vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.getImageFormat());
 	}
 
 	vulkan::Pipeline Window::initPipeline() const {
@@ -85,7 +89,7 @@ namespace stirling {
 	}
 
 	std::vector<vulkan::Framebuffer> Window::initFramebuffers() const {
-		return m_swapchain.createFramebuffers(m_render_pass);
+		return m_swapchain.createFramebuffers(m_render_pass, m_depth_image.getImageView());
 	}
 	
 	vulkan::CommandPool Window::initCommandPool() const {
@@ -181,7 +185,9 @@ namespace stirling {
 			begin_info.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 			vkBeginCommandBuffer(command_buffers[i], &begin_info);
 
-			VkClearValue clear_color = { 0.0f, 0.0f, 0.0f, 1.0f };
+			std::array<VkClearValue, 2> clear_values = {};
+			clear_values[0].color        = { 0.0f, 0.0f, 0.0f, 1.0f };
+			clear_values[1].depthStencil = { 1.0f, 0 };
 
 			VkRenderPassBeginInfo render_pass_info = {};
 			render_pass_info.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -189,8 +195,8 @@ namespace stirling {
 			render_pass_info.framebuffer       = m_framebuffers[i];
 			render_pass_info.renderArea.offset = { 0, 0 };
 			render_pass_info.renderArea.extent = m_swapchain.getExtent();
-			render_pass_info.clearValueCount   = 1;
-			render_pass_info.pClearValues      = &clear_color;
+			render_pass_info.clearValueCount   = clear_values.size();
+			render_pass_info.pClearValues      = clear_values.data();
 
 			vkCmdBeginRenderPass(command_buffers[i], &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
 				vkCmdBindPipeline(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
@@ -229,10 +235,10 @@ namespace stirling {
 	void Window::recreateSwapchain() {
 		vkDeviceWaitIdle(m_device);
 
-		m_swapchain.reset(getSize());
-		m_render_pass.reset(m_swapchain.getImageFormat());
-		m_pipeline.reset(m_render_pass, m_swapchain.getExtent());
-
+		m_swapchain    = initSwapchain();
+		m_depth_image  = initDepthImage();
+		m_render_pass  = initRenderPass();
+		m_pipeline     = initPipeline();
 		m_framebuffers = initFramebuffers();
 
 		vkFreeCommandBuffers(m_device, m_command_pool, m_command_buffers.size(), m_command_buffers.data());

@@ -65,31 +65,16 @@ namespace stirling {
 		}
 
 		Image::Image(const Device& device, const VkImageCreateInfo& create_info, const VkMemoryPropertyFlags& properties) :
-			m_device (device),
+			m_device (&device),
 			m_image  (initImage(create_info)),
 			m_memory (allocateMemory(properties)) {
 
 			vkBindImageMemory(device, m_image, m_memory, 0);
 		}
 
-		Image::Image(Image&& rhs) :
-			m_device (std::move(rhs.m_device)),
-			m_image  (std::move(rhs.m_image)),
-			m_memory (std::move(rhs.m_memory)) {
-			rhs.m_image = VK_NULL_HANDLE;
-			rhs.m_memory = VK_NULL_HANDLE;
-		}
-
-		Image::~Image() {
-			if (m_image != VK_NULL_HANDLE) {
-				vkFreeMemory(m_device, m_memory, nullptr);
-				vkDestroyImage(m_device, m_image, nullptr);
-			}
-		}
-
 		VkImage Image::initImage(const VkImageCreateInfo& create_info) {
 			VkImage image;
-			if (vkCreateImage(m_device, &create_info, nullptr, &image) != VK_SUCCESS) {
+			if (vkCreateImage(*m_device, &create_info, nullptr, &image) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to create image.");
 			}
 			return image;
@@ -97,7 +82,7 @@ namespace stirling {
 
 		VkDeviceMemory Image::allocateMemory(const VkMemoryPropertyFlags& properties) {
 			VkMemoryRequirements memory_requirements;
-			vkGetImageMemoryRequirements(m_device, m_image, &memory_requirements);
+			vkGetImageMemoryRequirements(*m_device, m_image, &memory_requirements);
 
 			VkMemoryAllocateInfo allocate_info = {};
 			allocate_info.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -105,7 +90,7 @@ namespace stirling {
 			allocate_info.memoryTypeIndex = findMemoryType(memory_requirements.memoryTypeBits, properties);
 
 			VkDeviceMemory memory;
-			if (vkAllocateMemory(m_device, &allocate_info, nullptr, &memory) != VK_SUCCESS) {
+			if (vkAllocateMemory(*m_device, &allocate_info, nullptr, &memory) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to allocate image memory.");
 			}
 			return memory;
@@ -113,7 +98,7 @@ namespace stirling {
 
 		uint32_t Image::findMemoryType(uint32_t type_filter, VkMemoryPropertyFlags properties) const {
 			VkPhysicalDeviceMemoryProperties memory_properties;
-			vkGetPhysicalDeviceMemoryProperties(m_device.getPhysicalDevice(), &memory_properties);
+			vkGetPhysicalDeviceMemoryProperties(m_device->getPhysicalDevice(), &memory_properties);
 
 			for (uint32_t i = 0; i < memory_properties.memoryTypeCount; ++i) {
 				if ((type_filter & (1 << i)) && (memory_properties.memoryTypes[i].propertyFlags & properties) == properties) {
@@ -121,6 +106,33 @@ namespace stirling {
 				}
 			}
 			throw std::runtime_error("Failed to find suitable memory type.");
+		}
+
+		Image::Image(Image&& rhs) :
+			m_device (std::move(rhs.m_device)),
+			m_image  (std::move(rhs.m_image)),
+			m_memory (std::move(rhs.m_memory)) {
+
+			rhs.m_image  = VK_NULL_HANDLE;
+			rhs.m_memory = VK_NULL_HANDLE;
+		}
+
+		Image& Image::operator=(Image&& rhs) {
+			m_device = std::move(rhs.m_device);
+			m_image  = std::move(rhs.m_image);
+			m_memory = std::move(rhs.m_memory);
+
+			rhs.m_image  = VK_NULL_HANDLE;
+			rhs.m_memory = VK_NULL_HANDLE;
+
+			return *this;
+		}
+
+		Image::~Image() {
+			if (m_image != VK_NULL_HANDLE) {
+				vkFreeMemory(*m_device, m_memory, nullptr);
+				vkDestroyImage(*m_device, m_image, nullptr);
+			}
 		}
 
 		Image::operator VkImage() const {

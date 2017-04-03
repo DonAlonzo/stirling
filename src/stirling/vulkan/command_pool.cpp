@@ -5,7 +5,7 @@ namespace stirling {
 	namespace vulkan {
 
 		CommandPool::CommandPool(const Device& device, int queue_family_index) :
-			m_device       (device),
+			m_device       (&device),
 			m_command_pool (initCommandPool(queue_family_index)) {
 		}
 
@@ -16,14 +16,14 @@ namespace stirling {
 			create_info.flags            = 0;
 
 			VkCommandPool command_pool;
-			if (vkCreateCommandPool(m_device, &create_info, nullptr, &command_pool) != VK_SUCCESS) {
+			if (vkCreateCommandPool(*m_device, &create_info, nullptr, &command_pool) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to create command pool.");
 			}
 			return command_pool;
 		}
 
 		CommandPool::~CommandPool() {
-			vkDestroyCommandPool(m_device, m_command_pool, nullptr);
+			vkDestroyCommandPool(*m_device, m_command_pool, nullptr);
 		}
 
 		CommandPool::operator VkCommandPool() const {
@@ -38,7 +38,7 @@ namespace stirling {
 			allocate_info.commandBufferCount = count;
 
 			std::vector<VkCommandBuffer> command_buffers{count};
-			if (vkAllocateCommandBuffers(m_device, &allocate_info, command_buffers.data()) != VK_SUCCESS) {
+			if (vkAllocateCommandBuffers(*m_device, &allocate_info, command_buffers.data()) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to allocate command buffers.");
 			}
 			return command_buffers;

@@ -25,7 +25,7 @@ namespace stirling {
 			operator VkShaderModule() const;
 
 		private:
-			const Pipeline& m_pipeline;
+			const Pipeline* m_pipeline;
 
 			VkShaderModule  m_shader_module;
 

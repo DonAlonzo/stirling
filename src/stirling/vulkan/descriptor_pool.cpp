@@ -5,7 +5,7 @@ namespace stirling {
 	namespace vulkan {
 
 		DescriptorPool::DescriptorPool(const Device& device, const std::vector<VkDescriptorPoolSize>& pool_sizes, int max_sets) :
-			m_device          (device),
+			m_device          (&device),
 			m_descriptor_pool (initDescriptorPool(pool_sizes, max_sets)) {
 		}
 
@@ -17,14 +17,14 @@ namespace stirling {
 			create_info.maxSets       = max_sets;
 
 			VkDescriptorPool descriptor_pool;
-			if (vkCreateDescriptorPool(m_device, &create_info, nullptr, &descriptor_pool) != VK_SUCCESS) {
+			if (vkCreateDescriptorPool(*m_device, &create_info, nullptr, &descriptor_pool) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to create descriptor pool.");
 			}
 			return descriptor_pool;
 		}
 
 		DescriptorPool::~DescriptorPool() {
-			vkDestroyDescriptorPool(m_device, m_descriptor_pool, nullptr);
+			vkDestroyDescriptorPool(*m_device, m_descriptor_pool, nullptr);
 		}
 
 		DescriptorPool::operator VkDescriptorPool() const {
@@ -39,7 +39,7 @@ namespace stirling {
 			allocate_info.pSetLayouts        = &set_layout;
 
 			VkDescriptorSet descriptor_set;
-			if (vkAllocateDescriptorSets(m_device, &allocate_info, &descriptor_set) != VK_SUCCESS) {
+			if (vkAllocateDescriptorSets(*m_device, &allocate_info, &descriptor_set) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to allocate descriptor sets.");
 			}
 			return descriptor_set;
@@ -53,7 +53,7 @@ namespace stirling {
 			allocate_info.pSetLayouts        = set_layouts.data();
 
 			std::vector<VkDescriptorSet> descriptor_sets;
-			if (vkAllocateDescriptorSets(m_device, &allocate_info, descriptor_sets.data()) != VK_SUCCESS) {
+			if (vkAllocateDescriptorSets(*m_device, &allocate_info, descriptor_sets.data()) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to allocate descriptor sets.");
 			}
 			return descriptor_sets;

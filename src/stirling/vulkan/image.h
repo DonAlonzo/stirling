@@ -17,7 +17,7 @@ namespace stirling {
 			~Image();
 			Image(Image&&);
 			Image(const Image&) = delete;
-			Image& operator=(Image&&) = delete;
+			Image& operator=(Image&&);
 			Image& operator=(const Image&) = delete;
 
 			static Image loadFromFile(const Device& device, const std::string& file_name);
@@ -27,7 +27,7 @@ namespace stirling {
 			VkDeviceMemory getMemory() const;
 
 		private:
-			const Device&  m_device;
+			const Device*  m_device;
 			VkImage        m_image;
 			VkDeviceMemory m_memory;
 

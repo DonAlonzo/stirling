@@ -5,15 +5,10 @@ namespace stirling {
 	namespace vulkan {
 
 		Pipeline::Pipeline(const Device& device, const RenderPass& render_pass, const VkExtent2D& extent) :
-			m_device                (device),
+			m_device                (&device),
 			m_descriptor_set_layout (initDescriptorSetLayout()),
 			m_pipeline_layout       (initPipelineLayout()),
 			m_pipeline              (initPipeline(render_pass, extent)) {
-		}
-
-		void Pipeline::reset(const RenderPass& render_pass, const VkExtent2D& extent) {
-			vkDestroyPipeline(m_device, m_pipeline, nullptr);
-			m_pipeline = initPipeline(render_pass, extent);
 		}
 
 		VkDescriptorSetLayout Pipeline::initDescriptorSetLayout() const {
@@ -41,7 +36,7 @@ namespace stirling {
 			create_info.pBindings    = bindings.data();
 
 			VkDescriptorSetLayout descriptor_set_layout;
-			if (vkCreateDescriptorSetLayout(m_device, &create_info, nullptr, &descriptor_set_layout) != VK_SUCCESS) {
+			if (vkCreateDescriptorSetLayout(*m_device, &create_info, nullptr, &descriptor_set_layout) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to create descriptor set layout.");
 			}
 			return descriptor_set_layout;
@@ -60,7 +55,7 @@ namespace stirling {
 			pipeline_layout_info.pPushConstantRanges    = 0;
 
 			VkPipelineLayout pipeline_layout;
-			if (vkCreatePipelineLayout(m_device, &pipeline_layout_info, nullptr, &pipeline_layout) != VK_SUCCESS) {
+			if (vkCreatePipelineLayout(*m_device, &pipeline_layout_info, nullptr, &pipeline_layout) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to create pipeline layout.");
 			}
 			return pipeline_layout;
@@ -139,7 +134,17 @@ namespace stirling {
 			multisampling.sampleShadingEnable  = VK_FALSE;
 			multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
-			// TODO: Depth and stencil testing
+			VkPipelineDepthStencilStateCreateInfo depth_stencil = {};
+			depth_stencil.sType                 = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+			depth_stencil.depthTestEnable       = VK_TRUE;
+			depth_stencil.depthWriteEnable      = VK_TRUE;
+			depth_stencil.depthCompareOp        = VK_COMPARE_OP_LESS;
+			depth_stencil.depthBoundsTestEnable = VK_FALSE;
+			depth_stencil.minDepthBounds        = 0.0f;
+			depth_stencil.maxDepthBounds        = 1.0f;
+			depth_stencil.stencilTestEnable     = VK_FALSE;
+			depth_stencil.front                 = {};
+			depth_stencil.back                  = {};
 
 			VkPipelineColorBlendAttachmentState color_blend_attachment = {};
 			color_blend_attachment.colorWriteMask      = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
@@ -171,7 +176,7 @@ namespace stirling {
 			create_info.pViewportState      = &viewport_state;
 			create_info.pRasterizationState = &rasterizer;
 			create_info.pMultisampleState   = &multisampling;
-			create_info.pDepthStencilState  = nullptr;
+			create_info.pDepthStencilState  = &depth_stencil;
 			create_info.pColorBlendState    = &color_blending;
 			create_info.pDynamicState       = nullptr;
 			create_info.layout              = m_pipeline_layout;
@@ -181,16 +186,44 @@ namespace stirling {
 			create_info.basePipelineIndex   = -1;
 
 			VkPipeline pipeline;
-			if (vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, 1, &create_info, nullptr, &pipeline) != VK_SUCCESS) {
+			if (vkCreateGraphicsPipelines(*m_device, VK_NULL_HANDLE, 1, &create_info, nullptr, &pipeline) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to create graphics pipeline.");
 			}
 			return pipeline;
 		}
 
+		Pipeline::Pipeline(Pipeline&& rhs) : 
+			m_device                (std::move(rhs.m_device)),
+			m_descriptor_set_layout (std::move(rhs.m_descriptor_set_layout)),
+			m_pipeline_layout       (std::move(rhs.m_pipeline_layout)),
+			m_pipeline              (std::move(rhs.m_pipeline)) {
+
+			rhs.m_descriptor_set_layout = VK_NULL_HANDLE;
+			rhs.m_pipeline_layout       = VK_NULL_HANDLE;
+			rhs.m_pipeline              = VK_NULL_HANDLE;
+		}
+
+		Pipeline& Pipeline::operator=(Pipeline&& rhs) {
+			if (m_pipeline              != VK_NULL_HANDLE) vkDestroyPipeline(*m_device, m_pipeline, nullptr);
+			if (m_pipeline_layout       != VK_NULL_HANDLE) vkDestroyPipelineLayout(*m_device, m_pipeline_layout, nullptr);
+			if (m_descriptor_set_layout != VK_NULL_HANDLE) vkDestroyDescriptorSetLayout(*m_device, m_descriptor_set_layout, nullptr);
+
+			m_device                = std::move(rhs.m_device);
+			m_descriptor_set_layout = std::move(rhs.m_descriptor_set_layout);
+			m_pipeline_layout       = std::move(rhs.m_pipeline_layout);
+			m_pipeline              = std::move(rhs.m_pipeline);
+
+			rhs.m_descriptor_set_layout = VK_NULL_HANDLE;
+			rhs.m_pipeline_layout       = VK_NULL_HANDLE;
+			rhs.m_pipeline              = VK_NULL_HANDLE;
+			
+			return *this;
+		}
+
 		Pipeline::~Pipeline() {
-			vkDestroyPipeline(m_device, m_pipeline, nullptr);
-			vkDestroyPipelineLayout(m_device, m_pipeline_layout, nullptr);
-			vkDestroyDescriptorSetLayout(m_device, m_descriptor_set_layout, nullptr);
+			if (m_pipeline              != VK_NULL_HANDLE) vkDestroyPipeline(*m_device, m_pipeline, nullptr);
+			if (m_pipeline_layout       != VK_NULL_HANDLE) vkDestroyPipelineLayout(*m_device, m_pipeline_layout, nullptr);
+			if (m_descriptor_set_layout != VK_NULL_HANDLE) vkDestroyDescriptorSetLayout(*m_device, m_descriptor_set_layout, nullptr);
 		}
 
 		Pipeline::operator VkPipeline() const {
@@ -198,7 +231,7 @@ namespace stirling {
 		}
 
 		const Device& Pipeline::getDevice() const {
-			return m_device;
+			return *m_device;
 		}
 
 		const VkDescriptorSetLayout& Pipeline::getDescriptorSetLayout() const {

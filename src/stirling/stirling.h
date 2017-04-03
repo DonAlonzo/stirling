@@ -7,9 +7,10 @@
 // stirling::vulkan
 #include "vulkan/command_buffer.h"
 #include "vulkan/command_pool.h"
-#include "vulkan/device.h"
+#include "vulkan/depth_image.h"
 #include "vulkan/descriptor_pool.h"
 #include "vulkan/descriptor_set.h"
+#include "vulkan/device.h"
 #include "vulkan/image.h"
 #include "vulkan/index_buffer.h"
 #include "vulkan/instance.h"

@@ -5,7 +5,7 @@ namespace stirling {
 	namespace vulkan {
 
 		Semaphore::Semaphore(const Device& device) :
-			m_device    (device),
+			m_device    (&device),
 			m_semaphore (initSemaphore()) {
 		}
 
@@ -14,7 +14,7 @@ namespace stirling {
 			create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
 			VkSemaphore semaphore;
-			if (vkCreateSemaphore(m_device, &create_info, nullptr, &semaphore) != VK_SUCCESS) {
+			if (vkCreateSemaphore(*m_device, &create_info, nullptr, &semaphore) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to create semaphore.");
 			}
 			return semaphore;
@@ -26,9 +26,22 @@ namespace stirling {
 			rhs.m_semaphore = VK_NULL_HANDLE;
 		}
 
+		Semaphore& Semaphore::operator=(Semaphore&& rhs) {
+			if (m_semaphore != VK_NULL_HANDLE) {
+				vkDestroySemaphore(*m_device, m_semaphore, nullptr);
+			}
+
+			m_device    = std::move(rhs.m_device);
+			m_semaphore = std::move(rhs.m_semaphore);
+
+			rhs.m_semaphore = VK_NULL_HANDLE;
+
+			return *this;
+		}
+
 		Semaphore::~Semaphore() {
 			if (m_semaphore != VK_NULL_HANDLE) {
-				vkDestroySemaphore(m_device, m_semaphore, nullptr);
+				vkDestroySemaphore(*m_device, m_semaphore, nullptr);
 			}
 		}
 

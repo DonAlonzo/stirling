@@ -23,7 +23,7 @@ namespace stirling {
 			operator VkSampler() const;
 
 		private:
-			const Device& m_device;
+			const Device* m_device;
 			VkSampler     m_sampler;
 
 			VkSampler     createSampler(const VkSamplerCreateInfo& create_info);

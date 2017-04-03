@@ -22,7 +22,7 @@ namespace stirling {
 			const Sampler& getSampler() const;
 
 		private:
-			const Device& m_device;
+			const Device* m_device;
 			Image         m_image;
 			ImageView     m_image_view;
 			Sampler       m_sampler;
