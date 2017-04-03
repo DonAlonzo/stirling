@@ -28,14 +28,12 @@ namespace stirling {
 
 		class Swapchain {
 		public:
-			Swapchain(const Device& device, const Surface& surface, const VkExtent2D& actual_extent);
+			Swapchain(const Device& device, const Surface& surface, const VkExtent2D& actual_extent, const VkSwapchainKHR& old_swapchain);
 			~Swapchain();
 			Swapchain(Swapchain&&);
 			Swapchain(const Swapchain&) = delete;
 			Swapchain& operator=(Swapchain&&);
 			Swapchain& operator=(const Swapchain&) = delete;
-
-			void reset(const VkExtent2D& actual_extent);
 
 			std::vector<Framebuffer> createFramebuffers(const RenderPass& render_pass, const ImageView& depth_image_view) const;
 

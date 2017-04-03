@@ -26,13 +26,12 @@ namespace stirling {
 		Sampler::Sampler(Sampler&& rhs) :
 			m_device  (std::move(rhs.m_device)),
 			m_sampler (std::move(rhs.m_sampler)) {
+
 			rhs.m_sampler = VK_NULL_HANDLE;
 		}
 
 		Sampler::~Sampler() {
-			if (m_sampler != VK_NULL_HANDLE) {
-				vkDestroySampler(*m_device, m_sampler, nullptr);
-			}
+			if (m_sampler != VK_NULL_HANDLE) vkDestroySampler(*m_device, m_sampler, nullptr);
 		}
 
 		Sampler::operator VkSampler() const {

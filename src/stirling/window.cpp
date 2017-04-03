@@ -73,7 +73,7 @@ namespace stirling {
 	}
 
 	vulkan::Swapchain Window::initSwapchain() const {
-		return vulkan::Swapchain(m_device, m_surface, getSize());
+		return vulkan::Swapchain(m_device, m_surface, getSize(), VK_NULL_HANDLE);
 	}
 
 	vulkan::DepthImage Window::initDepthImage() const {
@@ -235,7 +235,7 @@ namespace stirling {
 	void Window::recreateSwapchain() {
 		vkDeviceWaitIdle(m_device);
 
-		m_swapchain    = initSwapchain();
+		m_swapchain    = vulkan::Swapchain(m_device, m_surface, getSize(), m_swapchain);
 		m_depth_image  = initDepthImage();
 		m_render_pass  = initRenderPass();
 		m_pipeline     = initPipeline();

@@ -208,10 +208,10 @@ namespace stirling {
 			if (m_pipeline_layout       != VK_NULL_HANDLE) vkDestroyPipelineLayout(*m_device, m_pipeline_layout, nullptr);
 			if (m_descriptor_set_layout != VK_NULL_HANDLE) vkDestroyDescriptorSetLayout(*m_device, m_descriptor_set_layout, nullptr);
 
-			m_device                = std::move(rhs.m_device);
-			m_descriptor_set_layout = std::move(rhs.m_descriptor_set_layout);
-			m_pipeline_layout       = std::move(rhs.m_pipeline_layout);
 			m_pipeline              = std::move(rhs.m_pipeline);
+			m_pipeline_layout       = std::move(rhs.m_pipeline_layout);
+			m_descriptor_set_layout = std::move(rhs.m_descriptor_set_layout);
+			m_device                = std::move(rhs.m_device);
 
 			rhs.m_descriptor_set_layout = VK_NULL_HANDLE;
 			rhs.m_pipeline_layout       = VK_NULL_HANDLE;

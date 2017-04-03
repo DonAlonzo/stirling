@@ -27,12 +27,10 @@ namespace stirling {
 		}
 
 		Semaphore& Semaphore::operator=(Semaphore&& rhs) {
-			if (m_semaphore != VK_NULL_HANDLE) {
-				vkDestroySemaphore(*m_device, m_semaphore, nullptr);
-			}
+			if (m_semaphore != VK_NULL_HANDLE) vkDestroySemaphore(*m_device, m_semaphore, nullptr);
 
-			m_device    = std::move(rhs.m_device);
 			m_semaphore = std::move(rhs.m_semaphore);
+			m_device    = std::move(rhs.m_device);
 
 			rhs.m_semaphore = VK_NULL_HANDLE;
 
@@ -40,9 +38,7 @@ namespace stirling {
 		}
 
 		Semaphore::~Semaphore() {
-			if (m_semaphore != VK_NULL_HANDLE) {
-				vkDestroySemaphore(*m_device, m_semaphore, nullptr);
-			}
+			if (m_semaphore != VK_NULL_HANDLE) vkDestroySemaphore(*m_device, m_semaphore, nullptr);
 		}
 
 		Semaphore::operator VkSemaphore() const {

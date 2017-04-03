@@ -11,13 +11,13 @@
 namespace stirling {
 	namespace vulkan {
 
-		Swapchain::Swapchain(const Device& device, const Surface& surface, const VkExtent2D& actual_extent) :
+		Swapchain::Swapchain(const Device& device, const Surface& surface, const VkExtent2D& actual_extent, const VkSwapchainKHR& old_swapchain) :
 			m_device                 (&device),
 			m_surface                (&surface),
 			m_support_details        (fetchSupportDetails(m_device->getPhysicalDevice(), *m_surface)),
 			m_swapchain_extent       (chooseSwapExtent(m_support_details.capabilities, actual_extent)),
 			m_surface_format         (chooseSwapSurfaceFormat()),
-			m_swapchain              (initSwapchain(VK_NULL_HANDLE)),
+			m_swapchain              (initSwapchain(old_swapchain)),
 			m_swapchain_images       (m_device->getSwapchainImages(m_swapchain, getImageCount())),
 			m_swapchain_image_format (m_surface_format.format),
 			m_swapchain_image_views  (initImageViews(getImageCount())) {
@@ -157,17 +157,16 @@ namespace stirling {
 		}
 
 		Swapchain& Swapchain::operator=(Swapchain&& rhs) {
-			if (m_swapchain != VK_NULL_HANDLE) vkDestroySwapchainKHR(*m_device, m_swapchain, nullptr);
-
-			m_device                 = std::move(rhs.m_device);
-			m_surface                = std::move(rhs.m_surface);
-			m_support_details        = std::move(rhs.m_support_details);
-			m_swapchain_extent       = std::move(rhs.m_swapchain_extent);
-			m_surface_format         = std::move(rhs.m_surface_format);
-			m_swapchain              = std::move(rhs.m_swapchain);
-			m_swapchain_images       = std::move(rhs.m_swapchain_images);
-			m_swapchain_image_format = std::move(rhs.m_swapchain_image_format);
 			m_swapchain_image_views  = std::move(rhs.m_swapchain_image_views);
+			m_swapchain_image_format = std::move(rhs.m_swapchain_image_format);
+			m_swapchain_images       = std::move(rhs.m_swapchain_images);
+			if (m_swapchain != VK_NULL_HANDLE) vkDestroySwapchainKHR(*m_device, m_swapchain, nullptr);
+			m_swapchain              = std::move(rhs.m_swapchain);
+			m_surface_format         = std::move(rhs.m_surface_format);
+			m_swapchain_extent       = std::move(rhs.m_swapchain_extent);
+			m_support_details        = std::move(rhs.m_support_details);
+			m_surface                = std::move(rhs.m_surface);
+			m_device                 = std::move(rhs.m_device);
 
 			rhs.m_swapchain = VK_NULL_HANDLE;
 

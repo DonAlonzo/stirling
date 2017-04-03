@@ -118,6 +118,9 @@ namespace stirling {
 		}
 
 		Image& Image::operator=(Image&& rhs) {
+			if (m_memory != VK_NULL_HANDLE) vkFreeMemory(*m_device, m_memory, nullptr);
+			if (m_image != VK_NULL_HANDLE) vkDestroyImage(*m_device, m_image, nullptr);
+
 			m_device = std::move(rhs.m_device);
 			m_image  = std::move(rhs.m_image);
 			m_memory = std::move(rhs.m_memory);
@@ -129,10 +132,8 @@ namespace stirling {
 		}
 
 		Image::~Image() {
-			if (m_image != VK_NULL_HANDLE) {
-				vkFreeMemory(*m_device, m_memory, nullptr);
-				vkDestroyImage(*m_device, m_image, nullptr);
-			}
+			if (m_memory != VK_NULL_HANDLE) vkFreeMemory(*m_device, m_memory, nullptr);
+			if (m_image != VK_NULL_HANDLE) vkDestroyImage(*m_device, m_image, nullptr);
 		}
 
 		Image::operator VkImage() const {

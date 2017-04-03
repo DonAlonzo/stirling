@@ -13,13 +13,12 @@ namespace stirling {
 		Framebuffer::Framebuffer(Framebuffer&& rhs) :
 			m_device      (std::move(rhs.m_device)),
 			m_framebuffer (std::move(rhs.m_framebuffer)) {
+
 			rhs.m_framebuffer = VK_NULL_HANDLE;
 		}
 
 		Framebuffer::~Framebuffer() {
-			if (m_framebuffer != VK_NULL_HANDLE) {
-				vkDestroyFramebuffer(*m_device, m_framebuffer, nullptr);
-			}
+			if (m_framebuffer != VK_NULL_HANDLE) vkDestroyFramebuffer(*m_device, m_framebuffer, nullptr);
 		}
 
 		Framebuffer::operator VkFramebuffer() const {

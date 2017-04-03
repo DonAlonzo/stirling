@@ -83,12 +83,10 @@ namespace stirling {
 		}
 
 		RenderPass& RenderPass::operator=(RenderPass&& rhs) {
-			if (m_render_pass != VK_NULL_HANDLE) {
-				vkDestroyRenderPass(*m_device, m_render_pass, nullptr);
-			}
+			if (m_render_pass != VK_NULL_HANDLE) vkDestroyRenderPass(*m_device, m_render_pass, nullptr);
 
-			m_device      = std::move(rhs.m_device);
 			m_render_pass = std::move(rhs.m_render_pass);
+			m_device      = std::move(rhs.m_device);
 
 			rhs.m_render_pass = VK_NULL_HANDLE;
 
@@ -96,9 +94,7 @@ namespace stirling {
 		}
 
 		RenderPass::~RenderPass() {
-			if (m_render_pass != VK_NULL_HANDLE) {
-				vkDestroyRenderPass(*m_device, m_render_pass, nullptr);
-			}
+			if (m_render_pass != VK_NULL_HANDLE) vkDestroyRenderPass(*m_device, m_render_pass, nullptr);
 		}
 
 		RenderPass::operator VkRenderPass() const {
