@@ -24,8 +24,26 @@ namespace stirling {
 			return shader_module;
 		}
 
+        ShaderModule::ShaderModule(ShaderModule&& rhs) :
+            m_pipeline      (std::move(rhs.m_pipeline)),
+            m_shader_module (std::move(rhs.m_shader_module)) {
+
+            rhs.m_shader_module = VK_NULL_HANDLE;
+        }
+        
+        ShaderModule& ShaderModule::operator=(ShaderModule&& rhs) {
+            if (m_shader_module != VK_NULL_HANDLE) vkDestroyShaderModule(m_pipeline->getDevice(), m_shader_module, nullptr);
+
+            m_shader_module = std::move(rhs.m_shader_module);
+            m_pipeline      = std::move(rhs.m_pipeline);
+
+            rhs.m_shader_module = VK_NULL_HANDLE;
+            
+            return *this;
+        }
+
 		ShaderModule::~ShaderModule() {
-			vkDestroyShaderModule(m_pipeline->getDevice(), m_shader_module, nullptr);
+            if (m_shader_module != VK_NULL_HANDLE) vkDestroyShaderModule(m_pipeline->getDevice(), m_shader_module, nullptr);
 		}
 
 		ShaderModule::operator VkShaderModule() const {
