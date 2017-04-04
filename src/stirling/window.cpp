@@ -288,12 +288,12 @@ namespace stirling {
 
         uint32_t image_index;
         switch (vkAcquireNextImageKHR(m_device, m_swapchain, std::numeric_limits<uint64_t>::max(), m_image_available_semaphore, VK_NULL_HANDLE, &image_index)) {
-        case VK_ERROR_OUT_OF_DATE_KHR:
-            recreateSwapchain();
-            return;
         case VK_SUBOPTIMAL_KHR:
         case VK_SUCCESS:
             break;
+        case VK_ERROR_OUT_OF_DATE_KHR:
+            recreateSwapchain();
+            return;
         default:
             throw std::runtime_error("Failed to acquire swapchain image.");
         }
@@ -338,12 +338,12 @@ namespace stirling {
         present_info.pResults           = nullptr;
 
         switch (vkQueuePresentKHR(m_device.getPresentQueue(), &present_info)) {
+        case VK_SUCCESS:
+            break;
         case VK_ERROR_OUT_OF_DATE_KHR:
         case VK_SUBOPTIMAL_KHR:
             recreateSwapchain();
             return;
-        case VK_SUCCESS:
-            break;
         default:
             throw std::runtime_error("Failed to present swapchain image.");
         }
