@@ -270,19 +270,21 @@ namespace stirling {
     }
 
     void Window::update() {
-        // Update uniform buffer
-        static auto start_time = std::chrono::high_resolution_clock::now();
-        auto current_time = std::chrono::high_resolution_clock::now();
-        float time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count() / 1000.0f;
+        { // Rotate model
+            static auto start_time = std::chrono::high_resolution_clock::now();
+            auto current_time = std::chrono::high_resolution_clock::now();
+            float time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count() / 1000.0f;
+            m_model.rotate(0.1f * time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        }
 
-        vulkan::UniformBufferObject ubo = {};
-        ubo.model             = glm::rotate(glm::mat4(), 0.1f * time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        ubo.view              = m_camera;
-        ubo.projection        = m_projection_matrix;
-        ubo.projection[1][1] *= -1;
-
-        m_uniform_buffer.update(ubo);
-        // TODO: Move this into a separate camera class
+        { // Update model uniform
+            vulkan::UniformBufferObject ubo = {};
+            ubo.model             = m_model;
+            ubo.view              = m_camera;
+            ubo.projection        = m_projection_matrix;
+            ubo.projection[1][1] *= -1;
+            m_uniform_buffer.update(ubo);
+        }
 
         uint32_t image_index;
         switch (vkAcquireNextImageKHR(m_device, m_swapchain, std::numeric_limits<uint64_t>::max(), m_image_available_semaphore, VK_NULL_HANDLE, &image_index)) {

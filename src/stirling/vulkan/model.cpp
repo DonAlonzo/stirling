@@ -3,6 +3,8 @@
 #include "image.h"
 #include "texture.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "../tiny_obj_loader.h"
 
@@ -60,6 +62,14 @@ namespace stirling {
             m_vertex_buffer (std::move(vertex_buffer)),
             m_index_buffer  (std::move(index_buffer)),
             m_texture       (std::move(texture)) {
+        }
+
+        void Model::rotate(float a, glm::vec3 axis) {
+            m_model_matrix = glm::rotate(glm::mat4(), a, axis);
+        }
+
+        Model::operator const glm::mat4&() const {
+            return m_model_matrix;
         }
 
         const VertexBuffer& Model::getVertexBuffer() const {

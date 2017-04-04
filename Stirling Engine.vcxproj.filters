@@ -99,13 +99,13 @@
     <ClCompile Include="src\stirling\vulkan\depth_image.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="src\stirling\vulkan\model.cpp">
-      <Filter>Header Files\vulkan</Filter>
-    </ClCompile>
     <ClCompile Include="src\stirling\vulkan\vertex.cpp">
       <Filter>Header Files\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\stirling\camera.cpp">
+      <Filter>Source Files\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stirling\vulkan\model.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
   </ItemGroup>

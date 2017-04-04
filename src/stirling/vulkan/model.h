@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 namespace stirling {
     namespace vulkan {
         class Device;
@@ -19,6 +21,10 @@ namespace stirling {
         public:
             Model(VertexBuffer&& vertex_buffer, IndexBuffer&& index_buffer, Texture&& texture);
 
+            void rotate(float a, glm::vec3 axis);
+            
+            operator const glm::mat4&() const;
+
             const VertexBuffer& getVertexBuffer() const;
             const IndexBuffer& getIndexBuffer() const;
             const Texture& getTexture() const;
@@ -29,6 +35,7 @@ namespace stirling {
             VertexBuffer m_vertex_buffer;
             IndexBuffer  m_index_buffer;
             Texture      m_texture;
+            glm::mat4    m_model_matrix;
         };
     }
 }
