@@ -28,25 +28,27 @@ namespace stirling {
 
     private:
         GLFWwindow*                        m_window;
-        vulkan::Instance                   m_instance                  = initInstance();
-        vulkan::Surface                    m_surface                   = initSurface();
-        vulkan::PhysicalDevice             m_physical_device           = choosePhysicalDevice(m_instance.getPhysicalDevices());
-        vulkan::Device                     m_device                    = initDevice();
-        vulkan::Swapchain                  m_swapchain                 = initSwapchain();
-        vulkan::DepthImage                 m_depth_image               = initDepthImage();
-        vulkan::RenderPass                 m_render_pass               = initRenderPass();
-        vulkan::Pipeline                   m_pipeline                  = initPipeline();
-        std::vector<vulkan::Framebuffer>   m_framebuffers              = initFramebuffers();
-        vulkan::CommandPool                m_command_pool              = initCommandPool();
-        vulkan::Model                      m_model                     = loadModel();
-        vulkan::UniformBuffer              m_uniform_buffer            = initUniformBuffer();
-        vulkan::DescriptorPool             m_descriptor_pool           = initDescriptorPool();
-        VkDescriptorSet                    m_descriptor_set            = initDescriptorSet();
-        std::vector<VkCommandBuffer>       m_command_buffers           = initCommandBuffers();
-        vulkan::Semaphore                  m_image_available_semaphore   {m_device};
-        vulkan::Semaphore                  m_render_finished_semaphore   {m_device};
+        vulkan::Instance                   m_instance;
+        vulkan::Surface                    m_surface;
+        vulkan::PhysicalDevice             m_physical_device;
+        vulkan::Device                     m_device;
+        vulkan::Swapchain                  m_swapchain;
+        vulkan::DepthImage                 m_depth_image;
+        vulkan::RenderPass                 m_render_pass;
+        vulkan::Pipeline                   m_pipeline;
+        std::vector<vulkan::Framebuffer>   m_framebuffers;
+        vulkan::CommandPool                m_command_pool;
+        vulkan::Model                      m_model;
+        vulkan::UniformBuffer              m_uniform_buffer;
+        vulkan::DescriptorPool             m_descriptor_pool;
+        VkDescriptorSet                    m_descriptor_set;
+        std::vector<VkCommandBuffer>       m_command_buffers;
+        vulkan::Semaphore                  m_image_available_semaphore;
+        vulkan::Semaphore                  m_render_finished_semaphore;
+
         Camera                             m_camera;
-        
+        glm::mat4                          m_projection_matrix;
+
         GLFWwindow*                        initWindow(int width, int height);
         vulkan::Instance                   initInstance() const;
         vulkan::Surface                    initSurface() const;
@@ -64,6 +66,8 @@ namespace stirling {
         vulkan::DescriptorPool             initDescriptorPool() const;
         VkDescriptorSet                    initDescriptorSet() const;
         std::vector<VkCommandBuffer>       initCommandBuffers() const;
+
+        glm::mat4                          getProjectionMatrix() const;
 
         void                               recreateSwapchain();
         std::vector<const char*>           getRequiredExtensions() const;

@@ -17,7 +17,26 @@ const std::vector<const char*> g_device_extensions = {
 namespace stirling {
 
     Window::Window(int width, int height) :
-        m_window (initWindow(width, height)) {
+        m_window                    (initWindow(width, height)),
+        m_instance                  (initInstance()),
+        m_surface                   (initSurface()),
+        m_physical_device           (choosePhysicalDevice(m_instance.getPhysicalDevices())),
+        m_device                    (initDevice()),
+        m_swapchain                 (initSwapchain()),
+        m_depth_image               (initDepthImage()),
+        m_render_pass               (initRenderPass()),
+        m_pipeline                  (initPipeline()),
+        m_framebuffers              (initFramebuffers()),
+        m_command_pool              (initCommandPool()),
+        m_model                     (loadModel()),
+        m_uniform_buffer            (initUniformBuffer()),
+        m_descriptor_pool           (initDescriptorPool()),
+        m_descriptor_set            (initDescriptorSet()),
+        m_command_buffers           (initCommandBuffers()),
+        m_image_available_semaphore (vulkan::Semaphore{m_device}),
+        m_render_finished_semaphore (vulkan::Semaphore{m_device}) {
+
+        m_projection_matrix = getProjectionMatrix();
 
         m_camera.moveTo(glm::vec3(2.0f, 2.0f, 2.0f));
         m_camera.lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -213,11 +232,12 @@ namespace stirling {
     void Window::recreateSwapchain() {
         vkDeviceWaitIdle(m_device);
 
-        m_swapchain    = vulkan::Swapchain(m_device, m_surface, getSize(), m_swapchain);
-        m_depth_image  = initDepthImage();
-        m_render_pass  = initRenderPass();
-        m_pipeline     = initPipeline();
-        m_framebuffers = initFramebuffers();
+        m_swapchain         = vulkan::Swapchain(m_device, m_surface, getSize(), m_swapchain);
+        m_projection_matrix = getProjectionMatrix();
+        m_depth_image       = initDepthImage();
+        m_render_pass       = initRenderPass();
+        m_pipeline          = initPipeline();
+        m_framebuffers      = initFramebuffers();
 
         vkFreeCommandBuffers(m_device, m_command_pool, m_command_buffers.size(), m_command_buffers.data());
         m_command_buffers = initCommandBuffers();
@@ -249,7 +269,6 @@ namespace stirling {
         return !glfwWindowShouldClose(m_window);
     }
 
-
     void Window::update() {
         // Update uniform buffer
         static auto start_time = std::chrono::high_resolution_clock::now();
@@ -257,10 +276,10 @@ namespace stirling {
         float time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count() / 1000.0f;
 
         vulkan::UniformBufferObject ubo = {};
-        ubo.model = glm::rotate(glm::mat4(), 0.1f * time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        ubo.view  = m_camera;
-        ubo.proj  = glm::perspective(glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.1f, 10.0f);
-        ubo.proj[1][1] *= -1;
+        ubo.model             = glm::rotate(glm::mat4(), 0.1f * time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        ubo.view              = m_camera;
+        ubo.projection        = m_projection_matrix;
+        ubo.projection[1][1] *= -1;
 
         m_uniform_buffer.update(ubo);
         // TODO: Move this into a separate camera class
@@ -326,6 +345,10 @@ namespace stirling {
         default:
             throw std::runtime_error("Failed to present swapchain image.");
         }
+    }
+
+    glm::mat4 Window::getProjectionMatrix() const {
+        return glm::perspective(glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.1f, 10.0f);
     }
 
 }
