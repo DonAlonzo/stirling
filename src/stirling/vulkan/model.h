@@ -26,9 +26,9 @@ namespace stirling {
             static Model loadFromFile(const Device& device, const std::string& model_path, const std::string& texture_path);
 
         private:
-            VertexBuffer          m_vertex_buffer;
-            IndexBuffer           m_index_buffer;
-            Texture               m_texture;
+            VertexBuffer m_vertex_buffer;
+            IndexBuffer  m_index_buffer;
+            Texture      m_texture;
         };
     }
 }

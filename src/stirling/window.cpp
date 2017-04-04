@@ -18,6 +18,9 @@ namespace stirling {
 
     Window::Window(int width, int height) :
         m_window (initWindow(width, height)) {
+
+        m_camera.moveTo(glm::vec3(2.0f, 2.0f, 2.0f));
+        m_camera.lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
     }
 
     GLFWwindow* Window::initWindow(int width, int height) {
@@ -255,8 +258,8 @@ namespace stirling {
 
         vulkan::UniformBufferObject ubo = {};
         ubo.model = glm::rotate(glm::mat4(), 0.1f * time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        ubo.view  = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        ubo.proj  = glm::perspective(glm::radians(45.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.1f, 10.0f);
+        ubo.view  = m_camera;
+        ubo.proj  = glm::perspective(glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.1f, 10.0f);
         ubo.proj[1][1] *= -1;
 
         m_uniform_buffer.update(ubo);

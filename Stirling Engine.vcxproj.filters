@@ -105,6 +105,9 @@
     <ClCompile Include="src\stirling\vulkan\vertex.cpp">
       <Filter>Header Files\vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\stirling\camera.cpp">
+      <Filter>Source Files\vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\stirling\vulkan\instance.h">
@@ -195,6 +198,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\stirling\vulkan\model.h">
+      <Filter>Header Files\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stirling\camera.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
   </ItemGroup>

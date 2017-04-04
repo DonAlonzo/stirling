@@ -24,3 +24,6 @@
 #include "vulkan/uniform_buffer_object.h"
 #include "vulkan/vertex.h"
 #include "vulkan/vertex_buffer.h"
+
+// stirling
+#include "camera.h"
