@@ -1,6 +1,6 @@
+#include "vertex.h"
 #include "vertex_buffer.h"
 #include "device.h"
-#include "../stirling.h"
 
 namespace stirling {
 	namespace vulkan {

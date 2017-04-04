@@ -99,6 +99,12 @@
     <ClCompile Include="src\stirling\vulkan\depth_image.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\stirling\vulkan\model.cpp">
+      <Filter>Header Files\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stirling\vulkan\vertex.cpp">
+      <Filter>Header Files\vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\stirling\vulkan\instance.h">
@@ -183,6 +189,12 @@
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\stirling\vulkan\depth_image.h">
+      <Filter>Header Files\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stirling\tiny_obj_loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stirling\vulkan\model.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
   </ItemGroup>

@@ -150,6 +150,7 @@
   <ItemGroup>
     <ClCompile Include="src\stirling\vulkan\depth_image.cpp" />
     <ClCompile Include="DESCRIPTOR_SET.CPP" />
+    <ClCompile Include="src\stirling\vulkan\model.cpp" />
     <ClCompile Include="src\stirling\vulkan\sampler.cpp" />
     <ClCompile Include="src\stirling\vulkan\image.cpp" />
     <ClCompile Include="src\stirling\vulkan\descriptor_pool.cpp" />
@@ -174,9 +175,12 @@
     <ClCompile Include="src\stirling\vulkan\validator.cpp" />
     <ClCompile Include="src\stirling\vulkan\swapchain.cpp" />
     <ClCompile Include="src\stirling\vulkan\texture.cpp" />
+    <ClCompile Include="src\stirling\vulkan\vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\stirling\tiny_obj_loader.h" />
     <ClInclude Include="src\stirling\vulkan\depth_image.h" />
+    <ClInclude Include="src\stirling\vulkan\model.h" />
     <ClInclude Include="src\stirling\vulkan\sampler.h" />
     <ClInclude Include="src\stirling\vulkan\image.h" />
     <ClInclude Include="src\stirling\vulkan\descriptor_pool.h" />

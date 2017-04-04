@@ -3,25 +3,25 @@
 #include "vulkan/vulkan.h"
 
 namespace stirling {
-	struct Vertex;
-	namespace vulkan {
-		class Device;
-	}
+    namespace vulkan {
+        struct Vertex;
+        class Device;
+    }
 }
 #include "buffer.h"
 
 #include <vector>
 
 namespace stirling {
-	namespace vulkan {
-		class VertexBuffer : public Buffer {
-		public:
-			VertexBuffer(const Device& device, const std::vector<Vertex>& vertices);
+    namespace vulkan {
+        class VertexBuffer : public Buffer {
+        public:
+            VertexBuffer(const Device& device, const std::vector<Vertex>& vertices);
 
-			int size() const;
+            int size() const;
 
-		private:
-			int m_size;
-		};
-	}
+        private:
+            int m_size;
+        };
+    }
 }

@@ -38,9 +38,7 @@ namespace stirling {
 		vulkan::Pipeline                   m_pipeline                  = initPipeline();
 		std::vector<vulkan::Framebuffer>   m_framebuffers              = initFramebuffers();
 		vulkan::CommandPool                m_command_pool              = initCommandPool();
-		vulkan::Texture                    m_texture                   = initTexture();
-		vulkan::VertexBuffer               m_vertex_buffer             = initVertexBuffer();
-		vulkan::IndexBuffer                m_index_buffer              = initIndexBuffer();
+		vulkan::Model                      m_model                     = loadModel();
 		vulkan::UniformBuffer              m_uniform_buffer            = initUniformBuffer();
 		vulkan::DescriptorPool             m_descriptor_pool           = initDescriptorPool();
 		VkDescriptorSet                    m_descriptor_set            = initDescriptorSet();
@@ -60,9 +58,7 @@ namespace stirling {
 		vulkan::Pipeline                   initPipeline() const;
 		std::vector<vulkan::Framebuffer>   initFramebuffers() const;
 		vulkan::CommandPool                initCommandPool() const;
-		vulkan::Texture                    initTexture() const;
-		vulkan::VertexBuffer               initVertexBuffer() const;
-		vulkan::IndexBuffer                initIndexBuffer() const;
+		vulkan::Model                      loadModel() const;
 		vulkan::UniformBuffer              initUniformBuffer() const;
 		vulkan::DescriptorPool             initDescriptorPool() const;
 		VkDescriptorSet                    initDescriptorSet() const;
