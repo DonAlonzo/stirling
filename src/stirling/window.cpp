@@ -257,10 +257,12 @@ namespace stirling {
 
     void Window::update() {
         { // Rotate model
-            static auto start_time = std::chrono::high_resolution_clock::now();
+            static auto last_time = std::chrono::high_resolution_clock::now();
             auto current_time = std::chrono::high_resolution_clock::now();
-            float time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count() / 1000.0f;
-            m_model.rotate(0.1f * time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+            float delta_time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_time).count() / 1000.0f;
+            last_time = current_time;
+
+            m_model.rotate(0.1f * delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         }
 
         { // Update model uniform
@@ -341,6 +343,43 @@ namespace stirling {
     }
 
     void Window::onKeyInput(int key, int scancode, int action, int mods) {
+        std::cout << std::to_string(key) << std::endl;
+        if (action == GLFW_PRESS) {
+            switch (key) {
+            case 'w':
+            case 'W':
+                m_camera.translate(m_camera.forward() * 0.25f);
+                break;
+            case 'a':
+            case 'A':
+                m_camera.translate(m_camera.left() * 0.25f);
+                break;
+            case 's':
+            case 'S':
+                m_camera.translate(m_camera.backward() * 0.25f);
+                break;
+            case 'd':
+            case 'D':
+                m_camera.translate(m_camera.right() * 0.25f);
+                break;
+            case 32: // Space
+                m_camera.translate(m_camera.up() * 0.25f);
+                break;
+            case 341: // Left Ctrl
+                m_camera.translate(m_camera.down() * 0.25f);
+                break;
+            case 256: // ESC
+                glfwSetWindowShouldClose(m_window, GLFW_TRUE);
+                break;
+            case 300: // F11
+                if (glfwGetWindowAttrib(m_window, GLFW_MAXIMIZED)) {
+                    glfwRestoreWindow(m_window);
+                } else {
+                    glfwMaximizeWindow(m_window);
+                }
+                break;
+            }
+        }
     }
 
     void Window::onMouseMovementInput(double xpos, double ypos) {
