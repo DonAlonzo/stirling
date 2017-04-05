@@ -262,7 +262,7 @@ namespace stirling {
             float delta_time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_time).count() / 1000.0f;
             last_time = current_time;
 
-            m_model.rotate(0.1f * delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+            m_model.rotate(delta_time * 0.2f, glm::vec3(0.0f, 0.0f, 1.0f));
         }
 
         { // Update model uniform
@@ -382,7 +382,14 @@ namespace stirling {
         }
     }
 
-    void Window::onMouseMovementInput(double xpos, double ypos) {
+    float last_x, last_y;
+    void Window::onMouseMovementInput(double x, double y) {
+        double delta_x = x - last_x;
+        double delta_y = y - last_y;
+        m_camera.rotate(delta_x * 0.001f, m_camera.up());
+        m_camera.rotate(delta_y * 0.001f, m_camera.right());
+        last_x = x;
+        last_y = y;
     }
 
     void Window::onMouseButtonInput(int button, int action, int mods) {

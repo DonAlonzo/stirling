@@ -65,7 +65,7 @@ namespace stirling {
 
         void                               onResized(int width, int height);
         void                               onKeyInput(int key, int scancode, int action, int mods);
-        void                               onMouseMovementInput(double xpos, double ypos);
+        void                               onMouseMovementInput(double x, double y);
         void                               onMouseButtonInput(int button, int action, int mods);
         void                               onMouseScrollInput(double xoffset, double yoffset);
     };
