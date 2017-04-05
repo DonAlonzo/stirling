@@ -24,7 +24,6 @@ namespace stirling {
                 throw std::runtime_error(err);
             }
 
-
             std::unordered_map<Vertex, int> unique_vertices = {};
             std::vector<Vertex> vertices;
             std::vector<uint32_t> indices;
@@ -62,14 +61,6 @@ namespace stirling {
             m_vertex_buffer (std::move(vertex_buffer)),
             m_index_buffer  (std::move(index_buffer)),
             m_texture       (std::move(texture)) {
-        }
-
-        void Model::rotate(float a, glm::vec3 axis) {
-            m_model_matrix = glm::rotate(glm::mat4(), a, axis);
-        }
-
-        Model::operator const glm::mat4&() const {
-            return m_model_matrix;
         }
 
         const VertexBuffer& Model::getVertexBuffer() const {

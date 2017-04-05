@@ -2,17 +2,11 @@
 
 #include "glm/glm.hpp"
 
+#include "vulkan/transform.h"
+
 namespace stirling {
-    class Camera {
+    class Camera : public vulkan::Transform {
     public:
         Camera();
-
-        void moveTo(const glm::vec3& position);
-        void lookAt(const glm::vec3& target, const glm::vec3& up = glm::vec3(0.0f, 0.0f, 1.0f));
-
-        operator const glm::mat4&() const;
-
-    private:
-        glm::mat4 m_view_matrix;
     };
 }

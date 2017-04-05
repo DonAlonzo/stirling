@@ -177,6 +177,7 @@
     <ClCompile Include="src\stirling\vulkan\swapchain.cpp" />
     <ClCompile Include="src\stirling\vulkan\texture.cpp" />
     <ClCompile Include="src\stirling\vulkan\vertex.cpp" />
+    <ClCompile Include="src\stirling\vulkan\transform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\stirling\camera.h" />
@@ -210,6 +211,7 @@
     <ClInclude Include="src\stirling\vulkan\swapchain.h" />
     <ClInclude Include="src\stirling\stb_image.h" />
     <ClInclude Include="src\stirling\vulkan\texture.h" />
+    <ClInclude Include="src\stirling\vulkan\transform.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

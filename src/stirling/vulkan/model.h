@@ -9,6 +9,7 @@ namespace stirling {
 }
 #include "index_buffer.h"
 #include "texture.h"
+#include "transform.h"
 #include "vertex.h"
 #include "vertex_buffer.h"
 
@@ -17,13 +18,9 @@ namespace stirling {
 
 namespace stirling {
     namespace vulkan {
-        class Model {
+        class Model : public Transform {
         public:
             Model(VertexBuffer&& vertex_buffer, IndexBuffer&& index_buffer, Texture&& texture);
-
-            void rotate(float a, glm::vec3 axis);
-            
-            operator const glm::mat4&() const;
 
             const VertexBuffer& getVertexBuffer() const;
             const IndexBuffer& getIndexBuffer() const;
@@ -35,7 +32,6 @@ namespace stirling {
             VertexBuffer m_vertex_buffer;
             IndexBuffer  m_index_buffer;
             Texture      m_texture;
-            glm::mat4    m_model_matrix;
         };
     }
 }
