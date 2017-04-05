@@ -13,8 +13,11 @@
 #include <vector>
 
 namespace stirling {
-
+    
+    class WindowListener;
     class Window {
+        friend WindowListener;
+
     public:
         Window(int width, int height);
         ~Window();
@@ -60,7 +63,11 @@ namespace stirling {
         std::vector<const char*>           getRequiredExtensions() const;
         VkExtent2D                         getSize() const;
 
-        static void                        onResized(GLFWwindow* window, int width, int height);
+        void                               onResized(int width, int height);
+        void                               onKeyInput(int key, int scancode, int action, int mods);
+        void                               onMouseMovementInput(double xpos, double ypos);
+        void                               onMouseButtonInput(int button, int action, int mods);
+        void                               onMouseScrollInput(double xoffset, double yoffset);
     };
 
 }

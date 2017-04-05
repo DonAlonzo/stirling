@@ -8,11 +8,38 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <chrono>
+#include <iostream>
 #include <set>
 
 const std::vector<const char*> g_device_extensions = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
+
+namespace stirling {
+    class WindowListener {
+        friend Window;
+
+        static void onResized(GLFWwindow* glfw_window, int width, int height) {
+            reinterpret_cast<stirling::Window*>(glfwGetWindowUserPointer(glfw_window))->onResized(width, height);
+        }
+
+        static void onKeyInput(GLFWwindow* glfw_window, int key, int scancode, int action, int mods) {
+            reinterpret_cast<stirling::Window*>(glfwGetWindowUserPointer(glfw_window))->onKeyInput(key, scancode, action, mods);
+        }
+
+        static void onMouseMovementInput(GLFWwindow* glfw_window, double xpos, double ypos) {
+            reinterpret_cast<stirling::Window*>(glfwGetWindowUserPointer(glfw_window))->onMouseMovementInput(xpos, ypos);
+        }
+
+        static void onMouseButtonInput(GLFWwindow* glfw_window, int button, int action, int mods) {
+            reinterpret_cast<stirling::Window*>(glfwGetWindowUserPointer(glfw_window))->onMouseButtonInput(button, action, mods);
+        }
+
+        static void onMouseScrollInput(GLFWwindow* glfw_window, double xoffset, double yoffset) {
+            reinterpret_cast<stirling::Window*>(glfwGetWindowUserPointer(glfw_window))->onMouseScrollInput(xoffset, yoffset);
+        }
+    };
+}
 
 namespace stirling {
 
@@ -45,10 +72,15 @@ namespace stirling {
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-        
+
         auto window = glfwCreateWindow(width, height, "Stirling Engine", nullptr, nullptr);
         glfwSetWindowUserPointer(window, this);
-        glfwSetWindowSizeCallback(window, Window::onResized);
+        glfwSetWindowSizeCallback(window, WindowListener::onResized);
+        glfwSetKeyCallback(window, WindowListener::onKeyInput);
+        glfwSetCursorPosCallback(window, WindowListener::onMouseMovementInput);
+        glfwSetMouseButtonCallback(window, WindowListener::onMouseButtonInput);
+        glfwSetScrollCallback(window, WindowListener::onMouseScrollInput);
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         
         return window;
     }
@@ -182,12 +214,6 @@ namespace stirling {
         glfwTerminate();
     }
 
-    void Window::onResized(GLFWwindow* window, int width, int height) {
-        if (width == 0 || height == 0) return;
-
-        reinterpret_cast<Window*>(glfwGetWindowUserPointer(window))->recreateSwapchain();
-    }
-
     void Window::recreateSwapchain() {
         vkDeviceWaitIdle(m_device);
 
@@ -306,6 +332,24 @@ namespace stirling {
         default:
             throw std::runtime_error("Failed to present swapchain image.");
         }
+    }
+
+    void Window::onResized(int width, int height) {
+        if (width == 0 || height == 0) return;
+
+        recreateSwapchain();
+    }
+
+    void Window::onKeyInput(int key, int scancode, int action, int mods) {
+    }
+
+    void Window::onMouseMovementInput(double xpos, double ypos) {
+    }
+
+    void Window::onMouseButtonInput(int button, int action, int mods) {
+    }
+
+    void Window::onMouseScrollInput(double xoffset, double yoffset) {
     }
 
 }

@@ -7,10 +7,10 @@
 namespace stirling {
 
     Camera::Camera(float field_of_view, float aspect_ratio, float near_plane, float far_plane) :
-        m_field_of_view     (field_of_view),
-        m_aspect_ratio      (aspect_ratio), 
-        m_near_plane        (near_plane),
-        m_far_plane         (far_plane) {
+        m_field_of_view (field_of_view),
+        m_aspect_ratio  (aspect_ratio), 
+        m_near_plane    (near_plane),
+        m_far_plane     (far_plane) {
 
         updateProjectionMatrix();
     }
