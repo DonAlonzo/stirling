@@ -50,19 +50,9 @@ namespace stirling {
         glm::mat4                          m_projection_matrix;
 
         GLFWwindow*                        initWindow(int width, int height);
-        vulkan::Instance                   initInstance() const;
         vulkan::Surface                    initSurface() const;
         vulkan::PhysicalDevice             choosePhysicalDevice(const std::vector<vulkan::PhysicalDevice>& physical_devices) const;
         bool                               isPhysicalDeviceSuitable(const vulkan::PhysicalDevice& physical_device) const;
-        vulkan::Device                     initDevice() const;
-        vulkan::Swapchain                  initSwapchain() const;
-        vulkan::DepthImage                 initDepthImage() const;
-        vulkan::RenderPass                 initRenderPass() const;
-        vulkan::Pipeline                   initPipeline() const;
-        std::vector<vulkan::Framebuffer>   initFramebuffers() const;
-        vulkan::CommandPool                initCommandPool() const;
-        vulkan::Model                      loadModel() const;
-        vulkan::UniformBuffer              initUniformBuffer() const;
         vulkan::DescriptorPool             initDescriptorPool() const;
         VkDescriptorSet                    initDescriptorSet() const;
         std::vector<VkCommandBuffer>       initCommandBuffers() const;

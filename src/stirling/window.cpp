@@ -18,18 +18,18 @@ namespace stirling {
 
     Window::Window(int width, int height) :
         m_window                    (initWindow(width, height)),
-        m_instance                  (initInstance()),
+        m_instance                  (vulkan::Instance(getRequiredExtensions())),
         m_surface                   (initSurface()),
         m_physical_device           (choosePhysicalDevice(m_instance.getPhysicalDevices())),
-        m_device                    (initDevice()),
-        m_swapchain                 (initSwapchain()),
-        m_depth_image               (initDepthImage()),
-        m_render_pass               (initRenderPass()),
-        m_pipeline                  (initPipeline()),
-        m_framebuffers              (initFramebuffers()),
-        m_command_pool              (initCommandPool()),
-        m_model                     (loadModel()),
-        m_uniform_buffer            (initUniformBuffer()),
+        m_device                    (m_physical_device.createDevice(m_surface, g_device_extensions)),
+        m_swapchain                 (vulkan::Swapchain(m_device, m_surface, getSize(), VK_NULL_HANDLE)),
+        m_depth_image               (vulkan::DepthImage(m_device, m_swapchain.getExtent())),
+        m_render_pass               (vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.getImageFormat())),
+        m_pipeline                  (vulkan::Pipeline(m_device, m_render_pass, m_swapchain.getExtent())),
+        m_framebuffers              (m_swapchain.createFramebuffers(m_render_pass, m_depth_image.getImageView())),
+        m_command_pool              (m_device.getGraphicsQueue().createCommandPool()),
+        m_model                     (vulkan::Model::loadFromFile(m_device, "models/chalet.obj", "textures/chalet.jpg")),
+        m_uniform_buffer            (vulkan::UniformBuffer(m_device)),
         m_descriptor_pool           (initDescriptorPool()),
         m_descriptor_set            (initDescriptorSet()),
         m_command_buffers           (initCommandBuffers()),
@@ -62,10 +62,6 @@ namespace stirling {
         return vulkan::Surface(m_instance, surface);
     }
 
-    vulkan::Instance Window::initInstance() const {
-        return vulkan::Instance(getRequiredExtensions());
-    }
-    
     vulkan::PhysicalDevice Window::choosePhysicalDevice(const std::vector<vulkan::PhysicalDevice>& physical_devices) const {
         for (const auto& physical_device : physical_devices) {
             if (isPhysicalDeviceSuitable(physical_device)) {
@@ -88,42 +84,6 @@ namespace stirling {
         auto formats = physical_device.getSurfaceFormats(m_surface);
         auto present_modes = physical_device.getSurfacePresentModes(m_surface);
         return !formats.empty() && !present_modes.empty();
-    }
-
-    vulkan::Device Window::initDevice() const {
-        return m_physical_device.createDevice(m_surface, g_device_extensions);
-    }
-
-    vulkan::Swapchain Window::initSwapchain() const {
-        return vulkan::Swapchain(m_device, m_surface, getSize(), VK_NULL_HANDLE);
-    }
-
-    vulkan::DepthImage Window::initDepthImage() const {
-        return vulkan::DepthImage(m_device, m_swapchain.getExtent());
-    }
-
-    vulkan::RenderPass Window::initRenderPass() const {
-        return vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.getImageFormat());
-    }
-
-    vulkan::Pipeline Window::initPipeline() const {
-        return vulkan::Pipeline(m_device, m_render_pass, m_swapchain.getExtent());
-    }
-
-    std::vector<vulkan::Framebuffer> Window::initFramebuffers() const {
-        return m_swapchain.createFramebuffers(m_render_pass, m_depth_image.getImageView());
-    }
-    
-    vulkan::CommandPool Window::initCommandPool() const {
-        return m_device.getGraphicsQueue().createCommandPool();
-    }
-
-    vulkan::Model Window::loadModel() const {
-        return vulkan::Model::loadFromFile(m_device, "models/chalet.obj", "textures/chalet.jpg");
-    }
-
-    vulkan::UniformBuffer Window::initUniformBuffer() const {
-        return vulkan::UniformBuffer(m_device);
     }
 
     vulkan::DescriptorPool Window::initDescriptorPool() const {
@@ -234,10 +194,10 @@ namespace stirling {
 
         m_swapchain         = vulkan::Swapchain(m_device, m_surface, getSize(), m_swapchain);
         m_projection_matrix = getProjectionMatrix();
-        m_depth_image       = initDepthImage();
-        m_render_pass       = initRenderPass();
-        m_pipeline          = initPipeline();
-        m_framebuffers      = initFramebuffers();
+        m_depth_image       = vulkan::DepthImage(m_device, m_swapchain.getExtent());
+        m_render_pass       = vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.getImageFormat());
+        m_pipeline          = vulkan::Pipeline(m_device, m_render_pass, m_swapchain.getExtent());
+        m_framebuffers      = m_swapchain.createFramebuffers(m_render_pass, m_depth_image.getImageView());
 
         vkFreeCommandBuffers(m_device, m_command_pool, m_command_buffers.size(), m_command_buffers.data());
         m_command_buffers = initCommandBuffers();
