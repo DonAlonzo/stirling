@@ -22,7 +22,7 @@ namespace stirling {
         m_surface                   (initSurface()),
         m_physical_device           (choosePhysicalDevice(m_instance.getPhysicalDevices())),
         m_device                    (m_physical_device.createDevice(m_surface, g_device_extensions)),
-        m_swapchain                 (vulkan::Swapchain(m_device, m_surface, getSize(), VK_NULL_HANDLE)),
+        m_swapchain                 (vulkan::Swapchain(m_device, m_surface, getSize())),
         m_depth_image               (vulkan::DepthImage(m_device, m_swapchain.getExtent())),
         m_render_pass               (vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.getImageFormat())),
         m_pipeline                  (vulkan::Pipeline(m_device, m_render_pass, m_swapchain.getExtent())),
@@ -192,7 +192,7 @@ namespace stirling {
     void Window::recreateSwapchain() {
         vkDeviceWaitIdle(m_device);
 
-        m_swapchain         = vulkan::Swapchain(m_device, m_surface, getSize(), m_swapchain);
+        m_swapchain.reset(getSize());
         m_projection_matrix = getProjectionMatrix();
         m_depth_image       = vulkan::DepthImage(m_device, m_swapchain.getExtent());
         m_render_pass       = vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.getImageFormat());
