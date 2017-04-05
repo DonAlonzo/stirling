@@ -38,6 +38,7 @@ namespace stirling {
         vulkan::Pipeline                   m_pipeline;
         std::vector<vulkan::Framebuffer>   m_framebuffers;
         vulkan::CommandPool                m_command_pool;
+        Camera                             m_camera;
         vulkan::Model                      m_model;
         vulkan::UniformBuffer              m_uniform_buffer;
         vulkan::DescriptorPool             m_descriptor_pool;
@@ -46,8 +47,6 @@ namespace stirling {
         vulkan::Semaphore                  m_image_available_semaphore;
         vulkan::Semaphore                  m_render_finished_semaphore;
 
-        Camera                             m_camera;
-        glm::mat4                          m_projection_matrix;
 
         GLFWwindow*                        initWindow(int width, int height);
         vulkan::Surface                    initSurface() const;
@@ -56,8 +55,6 @@ namespace stirling {
         vulkan::DescriptorPool             initDescriptorPool() const;
         VkDescriptorSet                    initDescriptorSet() const;
         std::vector<VkCommandBuffer>       initCommandBuffers() const;
-
-        glm::mat4                          getProjectionMatrix() const;
 
         void                               recreateSwapchain();
         std::vector<const char*>           getRequiredExtensions() const;

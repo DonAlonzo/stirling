@@ -34,9 +34,8 @@ namespace stirling {
         m_descriptor_set            (initDescriptorSet()),
         m_command_buffers           (initCommandBuffers()),
         m_image_available_semaphore (vulkan::Semaphore{m_device}),
-        m_render_finished_semaphore (vulkan::Semaphore{m_device}) {
-
-        m_projection_matrix = getProjectionMatrix();
+        m_render_finished_semaphore (vulkan::Semaphore{m_device}),
+        m_camera                    (Camera(glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.1f, 10.0f)) {
 
         m_camera.moveTo(glm::vec3(2.0f, 2.0f, 2.0f));
         m_camera.lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -193,7 +192,6 @@ namespace stirling {
         vkDeviceWaitIdle(m_device);
 
         m_swapchain.reset(getSize());
-        m_projection_matrix = getProjectionMatrix();
         m_depth_image       = vulkan::DepthImage(m_device, m_swapchain.getExtent());
         m_render_pass       = vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.getImageFormat());
         m_pipeline          = vulkan::Pipeline(m_device, m_render_pass, m_swapchain.getExtent());
@@ -201,6 +199,8 @@ namespace stirling {
 
         vkFreeCommandBuffers(m_device, m_command_pool, m_command_buffers.size(), m_command_buffers.data());
         m_command_buffers = initCommandBuffers();
+
+        m_camera.setAspectRatio(m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height);
     }
 
     std::vector<const char*> Window::getRequiredExtensions() const {
@@ -241,8 +241,7 @@ namespace stirling {
             vulkan::UniformBufferObject ubo = {};
             ubo.model             = m_model;
             ubo.view              = m_camera;
-            ubo.projection        = m_projection_matrix;
-            ubo.projection[1][1] *= -1;
+            ubo.projection        = m_camera.getProjectionMatrix();
             m_uniform_buffer.update(ubo);
         }
 
@@ -307,10 +306,6 @@ namespace stirling {
         default:
             throw std::runtime_error("Failed to present swapchain image.");
         }
-    }
-
-    glm::mat4 Window::getProjectionMatrix() const {
-        return glm::perspective(glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.1f, 10.0f);
     }
 
 }

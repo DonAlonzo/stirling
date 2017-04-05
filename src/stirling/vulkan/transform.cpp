@@ -1,5 +1,7 @@
 #include "transform.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 namespace stirling {
     namespace vulkan {
 
