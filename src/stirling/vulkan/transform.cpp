@@ -62,7 +62,7 @@ namespace stirling {
             return -forward();
         }
 
-        glm::vec3 Transform::position() const {
+        const glm::vec3& Transform::position() const {
             return m_position;
         }
 
