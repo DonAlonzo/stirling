@@ -218,10 +218,10 @@ namespace stirling {
         vkDeviceWaitIdle(m_device);
 
         m_swapchain.reset(getSize());
-        m_depth_image       = vulkan::DepthImage(m_device, m_swapchain.getExtent());
-        m_render_pass       = vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.getImageFormat());
-        m_pipeline          = vulkan::Pipeline(m_device, m_render_pass, m_swapchain.getExtent());
-        m_framebuffers      = m_swapchain.createFramebuffers(m_render_pass, m_depth_image.getImageView());
+        m_depth_image  = vulkan::DepthImage(m_device, m_swapchain.getExtent());
+        m_render_pass  = vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.getImageFormat());
+        m_pipeline     = vulkan::Pipeline(m_device, m_render_pass, m_swapchain.getExtent());
+        m_framebuffers = m_swapchain.createFramebuffers(m_render_pass, m_depth_image.getImageView());
 
         vkFreeCommandBuffers(m_device, m_command_pool, m_command_buffers.size(), m_command_buffers.data());
         m_command_buffers = initCommandBuffers();
@@ -267,9 +267,9 @@ namespace stirling {
 
         { // Update model uniform
             vulkan::UniformBufferObject ubo = {};
-            ubo.model             = m_model;
-            ubo.view              = m_camera;
-            ubo.projection        = m_camera.getProjectionMatrix();
+            ubo.model      = m_model;
+            ubo.view       = m_camera;
+            ubo.projection = m_camera.getProjectionMatrix();
             m_uniform_buffer.update(ubo);
         }
 
@@ -346,32 +346,28 @@ namespace stirling {
         std::cout << std::to_string(key) << std::endl;
         if (action == GLFW_PRESS) {
             switch (key) {
-            case 'w':
-            case 'W':
+            case GLFW_KEY_W:
                 m_camera.translate(m_camera.forward() * 0.25f);
                 break;
-            case 'a':
-            case 'A':
+            case GLFW_KEY_A:
                 m_camera.translate(m_camera.left() * 0.25f);
                 break;
-            case 's':
-            case 'S':
+            case GLFW_KEY_S:
                 m_camera.translate(m_camera.backward() * 0.25f);
                 break;
-            case 'd':
-            case 'D':
+            case GLFW_KEY_D:
                 m_camera.translate(m_camera.right() * 0.25f);
                 break;
-            case 32: // Space
+            case GLFW_KEY_SPACE:
                 m_camera.translate(m_camera.up() * 0.25f);
                 break;
-            case 341: // Left Ctrl
+            case GLFW_KEY_LEFT_CONTROL:
                 m_camera.translate(m_camera.down() * 0.25f);
                 break;
-            case 256: // ESC
+            case GLFW_KEY_ESCAPE:
                 glfwSetWindowShouldClose(m_window, GLFW_TRUE);
                 break;
-            case 300: // F11
+            case GLFW_KEY_F11:
                 if (glfwGetWindowAttrib(m_window, GLFW_MAXIMIZED)) {
                     glfwRestoreWindow(m_window);
                 } else {
