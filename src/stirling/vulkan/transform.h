@@ -21,7 +21,7 @@ namespace stirling {
             glm::vec3 forward() const;
             glm::vec3 backward() const;
 
-            glm::vec3 position() const;
+            const glm::vec3& position() const;
 
         private:
             glm::vec3 m_position;
