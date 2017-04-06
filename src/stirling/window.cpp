@@ -62,9 +62,9 @@ namespace stirling {
         m_command_buffers           (initCommandBuffers()),
         m_image_available_semaphore (vulkan::Semaphore{m_device}),
         m_render_finished_semaphore (vulkan::Semaphore{m_device}),
-        m_camera                    (Camera(glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.1f, 10.0f)) {
+        m_camera                    (Camera(glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.01f, 10.0f)) {
 
-        m_camera.moveTo(glm::vec3(2.0f, 2.0f, 2.0f));
+        m_camera.moveTo(glm::vec3(2.0f, -2.0f, -2.0f));
         m_camera.lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
     }
 
@@ -262,7 +262,7 @@ namespace stirling {
             float delta_time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_time).count() / 1000.0f;
             last_time = current_time;
 
-            m_model.rotate(delta_time * 0.2f, glm::vec3(0.0f, 0.0f, 1.0f));
+            //m_model.rotate(glm::vec3(0.0f, 0.0f, delta_time * 0.2f));
         }
 
         { // Update model uniform
@@ -343,7 +343,6 @@ namespace stirling {
     }
 
     void Window::onKeyInput(int key, int scancode, int action, int mods) {
-        std::cout << std::to_string(key) << std::endl;
         if (action == GLFW_PRESS) {
             switch (key) {
             case GLFW_KEY_W:
@@ -380,10 +379,10 @@ namespace stirling {
 
     float last_x, last_y;
     void Window::onMouseMovementInput(double x, double y) {
-        double delta_x = x - last_x;
-        double delta_y = y - last_y;
-        m_camera.rotate(delta_x * 0.001f, m_camera.up());
+        double delta_x = last_x - x;
+        double delta_y = last_y - y;
         m_camera.rotate(delta_y * 0.001f, m_camera.right());
+        m_camera.rotate(-delta_x * 0.001f, glm::vec3(0.0f, 0.0f, 1.0f));
         last_x = x;
         last_y = y;
     }
