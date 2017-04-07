@@ -63,6 +63,8 @@ namespace stirling {
         m_image_available_semaphore (vulkan::Semaphore{m_device}),
         m_render_finished_semaphore (vulkan::Semaphore{m_device}) {
 
+        addControls();
+
         m_camera = std::make_shared<Camera>(glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.01f, 10.0f);
 
         glfwMaximizeWindow(m_window);
@@ -221,6 +223,20 @@ namespace stirling {
         glfwTerminate();
     }
 
+    void Window::addControls() {
+        InputHandler::getInstance().addCommand(Action::EXIT, [this]() {
+            glfwSetWindowShouldClose(m_window, GLFW_TRUE);
+        });
+
+        InputHandler::getInstance().addCommand(Action::FULL_SCREEN, [this]() {
+            if (glfwGetWindowAttrib(m_window, GLFW_MAXIMIZED)) {
+                glfwRestoreWindow(m_window);
+            } else {
+                glfwMaximizeWindow(m_window);
+            }
+        });
+    }
+
     void Window::recreateSwapchain() {
         vkDeviceWaitIdle(m_device);
 
@@ -262,24 +278,11 @@ namespace stirling {
     }
 
     void Window::update() {
-        if (InputHandler::getInstance()[Action::EXIT]) {
-            glfwSetWindowShouldClose(m_window, GLFW_TRUE);
-        }
-
-        if (InputHandler::getInstance()[Action::FULL_SCREEN]) {
-            if (glfwGetWindowAttrib(m_window, GLFW_MAXIMIZED)) {
-                glfwRestoreWindow(m_window);
-            } else {
-                glfwMaximizeWindow(m_window);
-            }
-        }
-
-        { // Game loop
-            static auto last_time = std::chrono::high_resolution_clock::now();
-            auto current_time = std::chrono::high_resolution_clock::now();
-            m_world.update(std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_time).count() / 1000.0f);
-            last_time = current_time;
-        }
+        // Game loop
+        static auto last_time = std::chrono::high_resolution_clock::now();
+        auto current_time = std::chrono::high_resolution_clock::now();
+        m_world.update(std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_time).count() / 1000.0f);
+        last_time = current_time;
     }
 
     void Window::render() {

@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <stdexcept>
 #include <string>
 
 namespace stirling {
@@ -24,9 +25,21 @@ namespace stirling {
         m_key_bindings[GLFW_KEY_F11]          = Action::FULL_SCREEN;
     }
 
+    void InputHandler::addCommand(Action action, std::function<void()> command) {
+        if (action == Action::NO_ACTION) throw std::runtime_error("Can't add a command to a no-action.");
+
+        m_commands[action].push_back(command);
+    }
+
     void InputHandler::onKeyInput(int key, int scancode, int action, int mods) {
         auto binding = m_key_bindings.find(key);
         if (binding != m_key_bindings.end()) {
+            if (action == GLFW_PRESS) {
+                for (auto& command : m_commands[binding->second]) {
+                    command();
+                }
+            }
+
             m_action_states[binding->second] = action != GLFW_RELEASE;
         }
     }
