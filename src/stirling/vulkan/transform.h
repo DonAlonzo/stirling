@@ -13,6 +13,7 @@ namespace stirling {
             void moveTo(const glm::vec3& position);
             void lookAt(const glm::vec3& target, const glm::vec3& up = glm::vec3(0.0f, 0.0f, 1.0f));
             void rotate(float angle, const glm::vec3& axis);
+            void setScale(const glm::vec3& scale);
 
             glm::vec3 left() const;
             glm::vec3 right() const;
@@ -23,9 +24,12 @@ namespace stirling {
 
             const glm::vec3& position() const;
 
+            const glm::vec3& scale() const;
+
         private:
             glm::vec3 m_position;
             glm::quat m_rotation;
+            glm::vec3 m_scale{1.0f};
             glm::mat4 m_transform;
 
             bool m_update_transform = true;

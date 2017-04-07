@@ -13,7 +13,7 @@ namespace stirling {
     }
 
     void ModelEntity::update(float delta_seconds) {
-        //m_transform.rotate(delta_seconds * 0.2f, glm::vec3(0.0f, 0.0f, 1.0f));
+        m_transform.rotate(delta_seconds * 0.02f, glm::vec3(0.0f, 0.0f, 1.0f));
     }
 
 }

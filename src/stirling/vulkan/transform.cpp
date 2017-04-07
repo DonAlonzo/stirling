@@ -11,7 +11,7 @@ namespace stirling {
 
         Transform::operator const glm::mat4&() {
             if (m_update_transform) {
-                m_transform = glm::toMat4(m_rotation);
+                m_transform = glm::toMat4(m_rotation) * glm::scale(glm::mat4(), m_scale);
                 m_transform = glm::translate(m_transform, m_position);
                 m_update_transform = false;
             }
@@ -36,6 +36,10 @@ namespace stirling {
         void Transform::lookAt(const glm::vec3& target, const glm::vec3& up) {
             m_rotation = glm::lookAt(target, m_position, up);
             m_update_transform = true;
+        }
+
+        void Transform::setScale(const glm::vec3& scale) {
+            m_scale = scale;
         }
 
         glm::vec3 Transform::left() const {
@@ -64,6 +68,10 @@ namespace stirling {
 
         const glm::vec3& Transform::position() const {
             return m_position;
+        }
+
+        const glm::vec3& Transform::scale() const {
+            return m_scale;
         }
 
     }
