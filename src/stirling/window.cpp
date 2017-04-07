@@ -51,11 +51,11 @@ namespace stirling {
         m_device                    (m_physical_device.createDevice(m_surface, g_device_extensions)),
         m_swapchain                 (vulkan::Swapchain(m_device, m_surface, getSize())),
         m_depth_image               (vulkan::DepthImage(m_device, m_swapchain.getExtent())),
+        m_model_entity              (std::make_shared<ModelEntity>(vulkan::Model::loadFromFile(m_device, "models/chalet.obj", "textures/chalet.jpg"))),
         m_render_pass               (vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.getImageFormat())),
         m_pipeline                  (vulkan::Pipeline(m_device, m_render_pass, m_swapchain.getExtent())),
         m_framebuffers              (m_swapchain.createFramebuffers(m_render_pass, m_depth_image.getImageView())),
         m_command_pool              (m_device.getGraphicsQueue().createCommandPool()),
-        m_model_entity              (std::make_shared<ModelEntity>(vulkan::Model::loadFromFile(m_device, "models/chalet.obj", "textures/chalet.jpg"))),
         m_uniform_buffer            (vulkan::UniformBuffer(m_device)),
         m_descriptor_pool           (initDescriptorPool()),
         m_descriptor_set            (initDescriptorSet()),
@@ -80,6 +80,7 @@ namespace stirling {
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
 
         auto window = glfwCreateWindow(width, height, "Stirling Engine", nullptr, nullptr);
         glfwSetWindowUserPointer(window, this);

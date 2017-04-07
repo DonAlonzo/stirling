@@ -4,6 +4,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <cmath>
+#include <iostream>
+#include <string>
 
 namespace stirling {
 
@@ -46,24 +48,31 @@ namespace stirling {
     }
 
     void Camera::update(float delta_seconds) {
+        float meters_per_second = 1.0f;
+
+        glm::vec3 direction;
         if (InputHandler::getInstance()[Action::MOVE_FORWARD]) {
-            m_transform.translate(m_transform.forward() * 0.0025f);
-        } else if (InputHandler::getInstance()[Action::MOVE_BACKWARD]) {
-            m_transform.translate(m_transform.backward() * 0.0025f);
+            direction += m_transform.forward();
         }
-
+        if (InputHandler::getInstance()[Action::MOVE_BACKWARD]) {
+            direction += m_transform.backward();
+        }
         if (InputHandler::getInstance()[Action::STRAFE_LEFT]) {
-            m_transform.translate(m_transform.left() * 0.0025f);
-        } else if (InputHandler::getInstance()[Action::STRAFE_RIGHT]) {
-            m_transform.translate(m_transform.right() * 0.0025f);
+            direction += m_transform.left();
         }
-
+        if (InputHandler::getInstance()[Action::STRAFE_RIGHT]) {
+            direction += m_transform.right();
+        }
         if (InputHandler::getInstance()[Action::JUMP]) {
-            m_transform.translate(m_transform.up() * 0.0025f);
-        } else if (InputHandler::getInstance()[Action::CROUCH]) {
-            m_transform.translate(m_transform.down() * 0.0025f);
+            direction += m_transform.up();
         }
-
+        if (InputHandler::getInstance()[Action::CROUCH]) {
+            direction += m_transform.down();
+        }
+        
+        if (glm::length(direction) > 0.0f) {
+            m_transform.translate(glm::normalize(direction) * meters_per_second * delta_seconds);
+        }
     }
 
 }

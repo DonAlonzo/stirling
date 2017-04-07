@@ -39,12 +39,12 @@ namespace stirling {
         vulkan::Device                   m_device;
         vulkan::Swapchain                m_swapchain;
         vulkan::DepthImage               m_depth_image;
+        std::shared_ptr<ModelEntity>     m_model_entity;
         vulkan::RenderPass               m_render_pass;
         vulkan::Pipeline                 m_pipeline;
         std::vector<vulkan::Framebuffer> m_framebuffers;
         vulkan::CommandPool              m_command_pool;
         std::shared_ptr<Camera>          m_camera;
-        std::shared_ptr<ModelEntity>     m_model_entity;
         vulkan::UniformBuffer            m_uniform_buffer;
         vulkan::DescriptorPool           m_descriptor_pool;
         VkDescriptorSet                  m_descriptor_set;
