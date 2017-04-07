@@ -2,10 +2,10 @@
 
 #include "glm/glm.hpp"
 
-#include "vulkan/transform.h"
+#include "entity.h"
 
 namespace stirling {
-    class Camera : public vulkan::Transform {
+    class Camera : public Entity {
     public:
         Camera(float field_of_view, float aspect_ratio, float near_plane, float far_plane);
 
@@ -15,7 +15,9 @@ namespace stirling {
         void setFarPlane(float far_plane);
 
         const glm::mat4& getProjectionMatrix() const;
-        
+
+        void update(float delta_seconds) override;
+
     private:
         glm::mat4 m_projection_matrix;
         float     m_aspect_ratio;

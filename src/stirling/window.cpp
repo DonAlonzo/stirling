@@ -55,17 +55,23 @@ namespace stirling {
         m_pipeline                  (vulkan::Pipeline(m_device, m_render_pass, m_swapchain.getExtent())),
         m_framebuffers              (m_swapchain.createFramebuffers(m_render_pass, m_depth_image.getImageView())),
         m_command_pool              (m_device.getGraphicsQueue().createCommandPool()),
-        m_model                     (vulkan::Model::loadFromFile(m_device, "models/chalet.obj", "textures/chalet.jpg")),
+        m_model_entity              (std::make_shared<ModelEntity>(vulkan::Model::loadFromFile(m_device, "models/chalet.obj", "textures/chalet.jpg"))),
         m_uniform_buffer            (vulkan::UniformBuffer(m_device)),
         m_descriptor_pool           (initDescriptorPool()),
         m_descriptor_set            (initDescriptorSet()),
         m_command_buffers           (initCommandBuffers()),
         m_image_available_semaphore (vulkan::Semaphore{m_device}),
-        m_render_finished_semaphore (vulkan::Semaphore{m_device}),
-        m_camera                    (Camera(glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.01f, 10.0f)) {
+        m_render_finished_semaphore (vulkan::Semaphore{m_device}) {
 
-        m_camera.moveTo(glm::vec3(2.0f, -2.0f, -2.0f));
-        m_camera.lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
+        m_camera = std::make_shared<Camera>(glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.01f, 10.0f);
+
+        glfwMaximizeWindow(m_window);
+
+        m_world.addEntity(m_camera);
+        m_world.addEntity(m_model_entity);
+
+        m_camera->transform().moveTo(glm::vec3(2.0f, -2.0f, -2.0f));
+        m_camera->transform().lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
     }
 
     GLFWwindow* Window::initWindow(int width, int height) {
@@ -80,8 +86,9 @@ namespace stirling {
         glfwSetCursorPosCallback(window, WindowListener::onMouseMovementInput);
         glfwSetMouseButtonCallback(window, WindowListener::onMouseButtonInput);
         glfwSetScrollCallback(window, WindowListener::onMouseScrollInput);
+
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        
+
         return window;
     }
 
@@ -139,8 +146,8 @@ namespace stirling {
 
         VkDescriptorImageInfo image_info = {};
         image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        image_info.imageView   = m_model.getTexture().getImageView();
-        image_info.sampler     = m_model.getTexture().getSampler();
+        image_info.imageView   = m_model_entity->model().getTexture().getImageView();
+        image_info.sampler     = m_model_entity->model().getTexture().getSampler();
 
         std::array<VkWriteDescriptorSet, 2> write_descriptor_sets = {};
 
@@ -189,15 +196,15 @@ namespace stirling {
             vkCmdBeginRenderPass(command_buffers[i], &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
                 vkCmdBindPipeline(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
 
-                VkBuffer vertex_buffers[] = { m_model.getVertexBuffer() };
+                VkBuffer vertex_buffers[] = { m_model_entity->model().getVertexBuffer() };
                 VkDeviceSize offsets[] = { 0 };
                 vkCmdBindVertexBuffers(command_buffers[i], 0, 1, vertex_buffers, offsets);
 
-                vkCmdBindIndexBuffer(command_buffers[i], m_model.getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+                vkCmdBindIndexBuffer(command_buffers[i], m_model_entity->model().getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
                 vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.getLayout(), 0, 1, &m_descriptor_set, 0, nullptr);
 
-                vkCmdDrawIndexed(command_buffers[i], m_model.getIndexBuffer().size(), 1, 0, 0, 0);
+                vkCmdDrawIndexed(command_buffers[i], m_model_entity->model().getIndexBuffer().size(), 1, 0, 0, 0);
             vkCmdEndRenderPass(command_buffers[i]);
 
             if (vkEndCommandBuffer(command_buffers[i]) != VK_SUCCESS) {
@@ -226,7 +233,7 @@ namespace stirling {
         vkFreeCommandBuffers(m_device, m_command_pool, m_command_buffers.size(), m_command_buffers.data());
         m_command_buffers = initCommandBuffers();
 
-        m_camera.setAspectRatio(m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height);
+        m_camera->setAspectRatio(m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height);
     }
 
     std::vector<const char*> Window::getRequiredExtensions() const {
@@ -249,27 +256,38 @@ namespace stirling {
         return VkExtent2D { (uint32_t) width, (uint32_t) height };
     }
 
-
     bool Window::isRunning() const {
         glfwPollEvents();
         return !glfwWindowShouldClose(m_window);
     }
 
     void Window::update() {
-        { // Rotate model
-            static auto last_time = std::chrono::high_resolution_clock::now();
-            auto current_time = std::chrono::high_resolution_clock::now();
-            float delta_time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_time).count() / 1000.0f;
-            last_time = current_time;
-
-            //m_model.rotate(glm::vec3(0.0f, 0.0f, delta_time * 0.2f));
+        if (InputHandler::getInstance()[Action::EXIT]) {
+            glfwSetWindowShouldClose(m_window, GLFW_TRUE);
         }
 
+        if (InputHandler::getInstance()[Action::FULL_SCREEN]) {
+            if (glfwGetWindowAttrib(m_window, GLFW_MAXIMIZED)) {
+                glfwRestoreWindow(m_window);
+            } else {
+                glfwMaximizeWindow(m_window);
+            }
+        }
+
+        { // Game loop
+            static auto last_time = std::chrono::high_resolution_clock::now();
+            auto current_time = std::chrono::high_resolution_clock::now();
+            m_world.update(std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_time).count() / 1000.0f);
+            last_time = current_time;
+        }
+    }
+
+    void Window::render() {
         { // Update model uniform
             vulkan::UniformBufferObject ubo = {};
-            ubo.model      = m_model;
-            ubo.view       = m_camera;
-            ubo.projection = m_camera.getProjectionMatrix();
+            ubo.model      = m_model_entity->transform();
+            ubo.view       = m_camera->transform();
+            ubo.projection = m_camera->getProjectionMatrix();
             m_uniform_buffer.update(ubo);
         }
 
@@ -343,46 +361,15 @@ namespace stirling {
     }
 
     void Window::onKeyInput(int key, int scancode, int action, int mods) {
-        if (action == GLFW_PRESS) {
-            switch (key) {
-            case GLFW_KEY_W:
-                m_camera.translate(m_camera.forward() * 0.25f);
-                break;
-            case GLFW_KEY_A:
-                m_camera.translate(m_camera.left() * 0.25f);
-                break;
-            case GLFW_KEY_S:
-                m_camera.translate(m_camera.backward() * 0.25f);
-                break;
-            case GLFW_KEY_D:
-                m_camera.translate(m_camera.right() * 0.25f);
-                break;
-            case GLFW_KEY_SPACE:
-                m_camera.translate(m_camera.up() * 0.25f);
-                break;
-            case GLFW_KEY_LEFT_CONTROL:
-                m_camera.translate(m_camera.down() * 0.25f);
-                break;
-            case GLFW_KEY_ESCAPE:
-                glfwSetWindowShouldClose(m_window, GLFW_TRUE);
-                break;
-            case GLFW_KEY_F11:
-                if (glfwGetWindowAttrib(m_window, GLFW_MAXIMIZED)) {
-                    glfwRestoreWindow(m_window);
-                } else {
-                    glfwMaximizeWindow(m_window);
-                }
-                break;
-            }
-        }
+        InputHandler::getInstance().onKeyInput(key, scancode, action, mods);
     }
 
     float last_x, last_y;
     void Window::onMouseMovementInput(double x, double y) {
         double delta_x = last_x - x;
         double delta_y = last_y - y;
-        m_camera.rotate(delta_y * 0.001f, m_camera.right());
-        m_camera.rotate(-delta_x * 0.001f, glm::vec3(0.0f, 0.0f, 1.0f));
+        m_camera->transform().rotate(delta_y * 0.001f, m_camera->transform().right());
+        m_camera->transform().rotate(-delta_x * 0.001f, glm::vec3(0.0f, 0.0f, 1.0f));
         last_x = x;
         last_y = y;
     }
