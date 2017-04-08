@@ -64,10 +64,10 @@ namespace stirling {
             direction += m_transform.right();
         }
         if (InputHandler::getInstance()[Action::JUMP]) {
-            direction += m_transform.up();
+            direction += glm::vec3(0.0f, 0.0f, -1.0f);
         }
         if (InputHandler::getInstance()[Action::CROUCH]) {
-            direction += m_transform.down();
+            direction += glm::vec3(0.0f, 0.0f, 1.0f);
         }
         
         if (glm::length(direction) > 0.0f) {
