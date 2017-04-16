@@ -4,53 +4,17 @@
 namespace stirling {
 	namespace vulkan {
 
-		Pipeline::Pipeline(const Device& device, const RenderPass& render_pass, const VkExtent2D& extent) :
+		Pipeline::Pipeline(const Device& device, const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts, const RenderPass& render_pass, const VkExtent2D& extent) :
 			m_device                (&device),
-			m_descriptor_set_layout (initDescriptorSetLayout()),
-			m_pipeline_layout       (initPipelineLayout()),
+			m_pipeline_layout       (initPipelineLayout(descriptor_set_layouts)),
 			m_pipeline              (initPipeline(render_pass, extent)) {
 		}
 
-		VkDescriptorSetLayout Pipeline::initDescriptorSetLayout() const {
-			VkDescriptorSetLayoutBinding ubo_layout_binding = {};
-			ubo_layout_binding.binding         = 0;
-			ubo_layout_binding.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			ubo_layout_binding.descriptorCount = 1;
-			ubo_layout_binding.stageFlags      = VK_SHADER_STAGE_VERTEX_BIT;
-
-			VkDescriptorSetLayoutBinding sampler_layout_binding = {};
-			sampler_layout_binding.binding            = 1;
-			sampler_layout_binding.descriptorCount    = 1;
-			sampler_layout_binding.descriptorType     = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			sampler_layout_binding.pImmutableSamplers = nullptr;
-			sampler_layout_binding.stageFlags         = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-			std::array<VkDescriptorSetLayoutBinding, 2> bindings = {
-				ubo_layout_binding,
-				sampler_layout_binding
-			};
-
-			VkDescriptorSetLayoutCreateInfo create_info = {};
-			create_info.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-			create_info.bindingCount = bindings.size();
-			create_info.pBindings    = bindings.data();
-
-			VkDescriptorSetLayout descriptor_set_layout;
-			if (vkCreateDescriptorSetLayout(*m_device, &create_info, nullptr, &descriptor_set_layout) != VK_SUCCESS) {
-				throw std::runtime_error("Failed to create descriptor set layout.");
-			}
-			return descriptor_set_layout;
-		}
-
-		VkPipelineLayout Pipeline::initPipelineLayout() const {
-			VkDescriptorSetLayout descriptor_set_layouts[] = {
-				m_descriptor_set_layout
-			};
-
+		VkPipelineLayout Pipeline::initPipelineLayout(const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts) const {
 			VkPipelineLayoutCreateInfo pipeline_layout_info = {};
 			pipeline_layout_info.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-			pipeline_layout_info.setLayoutCount         = 1;
-			pipeline_layout_info.pSetLayouts            = descriptor_set_layouts;
+			pipeline_layout_info.setLayoutCount         = descriptor_set_layouts.size();
+			pipeline_layout_info.pSetLayouts            = descriptor_set_layouts.data();
 			pipeline_layout_info.pushConstantRangeCount = 0;
 			pipeline_layout_info.pPushConstantRanges    = 0;
 
@@ -77,7 +41,7 @@ namespace stirling {
 			fragment_shader_stage_info.module = fragment_shader;
 			fragment_shader_stage_info.pName  = "main";
 
-			VkPipelineShaderStageCreateInfo shader_stages[] = {
+			std::array<VkPipelineShaderStageCreateInfo, 2> shader_stages = {
 				vertex_shader_stage_info,
 				fragment_shader_stage_info
 			};
@@ -169,8 +133,8 @@ namespace stirling {
 
 			VkGraphicsPipelineCreateInfo create_info = {};
 			create_info.sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-			create_info.stageCount          = 2;
-			create_info.pStages             = shader_stages;
+			create_info.stageCount          = shader_stages.size();
+			create_info.pStages             = shader_stages.data();
 			create_info.pVertexInputState   = &vertex_input_info;
 			create_info.pInputAssemblyState = &input_assembly;
 			create_info.pViewportState      = &viewport_state;
@@ -194,11 +158,9 @@ namespace stirling {
 
 		Pipeline::Pipeline(Pipeline&& rhs) : 
 			m_device                (std::move(rhs.m_device)),
-			m_descriptor_set_layout (std::move(rhs.m_descriptor_set_layout)),
 			m_pipeline_layout       (std::move(rhs.m_pipeline_layout)),
 			m_pipeline              (std::move(rhs.m_pipeline)) {
 
-			rhs.m_descriptor_set_layout = VK_NULL_HANDLE;
 			rhs.m_pipeline_layout       = VK_NULL_HANDLE;
 			rhs.m_pipeline              = VK_NULL_HANDLE;
 		}
@@ -206,14 +168,11 @@ namespace stirling {
 		Pipeline& Pipeline::operator=(Pipeline&& rhs) {
 			if (m_pipeline              != VK_NULL_HANDLE) vkDestroyPipeline(*m_device, m_pipeline, nullptr);
 			if (m_pipeline_layout       != VK_NULL_HANDLE) vkDestroyPipelineLayout(*m_device, m_pipeline_layout, nullptr);
-			if (m_descriptor_set_layout != VK_NULL_HANDLE) vkDestroyDescriptorSetLayout(*m_device, m_descriptor_set_layout, nullptr);
 
 			m_pipeline              = std::move(rhs.m_pipeline);
 			m_pipeline_layout       = std::move(rhs.m_pipeline_layout);
-			m_descriptor_set_layout = std::move(rhs.m_descriptor_set_layout);
 			m_device                = std::move(rhs.m_device);
 
-			rhs.m_descriptor_set_layout = VK_NULL_HANDLE;
 			rhs.m_pipeline_layout       = VK_NULL_HANDLE;
 			rhs.m_pipeline              = VK_NULL_HANDLE;
 			
@@ -223,19 +182,10 @@ namespace stirling {
 		Pipeline::~Pipeline() {
 			if (m_pipeline              != VK_NULL_HANDLE) vkDestroyPipeline(*m_device, m_pipeline, nullptr);
 			if (m_pipeline_layout       != VK_NULL_HANDLE) vkDestroyPipelineLayout(*m_device, m_pipeline_layout, nullptr);
-			if (m_descriptor_set_layout != VK_NULL_HANDLE) vkDestroyDescriptorSetLayout(*m_device, m_descriptor_set_layout, nullptr);
 		}
 
 		Pipeline::operator VkPipeline() const {
 			return m_pipeline;
-		}
-
-		const Device& Pipeline::getDevice() const {
-			return *m_device;
-		}
-
-		const VkDescriptorSetLayout& Pipeline::getDescriptorSetLayout() const {
-			return m_descriptor_set_layout;
 		}
 
 		const VkPipelineLayout& Pipeline::getLayout() const {

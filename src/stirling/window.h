@@ -41,13 +41,14 @@ namespace stirling {
         vulkan::DepthImage               m_depth_image;
         std::shared_ptr<ModelEntity>     m_model_entity;
         vulkan::RenderPass               m_render_pass;
+        vulkan::UniformBuffer            m_uniform_buffer;
+        VkDescriptorSetLayout            m_descriptor_set_layout;
+        vulkan::DescriptorPool           m_descriptor_pool;
+        VkDescriptorSet                  m_descriptor_set;
         vulkan::Pipeline                 m_pipeline;
         std::vector<vulkan::Framebuffer> m_framebuffers;
         vulkan::CommandPool              m_command_pool;
         std::shared_ptr<Camera>          m_camera;
-        vulkan::UniformBuffer            m_uniform_buffer;
-        vulkan::DescriptorPool           m_descriptor_pool;
-        VkDescriptorSet                  m_descriptor_set;
         std::vector<VkCommandBuffer>     m_command_buffers;
         vulkan::Semaphore                m_image_available_semaphore;
         vulkan::Semaphore                m_render_finished_semaphore;
@@ -58,6 +59,7 @@ namespace stirling {
         vulkan::Surface                  initSurface() const;
         vulkan::PhysicalDevice           choosePhysicalDevice(const std::vector<vulkan::PhysicalDevice>& physical_devices) const;
         bool                             isPhysicalDeviceSuitable(const vulkan::PhysicalDevice& physical_device) const;
+        VkDescriptorSetLayout            initDescriptorSetLayout() const;
         vulkan::DescriptorPool           initDescriptorPool() const;
         VkDescriptorSet                  initDescriptorSet() const;
         std::vector<VkCommandBuffer>     initCommandBuffers() const;

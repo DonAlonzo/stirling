@@ -53,12 +53,13 @@ namespace stirling {
         m_depth_image               (vulkan::DepthImage(m_device, m_swapchain.getExtent())),
         m_model_entity              (std::make_shared<ModelEntity>(vulkan::Model::loadFromFile(m_device, "models/chalet.obj", "textures/chalet.jpg"))),
         m_render_pass               (vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.getImageFormat())),
-        m_pipeline                  (vulkan::Pipeline(m_device, m_render_pass, m_swapchain.getExtent())),
+        m_descriptor_set_layout     (initDescriptorSetLayout()),
+        m_descriptor_pool           (initDescriptorPool()),
+        m_descriptor_set            (initDescriptorSet()),
+        m_pipeline                  (vulkan::Pipeline(m_device, { m_descriptor_set_layout }, m_render_pass, m_swapchain.getExtent())),
         m_framebuffers              (m_swapchain.createFramebuffers(m_render_pass, m_depth_image.getImageView())),
         m_command_pool              (m_device.getGraphicsQueue().createCommandPool()),
         m_uniform_buffer            (vulkan::UniformBuffer(m_device)),
-        m_descriptor_pool           (initDescriptorPool()),
-        m_descriptor_set            (initDescriptorSet()),
         m_command_buffers           (initCommandBuffers()),
         m_image_available_semaphore (vulkan::Semaphore{m_device}),
         m_render_finished_semaphore (vulkan::Semaphore{m_device}) {
@@ -127,6 +128,37 @@ namespace stirling {
         return !formats.empty() && !present_modes.empty();
     }
 
+    VkDescriptorSetLayout Window::initDescriptorSetLayout() const {
+        VkDescriptorSetLayoutBinding ubo_layout_binding = {};
+        ubo_layout_binding.binding         = 0;
+        ubo_layout_binding.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        ubo_layout_binding.descriptorCount = 1;
+        ubo_layout_binding.stageFlags      = VK_SHADER_STAGE_VERTEX_BIT;
+
+        VkDescriptorSetLayoutBinding sampler_layout_binding = {};
+        sampler_layout_binding.binding            = 1;
+        sampler_layout_binding.descriptorCount    = 1;
+        sampler_layout_binding.descriptorType     = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        sampler_layout_binding.pImmutableSamplers = nullptr;
+        sampler_layout_binding.stageFlags         = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+        std::array<VkDescriptorSetLayoutBinding, 2> bindings = {
+            ubo_layout_binding,
+            sampler_layout_binding
+        };
+
+        VkDescriptorSetLayoutCreateInfo create_info = {};
+        create_info.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        create_info.bindingCount = bindings.size();
+        create_info.pBindings    = bindings.data();
+
+        VkDescriptorSetLayout descriptor_set_layout;
+        if (vkCreateDescriptorSetLayout(m_device, &create_info, nullptr, &descriptor_set_layout) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create descriptor set layout.");
+        }
+        return descriptor_set_layout;
+    }
+
     vulkan::DescriptorPool Window::initDescriptorPool() const {
         std::vector<VkDescriptorPoolSize> pool_sizes{2};
 
@@ -140,7 +172,7 @@ namespace stirling {
     }
 
     VkDescriptorSet Window::initDescriptorSet() const {
-        auto descriptor_set = m_descriptor_pool.allocateDescriptorSet(m_pipeline.getDescriptorSetLayout());
+        auto descriptor_set = m_descriptor_pool.allocateDescriptorSet(m_descriptor_set_layout);
 
         VkDescriptorBufferInfo buffer_info = {};
         buffer_info.buffer = m_uniform_buffer;
@@ -244,7 +276,7 @@ namespace stirling {
         m_swapchain.reset(getSize());
         m_depth_image  = vulkan::DepthImage(m_device, m_swapchain.getExtent());
         m_render_pass  = vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.getImageFormat());
-        m_pipeline     = vulkan::Pipeline(m_device, m_render_pass, m_swapchain.getExtent());
+        m_pipeline     = vulkan::Pipeline(m_device, { m_descriptor_set_layout }, m_render_pass, m_swapchain.getExtent());
         m_framebuffers = m_swapchain.createFramebuffers(m_render_pass, m_depth_image.getImageView());
 
         vkFreeCommandBuffers(m_device, m_command_pool, m_command_buffers.size(), m_command_buffers.data());

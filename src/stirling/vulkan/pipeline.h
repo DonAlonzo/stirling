@@ -14,7 +14,7 @@ namespace stirling {
 	namespace vulkan {
 		class Pipeline {
 		public:
-			Pipeline(const Device& device, const RenderPass& render_pass, const VkExtent2D& extent);
+			Pipeline(const Device& device, const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts, const RenderPass& render_pass, const VkExtent2D& extent);
 			~Pipeline();
 			Pipeline(Pipeline&&);
 			Pipeline(const Pipeline&) = delete;
@@ -23,18 +23,14 @@ namespace stirling {
 
 			operator VkPipeline() const;
 
-			const Device& getDevice() const;
-			const VkDescriptorSetLayout& getDescriptorSetLayout() const;
 			const VkPipelineLayout& getLayout() const;
 
 		private:
 			const Device*         m_device;
-			VkDescriptorSetLayout m_descriptor_set_layout;
 			VkPipelineLayout      m_pipeline_layout;
 			VkPipeline            m_pipeline;
 			
-			VkDescriptorSetLayout initDescriptorSetLayout() const;
-			VkPipelineLayout      initPipelineLayout() const;
+			VkPipelineLayout      initPipelineLayout(const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts) const;
 			VkPipeline            initPipeline(const RenderPass& render_pass, const VkExtent2D& extent) const;
 		};
 	}
