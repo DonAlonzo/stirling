@@ -188,6 +188,10 @@ namespace stirling {
 			return m_pipeline;
 		}
 
+		const Device& Pipeline::getDevice() const {
+			return *m_device;
+		}
+
 		const VkPipelineLayout& Pipeline::getLayout() const {
 			return m_pipeline_layout;
 		}
