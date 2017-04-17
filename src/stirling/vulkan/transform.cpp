@@ -70,8 +70,16 @@ namespace stirling {
             return m_position;
         }
 
+        const glm::quat& Transform::rotation() const {
+            return m_rotation;
+        }
+
         const glm::vec3& Transform::scale() const {
             return m_scale;
+        }
+
+        const glm::mat4& Transform::transform() const {
+            return m_transform;
         }
 
     }

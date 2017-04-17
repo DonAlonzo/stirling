@@ -151,7 +151,8 @@
     <ClCompile Include="src\stirling\entity.cpp" />
     <ClCompile Include="src\stirling\input_handler.cpp" />
     <ClCompile Include="src\stirling\camera.cpp" />
-    <ClCompile Include="src\stirling\model_entity.cpp" />
+    <ClCompile Include="src\stirling\model_component.cpp" />
+    <ClCompile Include="src\stirling\physics_component.cpp" />
     <ClCompile Include="src\stirling\vulkan\depth_image.cpp" />
     <ClCompile Include="DESCRIPTOR_SET.CPP" />
     <ClCompile Include="src\stirling\vulkan\model.cpp" />
@@ -184,10 +185,12 @@
     <ClCompile Include="src\stirling\world.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\stirling\component.h" />
     <ClInclude Include="src\stirling\entity.h" />
     <ClInclude Include="src\stirling\input_handler.h" />
     <ClInclude Include="src\stirling\camera.h" />
-    <ClInclude Include="src\stirling\model_entity.h" />
+    <ClInclude Include="src\stirling\model_component.h" />
+    <ClInclude Include="src\stirling\physics_component.h" />
     <ClInclude Include="src\stirling\tiny_obj_loader.h" />
     <ClInclude Include="src\stirling\vulkan\depth_image.h" />
     <ClInclude Include="src\stirling\vulkan\model.h" />

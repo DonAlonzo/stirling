@@ -51,15 +51,17 @@ namespace stirling {
         m_device                    (m_physical_device.createDevice(m_surface, g_device_extensions)),
         m_swapchain                 (vulkan::Swapchain(m_device, m_surface, getSize())),
         m_depth_image               (vulkan::DepthImage(m_device, m_swapchain.getExtent())),
-        m_model_entity              (std::make_shared<ModelEntity>(vulkan::Model::loadFromFile(m_device, "models/chalet.obj", "textures/chalet.jpg"))),
+        m_house_model_component     (createHouseModelComponent()),
+        m_house_physics_component   (createHousePhysicsComponent()),
+        m_house_entity              (createHouseEntity(m_house_model_component.get(), m_house_physics_component.get())),
         m_render_pass               (vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.getImageFormat())),
+        m_uniform_buffer            (vulkan::UniformBuffer(m_device)),
         m_descriptor_set_layout     (initDescriptorSetLayout()),
         m_descriptor_pool           (initDescriptorPool()),
         m_descriptor_set            (initDescriptorSet()),
         m_pipeline                  (vulkan::Pipeline(m_device, { m_descriptor_set_layout }, m_render_pass, m_swapchain.getExtent())),
         m_framebuffers              (m_swapchain.createFramebuffers(m_render_pass, m_depth_image.getImageView())),
         m_command_pool              (m_device.getGraphicsQueue().createCommandPool()),
-        m_uniform_buffer            (vulkan::UniformBuffer(m_device)),
         m_command_buffers           (initCommandBuffers()),
         m_image_available_semaphore (vulkan::Semaphore{m_device}),
         m_render_finished_semaphore (vulkan::Semaphore{m_device}) {
@@ -70,8 +72,8 @@ namespace stirling {
 
         glfwMaximizeWindow(m_window);
 
-        m_world.addEntity(m_camera);
-        m_world.addEntity(m_model_entity);
+        m_world.addEntity(m_camera.get());
+        m_world.addEntity(m_house_entity.get());
 
         m_camera->transform().moveTo(glm::vec3(2.0f, -2.0f, -2.0f));
         m_camera->transform().lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -128,6 +130,27 @@ namespace stirling {
         return !formats.empty() && !present_modes.empty();
     }
 
+    ModelComponent* Window::createHouseModelComponent() const {
+        auto model_component = new ModelComponent(vulkan::Model::loadFromFile(m_device, "models/chalet.obj", "textures/chalet.jpg"));
+
+        return model_component;
+    }
+
+    PhysicsComponent* Window::createHousePhysicsComponent() const {
+        auto physics_component = new PhysicsComponent();
+
+        return physics_component;
+    }
+
+    Entity* Window::createHouseEntity(ModelComponent* model_component, PhysicsComponent* physics_component) const {
+        auto entity = new Entity();
+
+        entity->addComponent(model_component);
+        entity->addComponent(physics_component);
+
+        return entity;
+    }
+
     VkDescriptorSetLayout Window::initDescriptorSetLayout() const {
         VkDescriptorSetLayoutBinding ubo_layout_binding = {};
         ubo_layout_binding.binding         = 0;
@@ -181,8 +204,8 @@ namespace stirling {
 
         VkDescriptorImageInfo image_info = {};
         image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        image_info.imageView   = m_model_entity->model().getTexture().getImageView();
-        image_info.sampler     = m_model_entity->model().getTexture().getSampler();
+        image_info.imageView   = m_house_model_component->model().getTexture().getImageView();
+        image_info.sampler     = m_house_model_component->model().getTexture().getSampler();
 
         std::array<VkWriteDescriptorSet, 2> write_descriptor_sets = {};
 
@@ -231,15 +254,15 @@ namespace stirling {
             vkCmdBeginRenderPass(command_buffers[i], &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
                 vkCmdBindPipeline(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
 
-                VkBuffer vertex_buffers[] = { m_model_entity->model().getVertexBuffer() };
+                VkBuffer vertex_buffers[] = { m_house_model_component->model().getVertexBuffer() };
                 VkDeviceSize offsets[] = { 0 };
                 vkCmdBindVertexBuffers(command_buffers[i], 0, 1, vertex_buffers, offsets);
 
-                vkCmdBindIndexBuffer(command_buffers[i], m_model_entity->model().getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+                vkCmdBindIndexBuffer(command_buffers[i], m_house_model_component->model().getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
                 vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.getLayout(), 0, 1, &m_descriptor_set, 0, nullptr);
 
-                vkCmdDrawIndexed(command_buffers[i], m_model_entity->model().getIndexBuffer().size(), 1, 0, 0, 0);
+                vkCmdDrawIndexed(command_buffers[i], m_house_model_component->model().getIndexBuffer().size(), 1, 0, 0, 0);
             vkCmdEndRenderPass(command_buffers[i]);
 
             if (vkEndCommandBuffer(command_buffers[i]) != VK_SUCCESS) {
@@ -321,7 +344,7 @@ namespace stirling {
     void Window::render() {
         { // Update model uniform
             vulkan::UniformBufferObject ubo = {};
-            ubo.model      = m_model_entity->transform();
+            ubo.model      = m_house_entity->transform();
             ubo.view       = m_camera->transform();
             ubo.projection = m_camera->getProjectionMatrix();
             m_uniform_buffer.update(ubo);

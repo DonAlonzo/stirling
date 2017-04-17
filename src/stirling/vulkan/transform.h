@@ -23,8 +23,9 @@ namespace stirling {
             glm::vec3 backward() const;
 
             const glm::vec3& position() const;
-
+            const glm::quat& rotation() const;
             const glm::vec3& scale() const;
+            const glm::mat4& transform() const;
 
         private:
             glm::vec3 m_position;

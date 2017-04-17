@@ -14,6 +14,8 @@ namespace stirling {
         void setNearPlane(float near_plane);
         void setFarPlane(float far_plane);
 
+        void addComponent(Component* component) = delete;
+
         const glm::mat4& getProjectionMatrix() const;
 
         void update(float delta_seconds) override;

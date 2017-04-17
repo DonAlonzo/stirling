@@ -2,14 +2,9 @@
 
 #include <glm/glm.hpp>
 
-namespace stirling {
-    namespace vulkan {
-        class Device;
-    }
-}
+namespace stirling { namespace vulkan { class Device; } }
 #include "index_buffer.h"
 #include "texture.h"
-#include "transform.h"
 #include "vertex.h"
 #include "vertex_buffer.h"
 
@@ -18,7 +13,7 @@ namespace stirling {
 
 namespace stirling {
     namespace vulkan {
-        class Model : public Transform {
+        class Model {
         public:
             Model(VertexBuffer&& vertex_buffer, IndexBuffer&& index_buffer, Texture&& texture);
 

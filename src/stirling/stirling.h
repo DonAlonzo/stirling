@@ -28,5 +28,7 @@
 // stirling
 #include "camera.h"
 #include "input_handler.h"
-#include "model_entity.h"
+#include "entity.h"
+#include "model_component.h"
+#include "physics_component.h"
 #include "world.h"

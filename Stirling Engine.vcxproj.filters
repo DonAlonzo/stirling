@@ -117,10 +117,13 @@
     <ClCompile Include="src\stirling\vulkan\model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\stirling\model_entity.cpp">
+    <ClCompile Include="src\stirling\window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\stirling\window.cpp">
+    <ClCompile Include="src\stirling\model_component.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stirling\physics_component.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -227,10 +230,16 @@
     <ClInclude Include="src\stirling\vulkan\model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\stirling\model_entity.h">
+    <ClInclude Include="src\stirling\window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\stirling\window.h">
+    <ClInclude Include="src\stirling\component.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stirling\model_component.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stirling\physics_component.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

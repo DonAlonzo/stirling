@@ -8,11 +8,16 @@
 namespace stirling {
     class World {
     public:
-        void addEntity(std::shared_ptr<Entity> entity);
+        World();
+
+        void addEntity(Entity* entity);
 
         void update(float delta_seconds);
 
     private:
-        std::vector<std::shared_ptr<Entity>> m_entities;
+        static const int MAX_NUMBER_OF_ENTITIES = 128;
+
+        Entity* m_entities[MAX_NUMBER_OF_ENTITIES];
+        int     m_number_of_entities;
     };
 }
