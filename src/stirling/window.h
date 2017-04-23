@@ -39,33 +39,41 @@ namespace stirling {
         vulkan::Device                    m_device;
         vulkan::Swapchain                 m_swapchain;
         vulkan::DepthImage                m_depth_image;
+
+        vulkan::Buffer                    m_static_uniform_buffer;
+        vulkan::Buffer                    m_dynamic_uniform_buffer;
+        size_t                            m_dynamic_alignment;
+
         std::unique_ptr<ModelComponent>   m_house_model_component;
         std::unique_ptr<PhysicsComponent> m_house_physics_component;
-        std::unique_ptr<Entity>           m_house_entity;
+        std::unique_ptr<Entity>           m_house_entity_1;
+        std::unique_ptr<Entity>           m_house_entity_2;
         vulkan::RenderPass                m_render_pass;
-        vulkan::UniformBuffer             m_uniform_buffer;
         VkDescriptorSetLayout             m_descriptor_set_layout;
         vulkan::DescriptorPool            m_descriptor_pool;
         VkDescriptorSet                   m_descriptor_set;
         vulkan::Pipeline                  m_pipeline;
         std::vector<vulkan::Framebuffer>  m_framebuffers;
         vulkan::CommandPool               m_command_pool;
-        std::shared_ptr<Camera>           m_camera;
         std::vector<VkCommandBuffer>      m_command_buffers;
+
         vulkan::Semaphore                 m_image_available_semaphore;
         vulkan::Semaphore                 m_render_finished_semaphore;
-        
+
+        std::unique_ptr<Camera>           m_camera;
         World                             m_world;
 
         GLFWwindow*                       initWindow(int width, int height);
         vulkan::Surface                   initSurface() const;
         vulkan::PhysicalDevice            choosePhysicalDevice(const std::vector<vulkan::PhysicalDevice>& physical_devices) const;
         bool                              isPhysicalDeviceSuitable(const vulkan::PhysicalDevice& physical_device) const;
+        vulkan::Buffer                    initStaticUniformBuffer(const vulkan::Device& device);
+        vulkan::Buffer                    initDynamicUniformBuffer(const vulkan::Device& device);
+
         VkDescriptorSetLayout             initDescriptorSetLayout() const;
         vulkan::DescriptorPool            initDescriptorPool() const;
         VkDescriptorSet                   initDescriptorSet() const;
         std::vector<VkCommandBuffer>      initCommandBuffers() const;
-
         ModelComponent*                   createHouseModelComponent() const;
         PhysicsComponent*                 createHousePhysicsComponent() const;
         Entity*                           createHouseEntity(ModelComponent* model_component, PhysicsComponent* physics_component) const;
@@ -80,6 +88,8 @@ namespace stirling {
         void                              onMouseMovementInput(double x, double y);
         void                              onMouseButtonInput(int button, int action, int mods);
         void                              onMouseScrollInput(double xoffset, double yoffset);
+
+        void                              updateDynamicUniformBuffer();
     };
 
 }

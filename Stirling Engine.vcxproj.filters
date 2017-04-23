@@ -75,9 +75,6 @@
     <ClCompile Include="src\stirling\vulkan\index_buffer.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="src\stirling\vulkan\uniform_buffer.cpp">
-      <Filter>Source Files\vulkan</Filter>
-    </ClCompile>
     <ClCompile Include="src\stirling\vulkan\descriptor_pool.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
@@ -183,12 +180,6 @@
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\stirling\vulkan\vertex.h">
-      <Filter>Header Files\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\stirling\vulkan\uniform_buffer_object.h">
-      <Filter>Header Files\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\stirling\vulkan\uniform_buffer.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\stirling\vulkan\descriptor_pool.h">

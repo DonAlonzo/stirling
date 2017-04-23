@@ -174,7 +174,6 @@
     <ClCompile Include="src\stirling\vulkan\instance.cpp" />
     <ClCompile Include="src\stirling\vulkan\physical_device.cpp" />
     <ClCompile Include="src\stirling\vulkan\surface.cpp" />
-    <ClCompile Include="src\stirling\vulkan\uniform_buffer.cpp" />
     <ClCompile Include="src\stirling\vulkan\vertex_buffer.cpp" />
     <ClCompile Include="src\stirling\window.cpp" />
     <ClCompile Include="src\stirling\vulkan\validator.cpp" />
@@ -212,8 +211,6 @@
     <ClInclude Include="src\stirling\vulkan\physical_device.h" />
     <ClInclude Include="src\stirling\stirling.h" />
     <ClInclude Include="src\stirling\vulkan\surface.h" />
-    <ClInclude Include="src\stirling\vulkan\uniform_buffer.h" />
-    <ClInclude Include="src\stirling\vulkan\uniform_buffer_object.h" />
     <ClInclude Include="src\stirling\vulkan\vertex.h" />
     <ClInclude Include="src\stirling\vulkan\vertex_buffer.h" />
     <ClInclude Include="src\stirling\window.h" />

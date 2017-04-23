@@ -5,9 +5,9 @@
 
 // Stirling
 namespace stirling {
-	namespace vulkan {
-		class Surface;
-	}
+    namespace vulkan {
+        class Surface;
+    }
 }
 #include "device.h"
 
@@ -15,33 +15,36 @@ namespace stirling {
 #include <vector>
 
 namespace stirling {
-	namespace vulkan {
+    namespace vulkan {
 
-		struct QueueFamilyIndices {
-			int graphics_family_index;
-			int present_family_index;
+        struct QueueFamilyIndices {
+            int graphics_family_index;
+            int present_family_index;
 
-			bool isComplete() const;
-		};
+            bool isComplete() const;
+        };
 
-		class PhysicalDevice {
-		public:
-			PhysicalDevice(VkPhysicalDevice physical_device);
-		
-			operator VkPhysicalDevice() const;
+        class PhysicalDevice {
+        public:
+            PhysicalDevice(VkPhysicalDevice physical_device);
+        
+            operator VkPhysicalDevice() const;
 
-			QueueFamilyIndices findQueueFamilies(const Surface& surface) const;
+            const VkPhysicalDeviceProperties& getProperties() const;
 
-			Device createDevice(const Surface& surface, const std::vector<const char*> extensions) const;
+            QueueFamilyIndices findQueueFamilies(const Surface& surface) const;
 
-			std::vector<VkExtensionProperties> getExtensions() const;
-			VkSurfaceCapabilitiesKHR getSurfaceCapabilities(const Surface& surface) const;
-			std::vector<VkSurfaceFormatKHR> getSurfaceFormats(const Surface& surface) const;
-			std::vector<VkPresentModeKHR> getSurfacePresentModes(const Surface& surface) const;
+            Device createDevice(const Surface& surface, const std::vector<const char*> extensions) const;
 
-		private:
-			VkPhysicalDevice m_physical_device;
-		};
+            std::vector<VkExtensionProperties> getExtensions() const;
+            VkSurfaceCapabilitiesKHR getSurfaceCapabilities(const Surface& surface) const;
+            std::vector<VkSurfaceFormatKHR> getSurfaceFormats(const Surface& surface) const;
+            std::vector<VkPresentModeKHR> getSurfacePresentModes(const Surface& surface) const;
 
-	}
+        private:
+            VkPhysicalDevice m_physical_device;
+            VkPhysicalDeviceProperties m_properties;
+        };
+
+    }
 }

@@ -3,34 +3,49 @@
 #include "vulkan/vulkan.h"
 
 namespace stirling {
-	namespace vulkan {
-		class Device;
-	}
+    namespace vulkan {
+        class Device;
+    }
 }
 
 namespace stirling {
-	namespace vulkan {
-		class Buffer {
-		public:
-			~Buffer();
-			Buffer(Buffer&&);
-			Buffer(const Buffer&) = delete;
-			Buffer& operator=(Buffer&&);
-			Buffer& operator=(const Buffer&) = delete;
+    namespace vulkan {
+        class Buffer {
+            friend class Device;
 
-			operator VkBuffer() const;
+        public:
+            ~Buffer();
+            Buffer(Buffer&&);
+            Buffer(const Buffer&) = delete;
+            Buffer& operator=(Buffer&&);
+            Buffer& operator=(const Buffer&) = delete;
 
-		protected:
-			const Device*  m_device;
-			VkBuffer       m_buffer;
-			VkDeviceMemory m_memory;
+            operator VkBuffer() const;
 
-			Buffer(const Device& device, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties);
+            const VkDeviceMemory& getMemory() const;
+            const VkDescriptorBufferInfo& getDescriptor() const;
+            const VkDeviceSize& getSize() const;
 
-		private:
-			VkBuffer       initBuffer(VkDeviceSize size, VkBufferUsageFlags usage) const;
-			VkDeviceMemory allocateMemory(VkMemoryPropertyFlags properties) const;
-			uint32_t       findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
-		};
-	}
+            void* getMapped() const;
+            void map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
+            void unmap();
+            void memcpy(const void* data);
+
+        protected:
+            const Device*          m_device;
+            VkDeviceSize           m_size;
+            VkBuffer               m_buffer;
+            VkDeviceMemory         m_memory;
+            VkDescriptorBufferInfo m_descriptor;
+            void*                  m_mapped = nullptr;
+
+            Buffer(const Device& device, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkDeviceSize size);
+
+        private:
+            VkBuffer               initBuffer(VkDeviceSize size, VkBufferUsageFlags usage) const;
+            VkDeviceMemory         allocateMemory(VkMemoryPropertyFlags properties) const;
+            uint32_t               findMemoryType(uint32_t type_filter, VkMemoryPropertyFlags properties) const;
+            VkDescriptorBufferInfo initDescriptor(const VkDeviceSize& size = VK_WHOLE_SIZE, const VkDeviceSize& offset = 0) const;
+        };
+    }
 }

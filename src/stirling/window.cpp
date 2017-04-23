@@ -11,6 +11,19 @@
 #include <iostream>
 #include <set>
 
+void* alignedAlloc(size_t size, size_t alignment) {
+    void *data = nullptr;
+#if defined(_MSC_VER) || defined(__MINGW32__)
+    data = _aligned_malloc(size, alignment);
+#else 
+    int res = posix_memalign(&data, alignment, size);
+    if (res != 0) {
+        data = nullptr;
+    }
+#endif
+    return data;
+}
+
 const std::vector<const char*> g_device_extensions = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
@@ -41,7 +54,18 @@ namespace stirling {
     };
 }
 
+int NUMBER_OF_OBJECTS = 2;
+
 namespace stirling {
+
+    struct StaticUniformBufferObject {
+        glm::mat4 projection;
+        glm::mat4 view;
+    } static_ubo;
+
+    struct DynamicUniformBufferObject {
+        glm::mat4* model = nullptr;
+    } m_dynamic_ubo;
 
     Window::Window(int width, int height) :
         m_window                    (initWindow(width, height)),
@@ -51,11 +75,14 @@ namespace stirling {
         m_device                    (m_physical_device.createDevice(m_surface, g_device_extensions)),
         m_swapchain                 (vulkan::Swapchain(m_device, m_surface, getSize())),
         m_depth_image               (vulkan::DepthImage(m_device, m_swapchain.getExtent())),
+        m_static_uniform_buffer     (initStaticUniformBuffer(m_device)),
+        m_dynamic_uniform_buffer    (initDynamicUniformBuffer(m_device)),
+
         m_house_model_component     (createHouseModelComponent()),
         m_house_physics_component   (createHousePhysicsComponent()),
-        m_house_entity              (createHouseEntity(m_house_model_component.get(), m_house_physics_component.get())),
+        m_house_entity_1            (createHouseEntity(m_house_model_component.get(), m_house_physics_component.get())),
+        m_house_entity_2            (createHouseEntity(m_house_model_component.get(), m_house_physics_component.get())),
         m_render_pass               (vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.getImageFormat())),
-        m_uniform_buffer            (vulkan::UniformBuffer(m_device)),
         m_descriptor_set_layout     (initDescriptorSetLayout()),
         m_descriptor_pool           (initDescriptorPool()),
         m_descriptor_set            (initDescriptorSet()),
@@ -63,20 +90,25 @@ namespace stirling {
         m_framebuffers              (m_swapchain.createFramebuffers(m_render_pass, m_depth_image.getImageView())),
         m_command_pool              (m_device.getGraphicsQueue().createCommandPool()),
         m_command_buffers           (initCommandBuffers()),
+
         m_image_available_semaphore (vulkan::Semaphore{m_device}),
         m_render_finished_semaphore (vulkan::Semaphore{m_device}) {
 
         addControls();
 
-        m_camera = std::make_shared<Camera>(glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.01f, 10.0f);
+        m_camera = std::unique_ptr<Camera>(new Camera(glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.01f, 10.0f));
 
         glfwMaximizeWindow(m_window);
 
         m_world.addEntity(m_camera.get());
-        m_world.addEntity(m_house_entity.get());
+        m_world.addEntity(m_house_entity_1.get());
+        m_world.addEntity(m_house_entity_2.get());
 
         m_camera->transform().moveTo(glm::vec3(2.0f, -2.0f, -2.0f));
         m_camera->transform().lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
+
+        m_house_entity_2->transform().moveTo(glm::vec3(-2.0f, -2.0f, 0.0f));
+        m_house_entity_2->transform().setScale(glm::vec3(0.5f, 0.5f, 0.5f));
     }
 
     GLFWwindow* Window::initWindow(int width, int height) {
@@ -130,6 +162,25 @@ namespace stirling {
         return !formats.empty() && !present_modes.empty();
     }
 
+    vulkan::Buffer Window::initStaticUniformBuffer(const vulkan::Device& device) {
+        auto buffer = device.createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, sizeof(StaticUniformBufferObject));
+        buffer.map();
+        return buffer;
+    }
+
+    vulkan::Buffer Window::initDynamicUniformBuffer(const vulkan::Device& device) {
+        size_t ubo_alignment = m_physical_device.getProperties().limits.minUniformBufferOffsetAlignment;
+
+        m_dynamic_alignment = (sizeof(glm::mat4) / ubo_alignment) * ubo_alignment + ((sizeof(glm::mat4) % ubo_alignment) > 0 ? ubo_alignment : 0);
+
+        size_t buffer_size = NUMBER_OF_OBJECTS * m_dynamic_alignment;
+        m_dynamic_ubo.model = (glm::mat4*)alignedAlloc(buffer_size, m_dynamic_alignment);
+
+        auto buffer = device.createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, buffer_size);
+        buffer.map();
+        return buffer;
+    }
+
     ModelComponent* Window::createHouseModelComponent() const {
         auto model_component = new ModelComponent(vulkan::Model::loadFromFile(m_device, "models/chalet.obj", "textures/chalet.jpg"));
 
@@ -152,21 +203,28 @@ namespace stirling {
     }
 
     VkDescriptorSetLayout Window::initDescriptorSetLayout() const {
-        VkDescriptorSetLayoutBinding ubo_layout_binding = {};
-        ubo_layout_binding.binding         = 0;
-        ubo_layout_binding.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        ubo_layout_binding.descriptorCount = 1;
-        ubo_layout_binding.stageFlags      = VK_SHADER_STAGE_VERTEX_BIT;
+        VkDescriptorSetLayoutBinding static_ubo_layout_binding = {};
+        static_ubo_layout_binding.binding         = 0;
+        static_ubo_layout_binding.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        static_ubo_layout_binding.descriptorCount = 1;
+        static_ubo_layout_binding.stageFlags      = VK_SHADER_STAGE_VERTEX_BIT;
+
+        VkDescriptorSetLayoutBinding dynamic_ubo_layout_binding = {};
+        dynamic_ubo_layout_binding.binding         = 1;
+        dynamic_ubo_layout_binding.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+        dynamic_ubo_layout_binding.descriptorCount = 1;
+        dynamic_ubo_layout_binding.stageFlags      = VK_SHADER_STAGE_VERTEX_BIT;
 
         VkDescriptorSetLayoutBinding sampler_layout_binding = {};
-        sampler_layout_binding.binding            = 1;
+        sampler_layout_binding.binding            = 2;
         sampler_layout_binding.descriptorCount    = 1;
         sampler_layout_binding.descriptorType     = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         sampler_layout_binding.pImmutableSamplers = nullptr;
         sampler_layout_binding.stageFlags         = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-        std::array<VkDescriptorSetLayoutBinding, 2> bindings = {
-            ubo_layout_binding,
+        std::array<VkDescriptorSetLayoutBinding, 3> bindings = {
+            static_ubo_layout_binding,
+            dynamic_ubo_layout_binding,
             sampler_layout_binding
         };
 
@@ -183,13 +241,16 @@ namespace stirling {
     }
 
     vulkan::DescriptorPool Window::initDescriptorPool() const {
-        std::vector<VkDescriptorPoolSize> pool_sizes{2};
+        std::vector<VkDescriptorPoolSize> pool_sizes{3};
 
         pool_sizes[0].type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         pool_sizes[0].descriptorCount = 1;
 
-        pool_sizes[1].type            = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        pool_sizes[1].type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
         pool_sizes[1].descriptorCount = 1;
+
+        pool_sizes[2].type            = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        pool_sizes[2].descriptorCount = 1;
 
         return vulkan::DescriptorPool(m_device, pool_sizes, 1);
     }
@@ -197,33 +258,39 @@ namespace stirling {
     VkDescriptorSet Window::initDescriptorSet() const {
         auto descriptor_set = m_descriptor_pool.allocateDescriptorSet(m_descriptor_set_layout);
 
-        VkDescriptorBufferInfo buffer_info = {};
-        buffer_info.buffer = m_uniform_buffer;
-        buffer_info.offset = 0;
-        buffer_info.range  = sizeof(vulkan::UniformBufferObject);
+        std::array<VkWriteDescriptorSet, 3> write_descriptor_sets = {};
 
-        VkDescriptorImageInfo image_info = {};
-        image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        image_info.imageView   = m_house_model_component->model().getTexture().getImageView();
-        image_info.sampler     = m_house_model_component->model().getTexture().getSampler();
-
-        std::array<VkWriteDescriptorSet, 2> write_descriptor_sets = {};
-
+        // Binding 0: Static uniform buffer
         write_descriptor_sets[0].sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         write_descriptor_sets[0].dstSet           = descriptor_set;
         write_descriptor_sets[0].dstBinding       = 0;
         write_descriptor_sets[0].dstArrayElement  = 0;
         write_descriptor_sets[0].descriptorType   = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         write_descriptor_sets[0].descriptorCount  = 1;
-        write_descriptor_sets[0].pBufferInfo      = &buffer_info;
+        write_descriptor_sets[0].pBufferInfo      = &m_static_uniform_buffer.getDescriptor();
 
+        // Binding 1: Dynamic uniform buffer
         write_descriptor_sets[1].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         write_descriptor_sets[1].dstSet          = descriptor_set;
         write_descriptor_sets[1].dstBinding      = 1;
         write_descriptor_sets[1].dstArrayElement = 0;
-        write_descriptor_sets[1].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        write_descriptor_sets[1].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
         write_descriptor_sets[1].descriptorCount = 1;
-        write_descriptor_sets[1].pImageInfo      = &image_info;
+        write_descriptor_sets[1].pBufferInfo     = &m_dynamic_uniform_buffer.getDescriptor();
+
+        // Binding 2: Image
+        VkDescriptorImageInfo image_info = {};
+        image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        image_info.imageView   = m_house_model_component->model().getTexture().getImageView();
+        image_info.sampler     = m_house_model_component->model().getTexture().getSampler();
+
+        write_descriptor_sets[2].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        write_descriptor_sets[2].dstSet          = descriptor_set;
+        write_descriptor_sets[2].dstBinding      = 2;
+        write_descriptor_sets[2].dstArrayElement = 0;
+        write_descriptor_sets[2].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        write_descriptor_sets[2].descriptorCount = 1;
+        write_descriptor_sets[2].pImageInfo      = &image_info;
 
         vkUpdateDescriptorSets(m_device, write_descriptor_sets.size(), write_descriptor_sets.data(), 0, nullptr);
 
@@ -252,17 +319,22 @@ namespace stirling {
             render_pass_info.pClearValues      = clear_values.data();
 
             vkCmdBeginRenderPass(command_buffers[i], &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
+
                 vkCmdBindPipeline(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
 
                 VkBuffer vertex_buffers[] = { m_house_model_component->model().getVertexBuffer() };
                 VkDeviceSize offsets[] = { 0 };
                 vkCmdBindVertexBuffers(command_buffers[i], 0, 1, vertex_buffers, offsets);
-
                 vkCmdBindIndexBuffer(command_buffers[i], m_house_model_component->model().getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
-                vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.getLayout(), 0, 1, &m_descriptor_set, 0, nullptr);
+                for (uint32_t j = 0; j < NUMBER_OF_OBJECTS; ++j) {
+                    uint32_t dynamic_offset = j * static_cast<uint32_t>(m_dynamic_alignment);
 
-                vkCmdDrawIndexed(command_buffers[i], m_house_model_component->model().getIndexBuffer().size(), 1, 0, 0, 0);
+                    vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.getLayout(), 0, 1, &m_descriptor_set, 1, &dynamic_offset);
+
+                    vkCmdDrawIndexed(command_buffers[i], m_house_model_component->model().getIndexBuffer().size(), 1, 0, 0, 0);
+                }
+
             vkCmdEndRenderPass(command_buffers[i]);
 
             if (vkEndCommandBuffer(command_buffers[i]) != VK_SUCCESS) {
@@ -342,12 +414,29 @@ namespace stirling {
     }
 
     void Window::render() {
-        { // Update model uniform
-            vulkan::UniformBufferObject ubo = {};
-            ubo.model      = m_house_entity->transform();
-            ubo.view       = m_camera->transform();
-            ubo.projection = m_camera->getProjectionMatrix();
-            m_uniform_buffer.update(ubo);
+        { // Update static uniform buffer
+            static_ubo.view       = m_camera->transform();
+            static_ubo.projection = m_camera->getProjectionMatrix();
+            m_static_uniform_buffer.memcpy(&static_ubo);
+        }
+
+        { // Update dynamic uniform buffer
+            {
+                glm::mat4* model_matrix = (glm::mat4*)(((uint64_t)m_dynamic_ubo.model + (0 * m_dynamic_alignment)));
+                *model_matrix = m_house_entity_1->transform().transform();
+
+                model_matrix = (glm::mat4*)(((uint64_t)m_dynamic_ubo.model + (1 * m_dynamic_alignment)));
+                *model_matrix = m_house_entity_2->transform().transform();
+            }
+
+            m_dynamic_uniform_buffer.memcpy(m_dynamic_ubo.model);
+
+            // Flush dynamic uniform buffer memory
+            VkMappedMemoryRange mapped_memory_range = {};
+            mapped_memory_range.sType  = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+            mapped_memory_range.memory = m_dynamic_uniform_buffer.getMemory();
+            mapped_memory_range.size   = m_dynamic_uniform_buffer.getSize();
+            vkFlushMappedMemoryRanges(m_device, 1, &mapped_memory_range);
         }
 
         uint32_t image_index;
