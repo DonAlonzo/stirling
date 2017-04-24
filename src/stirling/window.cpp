@@ -196,8 +196,8 @@ namespace stirling {
     Entity* Window::createHouseEntity(ModelComponent* model_component, PhysicsComponent* physics_component) const {
         auto entity = new Entity();
 
-        entity->addComponent(model_component);
         entity->addComponent(physics_component);
+        entity->addComponent(model_component);
 
         return entity;
     }
