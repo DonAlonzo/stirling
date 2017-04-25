@@ -8,6 +8,7 @@ namespace stirling {
     namespace vulkan {
         class Buffer;
         class PhysicalDevice;
+        class Semaphore;
         struct QueueFamilyIndices;
     }
 }
@@ -36,6 +37,7 @@ namespace stirling {
             VkSwapchainKHR createSwapchain(VkSwapchainCreateInfoKHR create_info) const;
 
             Buffer createBuffer(VkBufferUsageFlags usage_flags, VkMemoryPropertyFlags memory_property_flags, VkDeviceSize size, void* data = nullptr) const;
+            Semaphore createSemaphore() const;
 
         private:
             const PhysicalDevice* m_physical_device;

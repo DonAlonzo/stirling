@@ -1,6 +1,7 @@
 #include "device.h"
 #include "buffer.h"
 #include "physical_device.h"
+#include "semaphore.h"
 
 #include <vector>
 
@@ -55,6 +56,10 @@ namespace stirling {
 
         Buffer Device::createBuffer(VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkDeviceSize size, void *data) const {
             return Buffer(*this, usage, properties, size);
+        }
+
+        Semaphore Device::createSemaphore() const {
+            return Semaphore(*this);
         }
 
     }

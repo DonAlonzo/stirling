@@ -61,7 +61,7 @@ namespace stirling {
     struct StaticUniformBufferObject {
         glm::mat4 projection;
         glm::mat4 view;
-    } static_ubo;
+    } m_static_ubo;
 
     struct DynamicUniformBufferObject {
         glm::mat4* model = nullptr;
@@ -91,8 +91,8 @@ namespace stirling {
         m_command_pool              (m_device.getGraphicsQueue().createCommandPool()),
         m_command_buffers           (initCommandBuffers()),
 
-        m_image_available_semaphore (vulkan::Semaphore{m_device}),
-        m_render_finished_semaphore (vulkan::Semaphore{m_device}) {
+        m_image_available_semaphore (m_device.createSemaphore()),
+        m_render_finished_semaphore (m_device.createSemaphore()) {
 
         addControls();
 
@@ -415,9 +415,9 @@ namespace stirling {
 
     void Window::render() {
         { // Update static uniform buffer
-            static_ubo.view       = m_camera->transform();
-            static_ubo.projection = m_camera->getProjectionMatrix();
-            m_static_uniform_buffer.memcpy(&static_ubo);
+            m_static_ubo.view       = m_camera->transform();
+            m_static_ubo.projection = m_camera->getProjectionMatrix();
+            m_static_uniform_buffer.memcpy(&m_static_ubo);
         }
 
         { // Update dynamic uniform buffer
