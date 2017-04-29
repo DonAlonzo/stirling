@@ -202,29 +202,10 @@ namespace stirling {
     }
 
     VkDescriptorSetLayout Window::initDescriptorSetLayout() const {
-        VkDescriptorSetLayoutBinding static_ubo_layout_binding = {};
-        static_ubo_layout_binding.binding         = 0;
-        static_ubo_layout_binding.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        static_ubo_layout_binding.descriptorCount = 1;
-        static_ubo_layout_binding.stageFlags      = VK_SHADER_STAGE_VERTEX_BIT;
-
-        VkDescriptorSetLayoutBinding dynamic_ubo_layout_binding = {};
-        dynamic_ubo_layout_binding.binding         = 1;
-        dynamic_ubo_layout_binding.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-        dynamic_ubo_layout_binding.descriptorCount = 1;
-        dynamic_ubo_layout_binding.stageFlags      = VK_SHADER_STAGE_VERTEX_BIT;
-
-        VkDescriptorSetLayoutBinding sampler_layout_binding = {};
-        sampler_layout_binding.binding            = 2;
-        sampler_layout_binding.descriptorCount    = 1;
-        sampler_layout_binding.descriptorType     = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        sampler_layout_binding.pImmutableSamplers = nullptr;
-        sampler_layout_binding.stageFlags         = VK_SHADER_STAGE_FRAGMENT_BIT;
-
         std::array<VkDescriptorSetLayoutBinding, 3> bindings = {
-            static_ubo_layout_binding,
-            dynamic_ubo_layout_binding,
-            sampler_layout_binding
+            vulkan::initializers::descriptorSetLayoutBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT),
+            vulkan::initializers::descriptorSetLayoutBinding(1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, VK_SHADER_STAGE_VERTEX_BIT),
+            vulkan::initializers::descriptorSetLayoutBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
         };
 
         VkDescriptorSetLayoutCreateInfo create_info = {};
