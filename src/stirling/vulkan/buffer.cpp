@@ -99,23 +99,6 @@ namespace stirling {
             return m_buffer;
         }
 
-        const VkDeviceMemory& Buffer::getMemory() const {
-            return m_memory;
-        }
-
-        const VkDescriptorBufferInfo& Buffer::getDescriptor() const {
-            return m_descriptor;
-        }
-
-        const VkDeviceSize& Buffer::getSize() const {
-            return m_size;
-        }
-
-        void* Buffer::getMapped() const {
-            if (!m_mapped) throw std::runtime_error("Buffer memory has not been mapped yet.");
-            return m_mapped;
-        }
-
         void Buffer::map(VkDeviceSize size, VkDeviceSize offset) {
             if (m_mapped) throw std::runtime_error("Buffer memory has already been mapped.");
 

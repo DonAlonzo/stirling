@@ -137,13 +137,13 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Program Files\GLFW\include;C:\VulkanSDK\1.0.42.1\Third-Party\Include;C:\VulkanSDK\1.0.42.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\GLFW\include;C:\VulkanSDK\1.0.46.0\Third-Party\Include;C:\VulkanSDK\1.0.46.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>C:\Program Files\GLFW\lib;C:\VulkanSDK\1.0.42.1\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files\GLFW\lib;C:\VulkanSDK\1.0.46.0\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -211,6 +211,7 @@
     <ClInclude Include="src\stirling\vulkan\physical_device.h" />
     <ClInclude Include="src\stirling\stirling.h" />
     <ClInclude Include="src\stirling\vulkan\surface.h" />
+    <ClInclude Include="src\stirling\vulkan\util\initializers.h" />
     <ClInclude Include="src\stirling\vulkan\vertex.h" />
     <ClInclude Include="src\stirling\vulkan\vertex_buffer.h" />
     <ClInclude Include="src\stirling\window.h" />

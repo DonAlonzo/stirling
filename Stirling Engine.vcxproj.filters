@@ -233,5 +233,8 @@
     <ClInclude Include="src\stirling\physics_component.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\stirling\vulkan\util\initializers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

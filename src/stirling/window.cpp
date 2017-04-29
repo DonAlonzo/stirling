@@ -1,4 +1,5 @@
 #include "window.h"
+#include "vulkan/util/initializers.h"
 #include "vulkan/instance.h"
 #include "vulkan/physical_device.h"
 
@@ -54,8 +55,6 @@ namespace stirling {
     };
 }
 
-int NUMBER_OF_OBJECTS = 2;
-
 namespace stirling {
 
     struct StaticUniformBufferObject {
@@ -76,7 +75,7 @@ namespace stirling {
         m_swapchain                 (vulkan::Swapchain(m_device, m_surface, getSize())),
         m_depth_image               (vulkan::DepthImage(m_device, m_swapchain.getExtent())),
         m_static_uniform_buffer     (initStaticUniformBuffer(m_device)),
-        m_dynamic_uniform_buffer    (initDynamicUniformBuffer(m_device)),
+        m_dynamic_uniform_buffer    (initDynamicUniformBuffer(m_device, 256)),
 
         m_house_model_component     (createHouseModelComponent()),
         m_house_physics_component   (createHousePhysicsComponent()),
@@ -168,12 +167,12 @@ namespace stirling {
         return buffer;
     }
 
-    vulkan::Buffer Window::initDynamicUniformBuffer(const vulkan::Device& device) {
+    vulkan::Buffer Window::initDynamicUniformBuffer(const vulkan::Device& device, int max_number_of_objects) {
         size_t ubo_alignment = m_physical_device.getProperties().limits.minUniformBufferOffsetAlignment;
 
         m_dynamic_alignment = (sizeof(glm::mat4) / ubo_alignment) * ubo_alignment + ((sizeof(glm::mat4) % ubo_alignment) > 0 ? ubo_alignment : 0);
 
-        size_t buffer_size = NUMBER_OF_OBJECTS * m_dynamic_alignment;
+        size_t buffer_size = max_number_of_objects * m_dynamic_alignment;
         m_dynamic_ubo.model = (glm::mat4*)alignedAlloc(buffer_size, m_dynamic_alignment);
 
         auto buffer = device.createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, buffer_size);
@@ -255,42 +254,19 @@ namespace stirling {
         return vulkan::DescriptorPool(m_device, pool_sizes, 1);
     }
 
-    VkDescriptorSet Window::initDescriptorSet() const {
+    VkDescriptorSet Window::initDescriptorSet() {
         auto descriptor_set = m_descriptor_pool.allocateDescriptorSet(m_descriptor_set_layout);
 
-        std::array<VkWriteDescriptorSet, 3> write_descriptor_sets = {};
-
-        // Binding 0: Static uniform buffer
-        write_descriptor_sets[0].sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        write_descriptor_sets[0].dstSet           = descriptor_set;
-        write_descriptor_sets[0].dstBinding       = 0;
-        write_descriptor_sets[0].dstArrayElement  = 0;
-        write_descriptor_sets[0].descriptorType   = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        write_descriptor_sets[0].descriptorCount  = 1;
-        write_descriptor_sets[0].pBufferInfo      = &m_static_uniform_buffer.getDescriptor();
-
-        // Binding 1: Dynamic uniform buffer
-        write_descriptor_sets[1].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        write_descriptor_sets[1].dstSet          = descriptor_set;
-        write_descriptor_sets[1].dstBinding      = 1;
-        write_descriptor_sets[1].dstArrayElement = 0;
-        write_descriptor_sets[1].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-        write_descriptor_sets[1].descriptorCount = 1;
-        write_descriptor_sets[1].pBufferInfo     = &m_dynamic_uniform_buffer.getDescriptor();
-
-        // Binding 2: Image
         VkDescriptorImageInfo image_info = {};
         image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         image_info.imageView   = m_house_model_component->model().getTexture().getImageView();
         image_info.sampler     = m_house_model_component->model().getTexture().getSampler();
 
-        write_descriptor_sets[2].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        write_descriptor_sets[2].dstSet          = descriptor_set;
-        write_descriptor_sets[2].dstBinding      = 2;
-        write_descriptor_sets[2].dstArrayElement = 0;
-        write_descriptor_sets[2].descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        write_descriptor_sets[2].descriptorCount = 1;
-        write_descriptor_sets[2].pImageInfo      = &image_info;
+        std::array<VkWriteDescriptorSet, 3> write_descriptor_sets = {
+            vulkan::initializers::writeDescriptorSet(descriptor_set, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0, &m_static_uniform_buffer.m_descriptor),
+            vulkan::initializers::writeDescriptorSet(descriptor_set, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1, &m_dynamic_uniform_buffer.m_descriptor),
+            vulkan::initializers::writeDescriptorSet(descriptor_set, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 2, &image_info)
+        };
 
         vkUpdateDescriptorSets(m_device, write_descriptor_sets.size(), write_descriptor_sets.data(), 0, nullptr);
 
@@ -327,7 +303,7 @@ namespace stirling {
                 vkCmdBindVertexBuffers(command_buffers[i], 0, 1, vertex_buffers, offsets);
                 vkCmdBindIndexBuffer(command_buffers[i], m_house_model_component->model().getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
-                for (uint32_t j = 0; j < NUMBER_OF_OBJECTS; ++j) {
+                for (uint32_t j = 0; j < 2; ++j) {
                     uint32_t dynamic_offset = j * static_cast<uint32_t>(m_dynamic_alignment);
 
                     vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.getLayout(), 0, 1, &m_descriptor_set, 1, &dynamic_offset);
@@ -422,11 +398,8 @@ namespace stirling {
 
         { // Update dynamic uniform buffer
             {
-                glm::mat4* model_matrix = (glm::mat4*)(((uint64_t)m_dynamic_ubo.model + (0 * m_dynamic_alignment)));
-                *model_matrix = m_house_entity_1->transform().transform();
-
-                model_matrix = (glm::mat4*)(((uint64_t)m_dynamic_ubo.model + (1 * m_dynamic_alignment)));
-                *model_matrix = m_house_entity_2->transform().transform();
+                *((glm::mat4*)(((uint64_t)m_dynamic_ubo.model + (0 * m_dynamic_alignment)))) = m_house_entity_1->transform().transform();
+                *((glm::mat4*)(((uint64_t)m_dynamic_ubo.model + (1 * m_dynamic_alignment)))) = m_house_entity_2->transform().transform();
             }
 
             m_dynamic_uniform_buffer.memcpy(m_dynamic_ubo.model);
@@ -434,8 +407,8 @@ namespace stirling {
             // Flush dynamic uniform buffer memory
             VkMappedMemoryRange mapped_memory_range = {};
             mapped_memory_range.sType  = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-            mapped_memory_range.memory = m_dynamic_uniform_buffer.getMemory();
-            mapped_memory_range.size   = m_dynamic_uniform_buffer.getSize();
+            mapped_memory_range.memory = m_dynamic_uniform_buffer.m_memory;
+            mapped_memory_range.size   = m_dynamic_uniform_buffer.m_size;
             vkFlushMappedMemoryRanges(m_device, 1, &mapped_memory_range);
         }
 

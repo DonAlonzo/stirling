@@ -10,6 +10,7 @@ namespace stirling {
     class Entity {
     public:
         Entity();
+        Entity(vulkan::Transform&& transform);
 
         vulkan::Transform& transform();
 
@@ -22,6 +23,6 @@ namespace stirling {
 
         vulkan::Transform m_transform;
         Component*        m_components[MAX_NUMBER_OF_COMPONENTS];
-        int               m_number_of_components;
+        int               m_number_of_components = 0;
     };
 }

@@ -68,11 +68,11 @@ namespace stirling {
         vulkan::PhysicalDevice            choosePhysicalDevice(const std::vector<vulkan::PhysicalDevice>& physical_devices) const;
         bool                              isPhysicalDeviceSuitable(const vulkan::PhysicalDevice& physical_device) const;
         vulkan::Buffer                    initStaticUniformBuffer(const vulkan::Device& device);
-        vulkan::Buffer                    initDynamicUniformBuffer(const vulkan::Device& device);
+        vulkan::Buffer                    initDynamicUniformBuffer(const vulkan::Device& device, int max_number_of_objects);
 
         VkDescriptorSetLayout             initDescriptorSetLayout() const;
         vulkan::DescriptorPool            initDescriptorPool() const;
-        VkDescriptorSet                   initDescriptorSet() const;
+        VkDescriptorSet                   initDescriptorSet();
         std::vector<VkCommandBuffer>      initCommandBuffers() const;
         ModelComponent*                   createHouseModelComponent() const;
         PhysicsComponent*                 createHousePhysicsComponent() const;

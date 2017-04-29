@@ -2,10 +2,15 @@
 
 #include "component.h"
 
+#include <algorithm>
+
 namespace stirling {
 
-    Entity::Entity() :
-        m_number_of_components(0) {
+    Entity::Entity() {
+    }
+
+    Entity::Entity(vulkan::Transform&& transform) :
+        m_transform (std::move(transform)) {
     }
 
     vulkan::Transform& Entity::transform() {
