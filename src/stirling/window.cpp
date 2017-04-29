@@ -244,9 +244,9 @@ namespace stirling {
         image_info.sampler     = m_house_model_component->model().getTexture().getSampler();
 
         std::array<VkWriteDescriptorSet, 3> write_descriptor_sets = {
-            vulkan::initializers::writeDescriptorSet(descriptor_set, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0, &m_static_uniform_buffer.m_descriptor),
-            vulkan::initializers::writeDescriptorSet(descriptor_set, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1, &m_dynamic_uniform_buffer.m_descriptor),
-            vulkan::initializers::writeDescriptorSet(descriptor_set, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 2, &image_info)
+            vulkan::initializers::writeDescriptorSet(descriptor_set, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, &m_static_uniform_buffer.m_descriptor),
+            vulkan::initializers::writeDescriptorSet(descriptor_set, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, &m_dynamic_uniform_buffer.m_descriptor),
+            vulkan::initializers::writeDescriptorSet(descriptor_set, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &image_info)
         };
 
         vkUpdateDescriptorSets(m_device, write_descriptor_sets.size(), write_descriptor_sets.data(), 0, nullptr);

@@ -6,10 +6,7 @@ namespace stirling {
     namespace vulkan {
         namespace initializers {
             
-            inline VkDescriptorSetLayoutBinding descriptorSetLayoutBinding(uint32_t binding,
-                                                                           VkDescriptorType descriptor_type,
-                                                                           VkShaderStageFlags stage_flags,
-                                                                           uint32_t descriptor_count = 1) {
+            inline VkDescriptorSetLayoutBinding descriptorSetLayoutBinding(uint32_t binding, VkDescriptorType descriptor_type, VkShaderStageFlags stage_flags, uint32_t descriptor_count = 1) {
                 VkDescriptorSetLayoutBinding descriptor_set_layout_binding = {};
                 descriptor_set_layout_binding.binding         = binding;
                 descriptor_set_layout_binding.descriptorType  = descriptor_type;
@@ -18,11 +15,7 @@ namespace stirling {
                 return descriptor_set_layout_binding;
             }
 
-            inline VkWriteDescriptorSet writeDescriptorSet(VkDescriptorSet         dst_set,
-                                                           VkDescriptorType        type,
-                                                           uint32_t                binding, 
-                                                           VkDescriptorBufferInfo* buffer_info,
-                                                           uint32_t                descriptor_count = 1) {
+            inline VkWriteDescriptorSet writeDescriptorSet(VkDescriptorSet dst_set, uint32_t binding, VkDescriptorType type, VkDescriptorBufferInfo* buffer_info, uint32_t descriptor_count = 1) {
                 VkWriteDescriptorSet write_descriptor_set = {};
                 write_descriptor_set.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
                 write_descriptor_set.dstSet          = dst_set;
@@ -33,11 +26,7 @@ namespace stirling {
                 return write_descriptor_set;
             }
 
-            inline VkWriteDescriptorSet writeDescriptorSet(VkDescriptorSet        dst_set,
-                                                           VkDescriptorType       type,
-                                                           uint32_t               binding,
-                                                           VkDescriptorImageInfo* image_info,
-                                                           uint32_t               descriptor_count = 1) {
+            inline VkWriteDescriptorSet writeDescriptorSet(VkDescriptorSet dst_set, uint32_t binding, VkDescriptorType type, VkDescriptorImageInfo* image_info, uint32_t descriptor_count = 1) {
                 VkWriteDescriptorSet write_descriptor_set = {};
                 write_descriptor_set.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
                 write_descriptor_set.dstSet          = dst_set;
@@ -47,6 +36,16 @@ namespace stirling {
                 write_descriptor_set.descriptorCount = descriptor_count;
                 return write_descriptor_set;
             }
+
+            inline VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo(VkShaderStageFlagBits stage, VkShaderModule module, const char* name) {
+                VkPipelineShaderStageCreateInfo create_info = {};
+                create_info.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+                create_info.stage  = stage;
+                create_info.module = module;
+                create_info.pName  = name;
+                return create_info;
+            }
+
 
         }
     }
