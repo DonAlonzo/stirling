@@ -12,6 +12,12 @@
 #include <iostream>
 #include <set>
 
+#ifdef NDEBUG
+#define ENABLE_VALIDATION_LAYERS false
+#else
+#define ENABLE_VALIDATION_LAYERS true
+#endif
+
 void* alignedAlloc(size_t size, size_t alignment) {
     void *data = nullptr;
 #if defined(_MSC_VER) || defined(__MINGW32__)

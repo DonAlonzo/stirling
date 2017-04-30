@@ -236,5 +236,8 @@
     <ClInclude Include="src\stirling\vulkan\util\initializers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\stirling\vulkan\deleter.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

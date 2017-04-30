@@ -5,8 +5,8 @@
 namespace stirling {
 	namespace vulkan {
 
-		Queue::Queue(const Device& device, int family_index) :
-			m_device       (&device),
+		Queue::Queue(Device* device, int family_index) :
+			m_device       (device),
 			m_family_index (family_index),
 			m_queue        (initQueue()) {
 		}
@@ -17,12 +17,12 @@ namespace stirling {
 			return queue;
 		}
 
-		Queue::operator VkQueue() const {
+		Queue::operator const VkQueue&() const {
 			return m_queue;
 		}
 
 		CommandPool Queue::createCommandPool() const {
-			return CommandPool(*m_device, m_family_index);
+			return CommandPool(m_device, m_family_index);
 		}
 
 	}

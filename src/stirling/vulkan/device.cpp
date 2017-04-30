@@ -16,7 +16,7 @@ namespace stirling {
         }
 
         Queue Device::initQueue(int queue_family_index) {
-            return Queue(*this, queue_family_index);
+            return Queue(this, queue_family_index);
         }
 
         Device::~Device() {

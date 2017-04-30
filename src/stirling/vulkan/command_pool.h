@@ -3,34 +3,29 @@
 #include "vulkan/vulkan.h"
 
 namespace stirling {
-	namespace vulkan {
-		class Device;
-	}
+    namespace vulkan {
+        class Device;
+    }
 }
+#include "deleter.hpp"
 
 #include <vector>
 
 namespace stirling {
-	namespace vulkan {
-		class CommandPool {
-		public:
-			CommandPool(const Device& device, int queue_family_index);
-			~CommandPool();
-			CommandPool(CommandPool&&) = default;
-			CommandPool(const CommandPool&) = delete;
-			CommandPool& operator=(CommandPool&&) = delete;
-			CommandPool& operator=(const CommandPool&) = delete;
+    namespace vulkan {
+        class CommandPool {
+        public:
+            CommandPool(Device* device, int queue_family_index);
 
-			operator VkCommandPool() const;
+            operator const VkCommandPool&() const;
 
-			std::vector<VkCommandBuffer> allocateCommandBuffers(uint32_t count) const;
+            std::vector<VkCommandBuffer> allocateCommandBuffers(uint32_t count) const;
 
-		private:
-			const Device* m_device;
+        private:
+            Device*                m_device;
+            Deleter<VkCommandPool> m_command_pool;
 
-			VkCommandPool m_command_pool;
-
-			VkCommandPool initCommandPool(int queue_family_index) const;
-		};
-	}
+            Deleter<VkCommandPool> initCommandPool(int queue_family_index) const;
+        };
+    }
 }

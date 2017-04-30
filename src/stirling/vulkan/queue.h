@@ -15,18 +15,18 @@ namespace stirling {
 
 		class Queue {
 		public:
-			Queue(const Device& device, int family_index);
+			Queue(Device* device, int family_index);
 
-			operator VkQueue() const;
+			operator const VkQueue&() const;
 
 			CommandPool createCommandPool() const;
 
 		private:
-			const Device* m_device;
-			int           m_family_index;
-			VkQueue       m_queue;
+			Device* m_device;
+			int     m_family_index;
+			VkQueue m_queue;
 
-			VkQueue       initQueue() const;
+			VkQueue initQueue() const;
 		};
 
 	}

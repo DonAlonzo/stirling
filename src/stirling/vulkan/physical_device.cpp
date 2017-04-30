@@ -6,9 +6,9 @@
 #include <set>
 
 #ifdef NDEBUG
-const bool ENABLE_VALIDATION_LAYERS = false;
+constexpr bool ENABLE_VALIDATION_LAYERS = false;
 #else
-const bool ENABLE_VALIDATION_LAYERS = true;
+constexpr bool ENABLE_VALIDATION_LAYERS = true;
 #endif
 
 const std::vector<const char*> g_validation_layers = {
