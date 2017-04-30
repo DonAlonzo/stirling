@@ -2,11 +2,9 @@
 
 #include "vulkan/vulkan.h"
 
-namespace stirling {
-	namespace vulkan {
-		class Device;
-	}
-}
+namespace stirling { namespace vulkan {
+	class Device;
+}}
 #include "buffer.h"
 
 #include <vector>

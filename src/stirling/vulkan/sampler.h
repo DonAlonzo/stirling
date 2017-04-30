@@ -2,31 +2,24 @@
 
 #include "vulkan/vulkan.h"
 
-namespace stirling {
-	namespace vulkan {
-		class Device;
-	}
-}
+namespace stirling { namespace vulkan { 
+    class Device;
+}}
+#include "deleter.hpp"
 
 namespace stirling {
-	namespace vulkan {
-		class Sampler {
-		public:
-			Sampler(const Device& device, VkSampler&& sampler);
-			Sampler(const Device& device, const VkSamplerCreateInfo& create_info);
-			~Sampler();
-			Sampler(Sampler&& rhs);
-			Sampler(const Sampler&) = delete;
-			Sampler& operator=(Sampler&&) = delete;
-			Sampler& operator=(const Sampler&) = delete;
+    namespace vulkan {
+        class Sampler {
+        public:
+            Sampler(const Device& device, VkSampler sampler);
+            Sampler(const Device& device, const VkSamplerCreateInfo& create_info);
 
-			operator VkSampler() const;
+            operator const VkSampler&() const;
 
-		private:
-			const Device* m_device;
-			VkSampler     m_sampler;
+        private:
+            Deleter<VkSampler> m_sampler;
 
-			VkSampler     createSampler(const VkSamplerCreateInfo& create_info);
-		};
-	}
+            Deleter<VkSampler> createSampler(const Device& device, const VkSamplerCreateInfo& create_info) const;
+        };
+    }
 }

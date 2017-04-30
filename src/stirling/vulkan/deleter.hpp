@@ -2,6 +2,7 @@
 
 #include "vulkan/vulkan.h"
 
+#include <algorithm>
 #include <functional>
 
 namespace stirling {
@@ -9,6 +10,11 @@ namespace stirling {
         template <typename T>
         class Deleter {
         public:
+            Deleter() :
+                m_object          (VK_NULL_HANDLE), 
+                m_delete_function ([]() {}) {
+            }
+
             Deleter(T object, std::function<void(T, VkAllocationCallbacks*)> delete_function) :
                 m_object          (object), 
                 m_delete_function ([=]() {
@@ -19,7 +25,7 @@ namespace stirling {
             Deleter(T object, VkInstance instance, std::function<void(VkInstance, T, VkAllocationCallbacks*)> delete_function) :
                 m_object          (object),
                 m_delete_function ([=]() {
-                    delete_function(instance, obj, nullptr);
+                    delete_function(instance, object, nullptr);
                 }) {
             }
 
@@ -30,8 +36,28 @@ namespace stirling {
                 }) {
             }
 
+            Deleter(const Deleter&) = delete;
+            Deleter& operator=(const Deleter&) = delete;
+
+            Deleter(Deleter&& rhs) :
+                m_object          (std::move(rhs.m_object)),
+                m_delete_function (std::move(rhs.m_delete_function)) {
+                rhs.m_object = VK_NULL_HANDLE;
+            }
+
+            Deleter& operator=(Deleter&& rhs) {
+                if (m_object != VK_NULL_HANDLE) m_delete_function();
+
+                m_object          = std::move(rhs.m_object);
+                m_delete_function = std::move(rhs.m_delete_function);
+                
+                rhs.m_object = VK_NULL_HANDLE;
+
+                return *this;
+            }
+
             ~Deleter() {
-                m_delete_function();
+                if (m_object != VK_NULL_HANDLE) m_delete_function();
             }
 
             operator const T&() const {

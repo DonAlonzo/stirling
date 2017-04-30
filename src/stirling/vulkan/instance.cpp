@@ -21,7 +21,7 @@ namespace stirling {
             m_validator (initValidator()) {
         }
 
-        VkInstance Instance::initInstance(std::vector<const char*> extensions) const {
+        Deleter<VkInstance> Instance::initInstance(std::vector<const char*> extensions) const {
             if (ENABLE_VALIDATION_LAYERS) {
                 if (!checkValidationLayerSupport()) {
                     throw std::runtime_error("Validation layers requested, but not available.");
@@ -49,15 +49,11 @@ namespace stirling {
             if (vkCreateInstance(&create_info, nullptr, &instance) != VK_SUCCESS) {
                 throw std::runtime_error("Failed to create instance.");
             }
-            return instance;
+            return Deleter<VkInstance>(instance, vkDestroyInstance);
         }
 
         Validator Instance::initValidator() const {
             return ENABLE_VALIDATION_LAYERS ? Validator(*this) : Validator::nullValidator();
-        }
-
-        Instance::~Instance() {
-            vkDestroyInstance(m_instance, nullptr);
         }
 
         Instance::operator VkInstance() const {

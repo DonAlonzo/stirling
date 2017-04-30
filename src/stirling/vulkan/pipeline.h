@@ -3,36 +3,30 @@
 #include "vulkan/vulkan.h"
 
 namespace stirling {
-	namespace vulkan {
-		class Device;
-		class RenderPass;
-	}
+    namespace vulkan {
+        class Device;
+        class RenderPass;
+    }
 }
+#include "deleter.hpp"
 #include "shader_module.h"
 
 namespace stirling {
-	namespace vulkan {
-		class Pipeline {
-		public:
-			Pipeline(const Device& device, const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts, const RenderPass& render_pass, const VkExtent2D& extent);
-			~Pipeline();
-			Pipeline(Pipeline&&);
-			Pipeline(const Pipeline&) = delete;
-			Pipeline& operator=(Pipeline&&);
-			Pipeline& operator=(const Pipeline&) = delete;
+    namespace vulkan {
+        class Pipeline {
+        public:
+            Pipeline(const Device& device, const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts, const RenderPass& render_pass, const VkExtent2D& extent);
 
-			operator VkPipeline() const;
+            operator VkPipeline() const;
 
-			const Device& getDevice() const;
-			const VkPipelineLayout& getLayout() const;
+            const VkPipelineLayout& getLayout() const;
 
-		private:
-			const Device*         m_device;
-			VkPipelineLayout      m_pipeline_layout;
-			VkPipeline            m_pipeline;
-			
-			VkPipelineLayout      initPipelineLayout(const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts) const;
-			VkPipeline            initPipeline(const RenderPass& render_pass, const VkExtent2D& extent) const;
-		};
-	}
+        private:
+            Deleter<VkPipelineLayout> m_pipeline_layout;
+            Deleter<VkPipeline>       m_pipeline;
+            
+            Deleter<VkPipelineLayout> initPipelineLayout(const Device& device, const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts) const;
+            Deleter<VkPipeline>       initPipeline(const Device& device, const RenderPass& render_pass, const VkExtent2D& extent) const;
+        };
+    }
 }

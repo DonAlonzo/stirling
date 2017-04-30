@@ -5,39 +5,33 @@
 
 // Stirling
 #include "validator.h"
-namespace stirling {
-	namespace vulkan {
-		class PhysicalDevice;
-	}
-}
+namespace stirling { namespace vulkan {
+    class PhysicalDevice;
+}}
+#include "deleter.hpp"
 
 // std
 #include <vector>
 
 namespace stirling {
-	namespace vulkan {
-		class Instance {
-		public:
-			Instance(const std::vector<const char*>& extensions);
-			~Instance();
-			Instance(Instance&&) = default;
-			Instance(const Instance&) = delete;
-			Instance& operator=(Instance&&) = delete;
-			Instance& operator=(const Instance&) = delete;
+    namespace vulkan {
+        class Instance {
+        public:
+            Instance(const std::vector<const char*>& extensions);
 
-			operator VkInstance() const;
+            operator VkInstance() const;
 
-			std::vector<VkLayerProperties> getLayerProperties() const;
-			std::vector<PhysicalDevice> getPhysicalDevices() const;
+            std::vector<VkLayerProperties> getLayerProperties() const;
+            std::vector<PhysicalDevice> getPhysicalDevices() const;
 
-		private:
-			VkInstance m_instance;
-			Validator  m_validator;
+        private:
+            Deleter<VkInstance> m_instance;
+            Validator           m_validator;
 
-			VkInstance initInstance(std::vector<const char*> extensions) const;
-			Validator  initValidator() const;
+            Deleter<VkInstance> initInstance(std::vector<const char*> extensions) const;
+            Validator           initValidator() const;
 
-			bool checkValidationLayerSupport() const;
-		};
-	}
+            bool checkValidationLayerSupport() const;
+        };
+    }
 }

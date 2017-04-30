@@ -6,43 +6,19 @@ namespace stirling {
 	namespace vulkan {
 
 		ImageView::ImageView(const Device& device, VkImageView image_view) :
-			m_device     (&device),
-			m_image_view (image_view) {
+			m_image_view (Deleter<VkImageView>(image_view, device, vkDestroyImageView)) {
 		}
 
 		ImageView::ImageView(const Device& device, const VkImageViewCreateInfo& create_info) :
-			m_device     (&device),
-			m_image_view (createImageView(create_info)) {
+			m_image_view (createImageView(device, create_info)) {
 		}
 
-		VkImageView ImageView::createImageView(const VkImageViewCreateInfo& create_info) const {
+		Deleter<VkImageView> ImageView::createImageView(const Device& device, const VkImageViewCreateInfo& create_info) const {
 			VkImageView image_view;
-			if (vkCreateImageView(*m_device, &create_info, nullptr, &image_view) != VK_SUCCESS) {
+			if (vkCreateImageView(device, &create_info, nullptr, &image_view) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to create image view.");
 			}
-			return image_view;
-		}
-
-		ImageView::ImageView(ImageView&& rhs) :
-			m_device     (std::move(rhs.m_device)),
-			m_image_view (std::move(rhs.m_image_view)) {
-
-			rhs.m_image_view = VK_NULL_HANDLE;
-		}
-
-		ImageView& ImageView::operator=(ImageView&& rhs) {
-			if (m_image_view != VK_NULL_HANDLE) vkDestroyImageView(*m_device, m_image_view, nullptr);
-
-			m_device     = std::move(rhs.m_device);
-			m_image_view = std::move(rhs.m_image_view);
-
-			rhs.m_image_view = VK_NULL_HANDLE;
-
-			return *this;
-		}
-
-		ImageView::~ImageView() {
-			if (m_image_view != VK_NULL_HANDLE) vkDestroyImageView(*m_device, m_image_view, nullptr);
+			return Deleter<VkImageView>(image_view, device, vkDestroyImageView);
 		}
 
 		ImageView::operator VkImageView() const {

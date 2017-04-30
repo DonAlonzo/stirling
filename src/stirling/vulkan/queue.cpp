@@ -5,7 +5,7 @@
 namespace stirling {
 	namespace vulkan {
 
-		Queue::Queue(Device* device, int family_index) :
+		Queue::Queue(const Device& device, int family_index) :
 			m_device       (device),
 			m_family_index (family_index),
 			m_queue        (initQueue()) {
@@ -13,7 +13,7 @@ namespace stirling {
 
 		VkQueue Queue::initQueue() const {
 			VkQueue queue;
-			vkGetDeviceQueue(*m_device, m_family_index, 0, &queue);
+			vkGetDeviceQueue(m_device, m_family_index, 0, &queue);
 			return queue;
 		}
 

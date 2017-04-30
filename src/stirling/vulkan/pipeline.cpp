@@ -6,12 +6,11 @@ namespace stirling {
     namespace vulkan {
 
         Pipeline::Pipeline(const Device& device, const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts, const RenderPass& render_pass, const VkExtent2D& extent) :
-            m_device                (&device),
-            m_pipeline_layout       (initPipelineLayout(descriptor_set_layouts)),
-            m_pipeline              (initPipeline(render_pass, extent)) {
+            m_pipeline_layout (initPipelineLayout(device, descriptor_set_layouts)),
+            m_pipeline        (initPipeline(device, render_pass, extent)) {
         }
 
-        VkPipelineLayout Pipeline::initPipelineLayout(const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts) const {
+        Deleter<VkPipelineLayout> Pipeline::initPipelineLayout(const Device& device, const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts) const {
             VkPipelineLayoutCreateInfo pipeline_layout_info = {};
             pipeline_layout_info.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
             pipeline_layout_info.setLayoutCount         = descriptor_set_layouts.size();
@@ -20,15 +19,15 @@ namespace stirling {
             pipeline_layout_info.pPushConstantRanges    = 0;
 
             VkPipelineLayout pipeline_layout;
-            if (vkCreatePipelineLayout(*m_device, &pipeline_layout_info, nullptr, &pipeline_layout) != VK_SUCCESS) {
+            if (vkCreatePipelineLayout(device, &pipeline_layout_info, nullptr, &pipeline_layout) != VK_SUCCESS) {
                 throw std::runtime_error("Failed to create pipeline layout.");
             }
-            return pipeline_layout;
+            return Deleter<VkPipelineLayout>(pipeline_layout, device, vkDestroyPipelineLayout);
         }
 
-        VkPipeline Pipeline::initPipeline(const RenderPass& render_pass, const VkExtent2D& extent) const {
-            ShaderModule vertex_shader(*this, "shaders/vert.spv");
-            ShaderModule fragment_shader(*this, "shaders/frag.spv");
+        Deleter<VkPipeline> Pipeline::initPipeline(const Device& device, const RenderPass& render_pass, const VkExtent2D& extent) const {
+            ShaderModule vertex_shader(device, "shaders/vert.spv");
+            ShaderModule fragment_shader(device, "shaders/frag.spv");
 
             std::array<VkPipelineShaderStageCreateInfo, 2> shader_stages = {
                 initializers::pipelineShaderStageCreateInfo(VK_SHADER_STAGE_VERTEX_BIT, vertex_shader, "main"),
@@ -139,46 +138,14 @@ namespace stirling {
             create_info.basePipelineIndex   = -1;
 
             VkPipeline pipeline;
-            if (vkCreateGraphicsPipelines(*m_device, VK_NULL_HANDLE, 1, &create_info, nullptr, &pipeline) != VK_SUCCESS) {
+            if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &create_info, nullptr, &pipeline) != VK_SUCCESS) {
                 throw std::runtime_error("Failed to create graphics pipeline.");
             }
-            return pipeline;
-        }
-
-        Pipeline::Pipeline(Pipeline&& rhs) : 
-            m_device                (std::move(rhs.m_device)),
-            m_pipeline_layout       (std::move(rhs.m_pipeline_layout)),
-            m_pipeline              (std::move(rhs.m_pipeline)) {
-
-            rhs.m_pipeline_layout       = VK_NULL_HANDLE;
-            rhs.m_pipeline              = VK_NULL_HANDLE;
-        }
-
-        Pipeline& Pipeline::operator=(Pipeline&& rhs) {
-            if (m_pipeline              != VK_NULL_HANDLE) vkDestroyPipeline(*m_device, m_pipeline, nullptr);
-            if (m_pipeline_layout       != VK_NULL_HANDLE) vkDestroyPipelineLayout(*m_device, m_pipeline_layout, nullptr);
-
-            m_pipeline              = std::move(rhs.m_pipeline);
-            m_pipeline_layout       = std::move(rhs.m_pipeline_layout);
-            m_device                = std::move(rhs.m_device);
-
-            rhs.m_pipeline_layout       = VK_NULL_HANDLE;
-            rhs.m_pipeline              = VK_NULL_HANDLE;
-            
-            return *this;
-        }
-
-        Pipeline::~Pipeline() {
-            if (m_pipeline              != VK_NULL_HANDLE) vkDestroyPipeline(*m_device, m_pipeline, nullptr);
-            if (m_pipeline_layout       != VK_NULL_HANDLE) vkDestroyPipelineLayout(*m_device, m_pipeline_layout, nullptr);
+            return Deleter<VkPipeline>(pipeline, device, vkDestroyPipeline);
         }
 
         Pipeline::operator VkPipeline() const {
             return m_pipeline;
-        }
-
-        const Device& Pipeline::getDevice() const {
-            return *m_device;
         }
 
         const VkPipelineLayout& Pipeline::getLayout() const {

@@ -35,12 +35,11 @@ namespace stirling {
             Queue getPresentQueue() const;
 
             VkSwapchainKHR createSwapchain(VkSwapchainCreateInfoKHR create_info) const;
-
             Buffer createBuffer(VkBufferUsageFlags usage_flags, VkMemoryPropertyFlags memory_property_flags, VkDeviceSize size, void* data = nullptr) const;
             Semaphore createSemaphore() const;
 
         private:
-            const PhysicalDevice* m_physical_device;
+            const PhysicalDevice& m_physical_device;
 
             VkDevice              m_device;
             Queue                 m_graphics_queue;

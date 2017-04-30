@@ -6,47 +6,24 @@
 
 namespace stirling {
     namespace vulkan {
-        ShaderModule::ShaderModule(const Pipeline& pipeline, const std::string& file_name) :
-            m_pipeline      (&pipeline),
-            m_shader_module (createShaderModule(readFile(file_name))) {
+        ShaderModule::ShaderModule(const Device& device, const std::string& file_name) :
+            m_shader_module (createShaderModule(device, readFile(file_name))) {
         }
 
-        VkShaderModule ShaderModule::createShaderModule(const std::vector<char>& code) {
+        Deleter<VkShaderModule> ShaderModule::createShaderModule(const Device& device, const std::vector<char>& code) const {
             VkShaderModuleCreateInfo create_info = {};
             create_info.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
             create_info.codeSize = code.size();
             create_info.pCode    = (uint32_t*) code.data();
 
             VkShaderModule shader_module;
-            if (vkCreateShaderModule(m_pipeline->getDevice(), &create_info, nullptr, &shader_module) != VK_SUCCESS) {
+            if (vkCreateShaderModule(device, &create_info, nullptr, &shader_module) != VK_SUCCESS) {
                 throw std::runtime_error("Failed to create shader module.");
             }
-            return shader_module;
+            return Deleter<VkShaderModule>(shader_module, device, vkDestroyShaderModule);
         }
 
-        ShaderModule::ShaderModule(ShaderModule&& rhs) :
-            m_pipeline      (std::move(rhs.m_pipeline)),
-            m_shader_module (std::move(rhs.m_shader_module)) {
-
-            rhs.m_shader_module = VK_NULL_HANDLE;
-        }
-        
-        ShaderModule& ShaderModule::operator=(ShaderModule&& rhs) {
-            if (m_shader_module != VK_NULL_HANDLE) vkDestroyShaderModule(m_pipeline->getDevice(), m_shader_module, nullptr);
-
-            m_shader_module = std::move(rhs.m_shader_module);
-            m_pipeline      = std::move(rhs.m_pipeline);
-
-            rhs.m_shader_module = VK_NULL_HANDLE;
-            
-            return *this;
-        }
-
-        ShaderModule::~ShaderModule() {
-            if (m_shader_module != VK_NULL_HANDLE) vkDestroyShaderModule(m_pipeline->getDevice(), m_shader_module, nullptr);
-        }
-
-        ShaderModule::operator VkShaderModule() const {
+        ShaderModule::operator const VkShaderModule&() const {
             return m_shader_module;
         }
 
@@ -62,5 +39,6 @@ namespace stirling {
             file.close();
             return buffer;
         }
+
     }
 }

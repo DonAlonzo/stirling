@@ -1,39 +1,33 @@
 #pragma once
 
 #include "vulkan/vulkan.h"
-namespace stirling {
-	namespace vulkan {
-		class Device;
-	}
-}
+
+namespace stirling { namespace vulkan {
+    class Device;
+}}
+#include "deleter.hpp"
 
 #include <string>
 
 namespace stirling {
-	namespace vulkan {
-		class Image {
-		public:
-			Image(const Device& device, const VkImageCreateInfo& create_info, const VkMemoryPropertyFlags& properties);
-			~Image();
-			Image(Image&&);
-			Image(const Image&) = delete;
-			Image& operator=(Image&&);
-			Image& operator=(const Image&) = delete;
+    namespace vulkan {
+        class Image {
+        public:
+            Image(const Device& device, const VkImageCreateInfo& create_info, const VkMemoryPropertyFlags& properties);
 
-			static Image loadFromFile(const Device& device, const std::string& file_name);
+            static Image loadFromFile(const Device& device, const std::string& file_name);
 
-			operator VkImage() const;
+            operator VkImage() const;
 
-			VkDeviceMemory getMemory() const;
+            VkDeviceMemory getMemory() const;
 
-		private:
-			const Device*  m_device;
-			VkImage        m_image;
-			VkDeviceMemory m_memory;
+        private:
+            Deleter<VkImage>        m_image;
+            Deleter<VkDeviceMemory> m_memory;
 
-			VkImage        initImage(const VkImageCreateInfo& create_info);
-			VkDeviceMemory allocateMemory(const VkMemoryPropertyFlags& properties);
-			uint32_t       findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
-		};
-	}
+            Deleter<VkImage>        initImage(const Device& device, const VkImageCreateInfo& create_info) const;
+            Deleter<VkDeviceMemory> allocateMemory(const Device& device, const VkMemoryPropertyFlags& properties) const;
+            uint32_t                findMemoryType(const Device& device, uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
+        };
+    }
 }

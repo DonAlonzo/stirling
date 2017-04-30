@@ -4,30 +4,30 @@
 #include "vulkan/vulkan.h"
 
 namespace stirling {
-	namespace vulkan {
-		class CommandPool;
-		class Device;
-	}
+    namespace vulkan {
+        class CommandPool;
+        class Device;
+    }
 }
 
 namespace stirling {
-	namespace vulkan {
+    namespace vulkan {
 
-		class Queue {
-		public:
-			Queue(Device* device, int family_index);
+        class Queue {
+        public:
+            Queue(const Device& device, int family_index);
 
-			operator const VkQueue&() const;
+            operator const VkQueue&() const;
 
-			CommandPool createCommandPool() const;
+            CommandPool createCommandPool() const;
 
-		private:
-			Device* m_device;
-			int     m_family_index;
-			VkQueue m_queue;
+        private:
+            const Device& m_device;
+            int           m_family_index;
+            VkQueue       m_queue;
 
-			VkQueue initQueue() const;
-		};
+            VkQueue       initQueue() const;
+        };
 
-	}
+    }
 }

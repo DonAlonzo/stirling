@@ -2,35 +2,28 @@
 
 #include "vulkan/vulkan.h"
 
-namespace stirling {
-	namespace vulkan {
-		class Pipeline;
-	}
-}
+namespace stirling { namespace vulkan {
+    class Device;
+}}
+#include "deleter.hpp"
 
 #include <string>
 #include <vector>
 
 namespace stirling {
-	namespace vulkan {
-		class ShaderModule {
-		public:
-			ShaderModule(const Pipeline& pipeline, const std::string& file_name);
-			~ShaderModule();
-			ShaderModule(ShaderModule&&);
-			ShaderModule(const ShaderModule&) = delete;
-			ShaderModule& operator=(ShaderModule&&);
-			ShaderModule& operator=(const ShaderModule&) = delete;
+    namespace vulkan {
+        class ShaderModule {
+        public:
+            ShaderModule(const Device& device, const std::string& file_name);
 
-			operator VkShaderModule() const;
+            operator const VkShaderModule&() const;
 
-		private:
-			const Pipeline* m_pipeline;
-			VkShaderModule  m_shader_module;
+        private:
+            Deleter<VkShaderModule> m_shader_module;
 
-			VkShaderModule  createShaderModule(const std::vector<char>& code);
+            Deleter<VkShaderModule> createShaderModule(const Device& device, const std::vector<char>& code) const;
 
-			std::vector<char> readFile(const std::string& file_name);
-		};
-	}
+            std::vector<char> readFile(const std::string& file_name);
+        };
+    }
 }
