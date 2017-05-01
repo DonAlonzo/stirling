@@ -6,15 +6,13 @@
 namespace stirling {
     class ModelComponent : public Component {
     public:
-        ModelComponent(vulkan::Model&&);
+        ModelComponent(vulkan::Model&&, VkDescriptorSet descriptor_set);
 
         operator const vulkan::Model&() const;
 
-        const vulkan::Model& model() const;
-
         void update(Entity* entity, float delta_seconds) override;
 
-    private:
-        vulkan::Model m_model;
+        const vulkan::Model   model;
+        const VkDescriptorSet descriptor_set;
     };
 }

@@ -57,7 +57,6 @@ namespace stirling {
         vulkan::Pipeline                  m_pipeline;
 
         std::unique_ptr<ModelComponent>   m_house_model_component;
-        VkDescriptorSet                   m_descriptor_set;
         std::unique_ptr<PhysicsComponent> m_house_physics_component;
         std::unique_ptr<Entity>           m_house_entity_1;
         std::unique_ptr<Entity>           m_house_entity_2;
@@ -75,7 +74,6 @@ namespace stirling {
 
         VkDescriptorSetLayout             initDescriptorSetLayout() const;
         vulkan::DescriptorPool            initDescriptorPool() const;
-        VkDescriptorSet                   initDescriptorSet();
         std::vector<VkCommandBuffer>      initCommandBuffers() const;
         ModelComponent*                   createHouseModelComponent() const;
         PhysicsComponent*                 createHousePhysicsComponent() const;

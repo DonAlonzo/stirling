@@ -15,7 +15,7 @@ namespace stirling {
                 return descriptor_set_layout_binding;
             }
 
-            inline VkWriteDescriptorSet writeDescriptorSet(VkDescriptorSet dst_set, uint32_t binding, VkDescriptorType type, VkDescriptorBufferInfo* buffer_info, uint32_t descriptor_count = 1) {
+            inline VkWriteDescriptorSet writeDescriptorSet(VkDescriptorSet dst_set, uint32_t binding, VkDescriptorType type, const VkDescriptorBufferInfo* buffer_info, uint32_t descriptor_count = 1) {
                 VkWriteDescriptorSet write_descriptor_set = {};
                 write_descriptor_set.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
                 write_descriptor_set.dstSet          = dst_set;
@@ -26,7 +26,7 @@ namespace stirling {
                 return write_descriptor_set;
             }
 
-            inline VkWriteDescriptorSet writeDescriptorSet(VkDescriptorSet dst_set, uint32_t binding, VkDescriptorType type, VkDescriptorImageInfo* image_info, uint32_t descriptor_count = 1) {
+            inline VkWriteDescriptorSet writeDescriptorSet(VkDescriptorSet dst_set, uint32_t binding, VkDescriptorType type, const VkDescriptorImageInfo* image_info, uint32_t descriptor_count = 1) {
                 VkWriteDescriptorSet write_descriptor_set = {};
                 write_descriptor_set.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
                 write_descriptor_set.dstSet          = dst_set;

@@ -88,7 +88,6 @@ namespace stirling {
         m_static_uniform_buffer     (initStaticUniformBuffer(m_device)),
         m_dynamic_uniform_buffer    (initDynamicUniformBuffer(m_device, 256)),
 
-
         m_descriptor_set_layout     (initDescriptorSetLayout()),
         m_descriptor_pool           (initDescriptorPool()),
 
@@ -98,7 +97,6 @@ namespace stirling {
         m_house_physics_component   (createHousePhysicsComponent()),
         m_house_entity_1            (createHouseEntity(m_house_model_component.get(), m_house_physics_component.get())),
         m_house_entity_2            (createHouseEntity(m_house_model_component.get(), m_house_physics_component.get())),
-        m_descriptor_set            (initDescriptorSet()),
 
         m_command_buffers           (initCommandBuffers()) {
 
@@ -224,7 +222,24 @@ namespace stirling {
     }
 
     ModelComponent* Window::createHouseModelComponent() const {
-        return new ModelComponent(vulkan::Model::loadFromFile(m_device, "models/chalet.obj", "textures/chalet.jpg"));
+        auto model = vulkan::Model::loadFromFile(m_device, "models/chalet.obj", "textures/chalet.jpg");
+
+        auto descriptor_set = m_descriptor_pool.allocateDescriptorSet(m_descriptor_set_layout);
+
+        VkDescriptorImageInfo image_info = {};
+        image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        image_info.imageView   = model.getTexture().getImageView();
+        image_info.sampler     = model.getTexture().getSampler();
+
+        std::array<VkWriteDescriptorSet, 3> write_descriptor_sets = {
+            vulkan::initializers::writeDescriptorSet(descriptor_set, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, &m_static_uniform_buffer.m_descriptor),
+            vulkan::initializers::writeDescriptorSet(descriptor_set, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, &m_dynamic_uniform_buffer.m_descriptor),
+            vulkan::initializers::writeDescriptorSet(descriptor_set, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &image_info)
+        };
+
+        vkUpdateDescriptorSets(m_device, write_descriptor_sets.size(), write_descriptor_sets.data(), 0, nullptr);
+
+        return new ModelComponent(std::move(model), descriptor_set);
     }
 
     PhysicsComponent* Window::createHousePhysicsComponent() const {
@@ -238,25 +253,6 @@ namespace stirling {
         entity->addComponent(model_component);
 
         return entity;
-    }
-
-    VkDescriptorSet Window::initDescriptorSet() {
-        auto descriptor_set = m_descriptor_pool.allocateDescriptorSet(m_descriptor_set_layout);
-
-        VkDescriptorImageInfo image_info = {};
-        image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        image_info.imageView   = m_house_model_component->model().getTexture().getImageView();
-        image_info.sampler     = m_house_model_component->model().getTexture().getSampler();
-
-        std::array<VkWriteDescriptorSet, 3> write_descriptor_sets = {
-            vulkan::initializers::writeDescriptorSet(descriptor_set, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, &m_static_uniform_buffer.m_descriptor),
-            vulkan::initializers::writeDescriptorSet(descriptor_set, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, &m_dynamic_uniform_buffer.m_descriptor),
-            vulkan::initializers::writeDescriptorSet(descriptor_set, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &image_info)
-        };
-
-        vkUpdateDescriptorSets(m_device, write_descriptor_sets.size(), write_descriptor_sets.data(), 0, nullptr);
-
-        return descriptor_set;
     }
 
     std::vector<VkCommandBuffer> Window::initCommandBuffers() const {
@@ -286,17 +282,17 @@ namespace stirling {
             for (uint32_t pipeline_index = 0; pipeline_index < number_of_pipelines; ++pipeline_index) {
                 vkCmdBindPipeline(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
 
-                VkBuffer vertex_buffers[] = { m_house_model_component->model().getVertexBuffer() };
+                VkBuffer vertex_buffers[] = { m_house_model_component->model.getVertexBuffer() };
                 VkDeviceSize offsets[] = { 0 };
                 vkCmdBindVertexBuffers(command_buffers[i], 0, 1, vertex_buffers, offsets);
-                vkCmdBindIndexBuffer(command_buffers[i], m_house_model_component->model().getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+                vkCmdBindIndexBuffer(command_buffers[i], m_house_model_component->model.getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
                 for (uint32_t dynamic_index = 0; dynamic_index < 2; ++dynamic_index) {
                     uint32_t dynamic_offset = dynamic_index * static_cast<uint32_t>(m_dynamic_alignment);
 
-                    vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.getLayout(), 0, 1, &m_descriptor_set, 1, &dynamic_offset);
+                    vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.getLayout(), 0, 1, &m_house_model_component->descriptor_set, 1, &dynamic_offset);
 
-                    vkCmdDrawIndexed(command_buffers[i], m_house_model_component->model().getIndexBuffer().size(), 1, 0, 0, 0);
+                    vkCmdDrawIndexed(command_buffers[i], m_house_model_component->model.getIndexBuffer().size(), 1, 0, 0, 0);
                 }
             }
 
