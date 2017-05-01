@@ -5,7 +5,8 @@
 namespace stirling { namespace vulkan {
     class Device;
 }}
-#include "deleter.hpp"
+#include "deleter.h"
+#include "../util/io.h"
 
 #include <string>
 #include <vector>
@@ -22,8 +23,6 @@ namespace stirling {
             Deleter<VkShaderModule> m_shader_module;
 
             Deleter<VkShaderModule> createShaderModule(const Device& device, const std::vector<char>& code) const;
-
-            std::vector<char> readFile(const std::string& file_name);
         };
     }
 }

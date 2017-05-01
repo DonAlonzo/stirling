@@ -8,7 +8,7 @@ namespace stirling {
         class RenderPass;
     }
 }
-#include "deleter.hpp"
+#include "deleter.h"
 #include "shader_module.h"
 
 namespace stirling {

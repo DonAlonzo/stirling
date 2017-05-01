@@ -1,5 +1,5 @@
 #include "window.h"
-#include "vulkan/util/initializers.h"
+#include "vulkan/initializers.h"
 #include "vulkan/instance.h"
 #include "vulkan/physical_device.h"
 

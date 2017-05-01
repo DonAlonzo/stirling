@@ -4,7 +4,7 @@
 #include "vulkan/vulkan.h"
 
 // Stirling
-#include "deleter.hpp"
+#include "deleter.h"
 
 namespace stirling {
     namespace vulkan {

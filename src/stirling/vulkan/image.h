@@ -5,7 +5,7 @@
 namespace stirling { namespace vulkan {
     class Device;
 }}
-#include "deleter.hpp"
+#include "deleter.h"
 
 #include <string>
 

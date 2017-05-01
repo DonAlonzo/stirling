@@ -1,6 +1,7 @@
 #include "pipeline.h"
+
+#include "initializers.h"
 #include "../stirling.h"
-#include "util/initializers.h"
 
 namespace stirling {
     namespace vulkan {

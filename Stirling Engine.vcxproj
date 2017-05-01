@@ -153,8 +153,8 @@
     <ClCompile Include="src\stirling\camera.cpp" />
     <ClCompile Include="src\stirling\model_component.cpp" />
     <ClCompile Include="src\stirling\physics_component.cpp" />
+    <ClCompile Include="src\stirling\util\io.cpp" />
     <ClCompile Include="src\stirling\vulkan\depth_image.cpp" />
-    <ClCompile Include="DESCRIPTOR_SET.CPP" />
     <ClCompile Include="src\stirling\vulkan\model.cpp" />
     <ClCompile Include="src\stirling\vulkan\sampler.cpp" />
     <ClCompile Include="src\stirling\vulkan\image.cpp" />
@@ -191,7 +191,8 @@
     <ClInclude Include="src\stirling\model_component.h" />
     <ClInclude Include="src\stirling\physics_component.h" />
     <ClInclude Include="src\stirling\tiny_obj_loader.h" />
-    <ClInclude Include="src\stirling\vulkan\deleter.hpp" />
+    <ClInclude Include="src\stirling\util\io.h" />
+    <ClInclude Include="src\stirling\vulkan\deleter.h" />
     <ClInclude Include="src\stirling\vulkan\depth_image.h" />
     <ClInclude Include="src\stirling\vulkan\model.h" />
     <ClInclude Include="src\stirling\vulkan\sampler.h" />
@@ -212,7 +213,7 @@
     <ClInclude Include="src\stirling\vulkan\physical_device.h" />
     <ClInclude Include="src\stirling\stirling.h" />
     <ClInclude Include="src\stirling\vulkan\surface.h" />
-    <ClInclude Include="src\stirling\vulkan\util\initializers.h" />
+    <ClInclude Include="src\stirling\vulkan\initializers.h" />
     <ClInclude Include="src\stirling\vulkan\vertex.h" />
     <ClInclude Include="src\stirling\vulkan\vertex_buffer.h" />
     <ClInclude Include="src\stirling\window.h" />

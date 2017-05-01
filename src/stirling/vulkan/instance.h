@@ -8,7 +8,7 @@
 namespace stirling { namespace vulkan {
     class PhysicalDevice;
 }}
-#include "deleter.hpp"
+#include "deleter.h"
 
 // std
 #include <vector>

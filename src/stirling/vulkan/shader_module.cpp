@@ -1,13 +1,12 @@
 #include "shader_module.h"
+
 #include "pipeline.h"
 #include "device.h"
-
-#include <fstream>
 
 namespace stirling {
     namespace vulkan {
         ShaderModule::ShaderModule(const Device& device, const std::string& file_name) :
-            m_shader_module (createShaderModule(device, readFile(file_name))) {
+            m_shader_module (createShaderModule(device, util::io::readFile(file_name))) {
         }
 
         Deleter<VkShaderModule> ShaderModule::createShaderModule(const Device& device, const std::vector<char>& code) const {
@@ -25,19 +24,6 @@ namespace stirling {
 
         ShaderModule::operator const VkShaderModule&() const {
             return m_shader_module;
-        }
-
-        std::vector<char> ShaderModule::readFile(const std::string& file_name) {
-            std::ifstream file(file_name, std::ios::ate | std::ios::binary);
-
-            if (!file.is_open()) throw std::runtime_error("Failed to open file.");
-
-            auto file_size = (size_t)file.tellg();
-            std::vector<char> buffer(file_size);
-            file.seekg(0);
-            file.read(buffer.data(), file_size);
-            file.close();
-            return buffer;
         }
 
     }

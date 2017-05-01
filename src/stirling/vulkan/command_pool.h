@@ -7,7 +7,7 @@ namespace stirling {
         class Device;
     }
 }
-#include "deleter.hpp"
+#include "deleter.h"
 
 #include <vector>
 

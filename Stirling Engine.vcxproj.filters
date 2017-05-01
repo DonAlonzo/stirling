@@ -19,6 +19,12 @@
     <Filter Include="Header Files\vulkan">
       <UniqueIdentifier>{639eea68-0f3a-4501-ace8-deea3e4101ee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\util">
+      <UniqueIdentifier>{e7562182-716f-48d3-8bef-66a014b8fc40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\util">
+      <UniqueIdentifier>{07267d9a-4269-4971-91eb-c432f1457af4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -78,9 +84,6 @@
     <ClCompile Include="src\stirling\vulkan\descriptor_pool.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="DESCRIPTOR_SET.CPP">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\stirling\vulkan\image.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
@@ -122,6 +125,9 @@
     </ClCompile>
     <ClCompile Include="src\stirling\physics_component.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stirling\util\io.cpp">
+      <Filter>Source Files\util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -233,11 +239,14 @@
     <ClInclude Include="src\stirling\physics_component.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\stirling\vulkan\util\initializers.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\stirling\util\io.h">
+      <Filter>Header Files\util</Filter>
     </ClInclude>
-    <ClInclude Include="src\stirling\vulkan\deleter.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\stirling\vulkan\deleter.h">
+      <Filter>Header Files\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stirling\vulkan\initializers.h">
+      <Filter>Header Files\vulkan</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -6,7 +6,7 @@
 namespace stirling { namespace vulkan {
 	class Instance;
 }}
-#include "deleter.hpp"
+#include "deleter.h"
 
 namespace stirling {
 	namespace vulkan {
