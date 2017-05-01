@@ -80,6 +80,11 @@ namespace stirling {
         m_device                    (m_physical_device.createDevice(m_surface, g_device_extensions)),
         m_swapchain                 (vulkan::Swapchain(m_device, m_surface, getSize())),
         m_depth_image               (vulkan::DepthImage(m_device, m_swapchain.getExtent())),
+        m_render_pass               (vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.getImageFormat())),
+        m_framebuffers              (m_swapchain.createFramebuffers(m_render_pass, m_depth_image.getImageView())),
+        m_command_pool              (m_device.getGraphicsQueue().createCommandPool()),
+        m_image_available_semaphore (m_device.createSemaphore()),
+        m_render_finished_semaphore (m_device.createSemaphore()),
         m_static_uniform_buffer     (initStaticUniformBuffer(m_device)),
         m_dynamic_uniform_buffer    (initDynamicUniformBuffer(m_device, 256)),
 
@@ -87,17 +92,11 @@ namespace stirling {
         m_house_physics_component   (createHousePhysicsComponent()),
         m_house_entity_1            (createHouseEntity(m_house_model_component.get(), m_house_physics_component.get())),
         m_house_entity_2            (createHouseEntity(m_house_model_component.get(), m_house_physics_component.get())),
-        m_render_pass               (vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.getImageFormat())),
         m_descriptor_set_layout     (initDescriptorSetLayout()),
         m_descriptor_pool           (initDescriptorPool()),
         m_descriptor_set            (initDescriptorSet()),
         m_pipeline                  (vulkan::Pipeline(m_device, { m_descriptor_set_layout }, m_render_pass, m_swapchain.getExtent())),
-        m_framebuffers              (m_swapchain.createFramebuffers(m_render_pass, m_depth_image.getImageView())),
-        m_command_pool              (m_device.getGraphicsQueue().createCommandPool()),
-        m_command_buffers           (initCommandBuffers()),
-
-        m_image_available_semaphore (m_device.createSemaphore()),
-        m_render_finished_semaphore (m_device.createSemaphore()) {
+        m_command_buffers           (initCommandBuffers()) {
 
         addControls();
 
