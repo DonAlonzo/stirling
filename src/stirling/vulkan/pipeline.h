@@ -11,13 +11,15 @@ namespace stirling {
 #include "deleter.h"
 #include "shader_module.h"
 
+#include <string>
+
 namespace stirling {
     namespace vulkan {
         class Pipeline {
         public:
-            Pipeline(const Device& device, const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts, const RenderPass& render_pass, const VkExtent2D& extent);
+            Pipeline(const Device& device, const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts, const RenderPass& render_pass, const VkExtent2D& extent, const std::string& vertex_shader_path, const std::string& fragment_shader_path);
 
-            operator VkPipeline() const;
+            operator const VkPipeline&() const;
 
             const VkPipelineLayout& getLayout() const;
 
@@ -26,7 +28,7 @@ namespace stirling {
             Deleter<VkPipeline>       m_pipeline;
             
             Deleter<VkPipelineLayout> initPipelineLayout(const Device& device, const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts) const;
-            Deleter<VkPipeline>       initPipeline(const Device& device, const RenderPass& render_pass, const VkExtent2D& extent) const;
+            Deleter<VkPipeline>       initPipeline(const Device& device, const RenderPass& render_pass, const VkExtent2D& extent, const std::string& vertex_shader_path, const std::string& fragment_shader_path) const;
         };
     }
 }

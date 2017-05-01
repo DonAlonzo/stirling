@@ -88,14 +88,18 @@ namespace stirling {
         m_static_uniform_buffer     (initStaticUniformBuffer(m_device)),
         m_dynamic_uniform_buffer    (initDynamicUniformBuffer(m_device, 256)),
 
+
+        m_descriptor_set_layout     (initDescriptorSetLayout()),
+        m_descriptor_pool           (initDescriptorPool()),
+
+        m_pipeline                  (vulkan::Pipeline(m_device, { m_descriptor_set_layout }, m_render_pass, m_swapchain.getExtent(), "shaders/vert.spv", "shaders/frag.spv")),
+
         m_house_model_component     (createHouseModelComponent()),
         m_house_physics_component   (createHousePhysicsComponent()),
         m_house_entity_1            (createHouseEntity(m_house_model_component.get(), m_house_physics_component.get())),
         m_house_entity_2            (createHouseEntity(m_house_model_component.get(), m_house_physics_component.get())),
-        m_descriptor_set_layout     (initDescriptorSetLayout()),
-        m_descriptor_pool           (initDescriptorPool()),
         m_descriptor_set            (initDescriptorSet()),
-        m_pipeline                  (vulkan::Pipeline(m_device, { m_descriptor_set_layout }, m_render_pass, m_swapchain.getExtent())),
+
         m_command_buffers           (initCommandBuffers()) {
 
         addControls();
@@ -185,27 +189,6 @@ namespace stirling {
         return buffer;
     }
 
-    ModelComponent* Window::createHouseModelComponent() const {
-        auto model_component = new ModelComponent(vulkan::Model::loadFromFile(m_device, "models/chalet.obj", "textures/chalet.jpg"));
-
-        return model_component;
-    }
-
-    PhysicsComponent* Window::createHousePhysicsComponent() const {
-        auto physics_component = new PhysicsComponent();
-
-        return physics_component;
-    }
-
-    Entity* Window::createHouseEntity(ModelComponent* model_component, PhysicsComponent* physics_component) const {
-        auto entity = new Entity();
-
-        entity->addComponent(physics_component);
-        entity->addComponent(model_component);
-
-        return entity;
-    }
-
     VkDescriptorSetLayout Window::initDescriptorSetLayout() const {
         std::array<VkDescriptorSetLayoutBinding, 3> bindings = {
             vulkan::initializers::descriptorSetLayoutBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT),
@@ -238,6 +221,23 @@ namespace stirling {
         pool_sizes[2].descriptorCount = 1;
 
         return vulkan::DescriptorPool(m_device, pool_sizes, 1);
+    }
+
+    ModelComponent* Window::createHouseModelComponent() const {
+        return new ModelComponent(vulkan::Model::loadFromFile(m_device, "models/chalet.obj", "textures/chalet.jpg"));
+    }
+
+    PhysicsComponent* Window::createHousePhysicsComponent() const {
+        return new PhysicsComponent();
+    }
+
+    Entity* Window::createHouseEntity(ModelComponent* model_component, PhysicsComponent* physics_component) const {
+        auto entity = new Entity();
+
+        entity->addComponent(physics_component);
+        entity->addComponent(model_component);
+
+        return entity;
     }
 
     VkDescriptorSet Window::initDescriptorSet() {
@@ -282,6 +282,8 @@ namespace stirling {
 
             vkCmdBeginRenderPass(command_buffers[i], &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
 
+            uint32_t number_of_pipelines = 1;
+            for (uint32_t pipeline_index = 0; pipeline_index < number_of_pipelines; ++pipeline_index) {
                 vkCmdBindPipeline(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
 
                 VkBuffer vertex_buffers[] = { m_house_model_component->model().getVertexBuffer() };
@@ -289,13 +291,14 @@ namespace stirling {
                 vkCmdBindVertexBuffers(command_buffers[i], 0, 1, vertex_buffers, offsets);
                 vkCmdBindIndexBuffer(command_buffers[i], m_house_model_component->model().getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
-                for (uint32_t j = 0; j < 2; ++j) {
-                    uint32_t dynamic_offset = j * static_cast<uint32_t>(m_dynamic_alignment);
+                for (uint32_t dynamic_index = 0; dynamic_index < 2; ++dynamic_index) {
+                    uint32_t dynamic_offset = dynamic_index * static_cast<uint32_t>(m_dynamic_alignment);
 
                     vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.getLayout(), 0, 1, &m_descriptor_set, 1, &dynamic_offset);
 
                     vkCmdDrawIndexed(command_buffers[i], m_house_model_component->model().getIndexBuffer().size(), 1, 0, 0, 0);
                 }
+            }
 
             vkCmdEndRenderPass(command_buffers[i]);
 
@@ -333,8 +336,9 @@ namespace stirling {
         m_swapchain.reset(getSize());
         m_depth_image  = vulkan::DepthImage(m_device, m_swapchain.getExtent());
         m_render_pass  = vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.getImageFormat());
-        m_pipeline     = vulkan::Pipeline(m_device, { m_descriptor_set_layout }, m_render_pass, m_swapchain.getExtent());
         m_framebuffers = m_swapchain.createFramebuffers(m_render_pass, m_depth_image.getImageView());
+
+        m_pipeline = vulkan::Pipeline(m_device, { m_descriptor_set_layout }, m_render_pass, m_swapchain.getExtent(), "shaders/vert.spv", "shaders/frag.spv");
 
         vkFreeCommandBuffers(m_device, m_command_pool, m_command_buffers.size(), m_command_buffers.data());
         m_command_buffers = initCommandBuffers();

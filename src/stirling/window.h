@@ -48,18 +48,23 @@ namespace stirling {
         vulkan::Buffer                    m_dynamic_uniform_buffer;
         size_t                            m_dynamic_alignment;
 
+        std::unique_ptr<Camera>           m_camera;
+        World                             m_world;
+
+        VkDescriptorSetLayout             m_descriptor_set_layout;
+        vulkan::DescriptorPool            m_descriptor_pool;
+        
+        vulkan::Pipeline                  m_pipeline;
+
         std::unique_ptr<ModelComponent>   m_house_model_component;
+        VkDescriptorSet                   m_descriptor_set;
         std::unique_ptr<PhysicsComponent> m_house_physics_component;
         std::unique_ptr<Entity>           m_house_entity_1;
         std::unique_ptr<Entity>           m_house_entity_2;
-        VkDescriptorSetLayout             m_descriptor_set_layout;
-        vulkan::DescriptorPool            m_descriptor_pool;
-        VkDescriptorSet                   m_descriptor_set;
-        vulkan::Pipeline                  m_pipeline;
+
         std::vector<VkCommandBuffer>      m_command_buffers;
 
-        std::unique_ptr<Camera>           m_camera;
-        World                             m_world;
+        // Initializer methods
 
         GLFWwindow*                       initWindow(int width, int height);
         vulkan::Surface                   initSurface() const;
