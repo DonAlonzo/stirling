@@ -93,10 +93,13 @@ namespace stirling {
 
         m_pipeline                  (vulkan::Pipeline(m_device, { m_descriptor_set_layout }, m_render_pass, m_swapchain.getExtent(), "shaders/vert.spv", "shaders/frag.spv")),
 
-        m_house_model_component     (createHouseModelComponent()),
-        m_house_physics_component   (createHousePhysicsComponent()),
-        m_house_entity_1            (createHouseEntity(m_house_model_component.get(), m_house_physics_component.get())),
-        m_house_entity_2            (createHouseEntity(m_house_model_component.get(), m_house_physics_component.get())),
+        m_house_model_component     (createModelComponent("models/chalet.obj", "textures/chalet.jpg")),
+        m_gladiator_model_component (createModelComponent("models/gladiators.obj", "textures/gladiators.jpg")),
+        m_physics_component         (createPhysicsComponent()),
+        m_house_entity_1            (createEntity(m_house_model_component.get(), m_physics_component.get())),
+        m_house_entity_2            (createEntity(m_house_model_component.get(), m_physics_component.get())),
+        m_gladiator_entity_1        (createEntity(m_gladiator_model_component.get(), m_physics_component.get())),
+        m_gladiator_entity_2        (createEntity(m_gladiator_model_component.get(), m_physics_component.get())),
 
         m_command_buffers           (initCommandBuffers()) {
 
@@ -109,12 +112,21 @@ namespace stirling {
         m_world.addEntity(m_camera.get());
         m_world.addEntity(m_house_entity_1.get());
         m_world.addEntity(m_house_entity_2.get());
+        m_world.addEntity(m_gladiator_entity_1.get());
+        m_world.addEntity(m_gladiator_entity_2.get());
 
-        m_camera->transform().moveTo(glm::vec3(2.0f, -2.0f, -2.0f));
-        m_camera->transform().lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
+        m_camera->transform().moveTo(glm::vec3(2.f, -2.f, -2.f));
+        m_camera->transform().lookAt(glm::vec3(0.f, 0.f, 0.f));
 
-        m_house_entity_2->transform().moveTo(glm::vec3(-2.0f, -2.0f, 0.0f));
-        m_house_entity_2->transform().setScale(glm::vec3(0.5f, 0.5f, 0.5f));
+        m_house_entity_2->transform().moveTo(glm::vec3(-2.f, -2.f, 0.f));
+        m_house_entity_2->transform().setScale(glm::vec3(0.5f, .5f, .5f));
+
+        m_gladiator_entity_1->transform().moveTo(glm::vec3(-10.f, -10.f, 0.f));
+        m_gladiator_entity_1->transform().setScale(glm::vec3(.2f, .2f, .2f));
+
+        m_gladiator_entity_2->transform().moveTo(glm::vec3(-10.f, 10.f, 0.f));
+        m_gladiator_entity_2->transform().setScale(glm::vec3(.2f, .2f, .2f));
+        m_gladiator_entity_2->transform().rotate(glm::radians(45.f), glm::vec3(0.f, 0.f, 1.f));
     }
 
     GLFWwindow* Window::initWindow(int width, int height) {
@@ -218,11 +230,11 @@ namespace stirling {
         pool_sizes[2].type            = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         pool_sizes[2].descriptorCount = 1;
 
-        return vulkan::DescriptorPool(m_device, pool_sizes, 1);
+        return vulkan::DescriptorPool(m_device, pool_sizes, 2);
     }
 
-    ModelComponent* Window::createHouseModelComponent() const {
-        auto model = vulkan::Model::loadFromFile(m_device, "models/chalet.obj", "textures/chalet.jpg");
+    ModelComponent* Window::createModelComponent(const std::string& model_file, const std::string& texture_file) const {
+        auto model = vulkan::Model::loadFromFile(m_device, model_file, texture_file);
 
         auto descriptor_set = m_descriptor_pool.allocateDescriptorSet(m_descriptor_set_layout);
 
@@ -242,11 +254,11 @@ namespace stirling {
         return new ModelComponent(std::move(model), descriptor_set);
     }
 
-    PhysicsComponent* Window::createHousePhysicsComponent() const {
+    PhysicsComponent* Window::createPhysicsComponent() const {
         return new PhysicsComponent();
     }
 
-    Entity* Window::createHouseEntity(ModelComponent* model_component, PhysicsComponent* physics_component) const {
+    Entity* Window::createEntity(ModelComponent* model_component, PhysicsComponent* physics_component) const {
         auto entity = new Entity();
 
         entity->addComponent(physics_component);
@@ -282,17 +294,33 @@ namespace stirling {
             for (uint32_t pipeline_index = 0; pipeline_index < number_of_pipelines; ++pipeline_index) {
                 vkCmdBindPipeline(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
 
-                VkBuffer vertex_buffers[] = { m_house_model_component->model.getVertexBuffer() };
-                VkDeviceSize offsets[] = { 0 };
-                vkCmdBindVertexBuffers(command_buffers[i], 0, 1, vertex_buffers, offsets);
-                vkCmdBindIndexBuffer(command_buffers[i], m_house_model_component->model.getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+                {
+                    VkBuffer vertex_buffers[] = { m_house_model_component->model.getVertexBuffer() };
+                    VkDeviceSize offsets[] = { 0 };
+                    vkCmdBindVertexBuffers(command_buffers[i], 0, 1, vertex_buffers, offsets);
+                    vkCmdBindIndexBuffer(command_buffers[i], m_house_model_component->model.getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
-                for (uint32_t dynamic_index = 0; dynamic_index < 2; ++dynamic_index) {
-                    uint32_t dynamic_offset = dynamic_index * static_cast<uint32_t>(m_dynamic_alignment);
+                    for (uint32_t dynamic_index = 0; dynamic_index < 2; ++dynamic_index) {
+                        uint32_t dynamic_offset = dynamic_index * static_cast<uint32_t>(m_dynamic_alignment);
 
-                    vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.getLayout(), 0, 1, &m_house_model_component->descriptor_set, 1, &dynamic_offset);
+                        vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.getLayout(), 0, 1, &m_house_model_component->descriptor_set, 1, &dynamic_offset);
 
-                    vkCmdDrawIndexed(command_buffers[i], m_house_model_component->model.getIndexBuffer().size(), 1, 0, 0, 0);
+                        vkCmdDrawIndexed(command_buffers[i], m_house_model_component->model.getIndexBuffer().size(), 1, 0, 0, 0);
+                    }
+                }
+                {
+                    VkBuffer vertex_buffers[] = { m_gladiator_model_component->model.getVertexBuffer() };
+                    VkDeviceSize offsets[] = { 0 };
+                    vkCmdBindVertexBuffers(command_buffers[i], 0, 1, vertex_buffers, offsets);
+                    vkCmdBindIndexBuffer(command_buffers[i], m_gladiator_model_component->model.getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+
+                    for (uint32_t dynamic_index = 2; dynamic_index < 4; ++dynamic_index) {
+                        uint32_t dynamic_offset = dynamic_index * static_cast<uint32_t>(m_dynamic_alignment);
+
+                        vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.getLayout(), 0, 1, &m_gladiator_model_component->descriptor_set, 1, &dynamic_offset);
+
+                        vkCmdDrawIndexed(command_buffers[i], m_gladiator_model_component->model.getIndexBuffer().size(), 1, 0, 0, 0);
+                    }
                 }
             }
 
@@ -386,6 +414,8 @@ namespace stirling {
             {
                 *((glm::mat4*)(((uint64_t)m_dynamic_ubo.model + (0 * m_dynamic_alignment)))) = m_house_entity_1->transform().transform();
                 *((glm::mat4*)(((uint64_t)m_dynamic_ubo.model + (1 * m_dynamic_alignment)))) = m_house_entity_2->transform().transform();
+                *((glm::mat4*)(((uint64_t)m_dynamic_ubo.model + (2 * m_dynamic_alignment)))) = m_gladiator_entity_1->transform().transform();
+                *((glm::mat4*)(((uint64_t)m_dynamic_ubo.model + (3 * m_dynamic_alignment)))) = m_gladiator_entity_2->transform().transform();
             }
 
             m_dynamic_uniform_buffer.memcpy(m_dynamic_ubo.model);

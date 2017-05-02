@@ -57,9 +57,12 @@ namespace stirling {
         vulkan::Pipeline                  m_pipeline;
 
         std::unique_ptr<ModelComponent>   m_house_model_component;
-        std::unique_ptr<PhysicsComponent> m_house_physics_component;
+        std::unique_ptr<ModelComponent>   m_gladiator_model_component;
+        std::unique_ptr<PhysicsComponent> m_physics_component;
         std::unique_ptr<Entity>           m_house_entity_1;
         std::unique_ptr<Entity>           m_house_entity_2;
+        std::unique_ptr<Entity>           m_gladiator_entity_1;
+        std::unique_ptr<Entity>           m_gladiator_entity_2;
 
         std::vector<VkCommandBuffer>      m_command_buffers;
 
@@ -75,9 +78,9 @@ namespace stirling {
         VkDescriptorSetLayout             initDescriptorSetLayout() const;
         vulkan::DescriptorPool            initDescriptorPool() const;
         std::vector<VkCommandBuffer>      initCommandBuffers() const;
-        ModelComponent*                   createHouseModelComponent() const;
-        PhysicsComponent*                 createHousePhysicsComponent() const;
-        Entity*                           createHouseEntity(ModelComponent* model_component, PhysicsComponent* physics_component) const;
+        ModelComponent*                   createModelComponent(const std::string& model_file, const std::string& texture_file) const;
+        PhysicsComponent*                 createPhysicsComponent() const;
+        Entity*                           createEntity(ModelComponent* model_component, PhysicsComponent* physics_component) const;
 
         void                              addControls();
         void                              recreateSwapchain();
