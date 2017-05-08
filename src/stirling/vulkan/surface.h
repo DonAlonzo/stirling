@@ -3,23 +3,20 @@
 // Vulkan
 #include "vulkan/vulkan.h"
 
-namespace stirling { namespace vulkan {
-	class Instance;
-}}
 #include "deleter.h"
 
 namespace stirling {
-	namespace vulkan {
+    namespace vulkan {
 
-		class Surface {
-		public:
-			Surface(const Instance& instance, VkSurfaceKHR);
+        class Surface {
+        public:
+            Surface(vulkan::Deleter<VkSurfaceKHR> surface);
 
-			operator VkSurfaceKHR() const;
+            operator const VkSurfaceKHR&() const;
 
-		private:
-			Deleter<VkSurfaceKHR> m_surface;
-		};
+        private:
+            Deleter<VkSurfaceKHR> surface;
+        };
 
-	}
+    }
 }

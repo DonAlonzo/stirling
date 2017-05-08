@@ -153,7 +153,7 @@ namespace stirling {
         if (glfwCreateWindowSurface(m_instance, m_window, nullptr, &surface) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create window surface.");
         }
-        return vulkan::Surface(m_instance, surface);
+        return vulkan::Surface(vulkan::Deleter<VkSurfaceKHR>(surface, m_instance, vkDestroySurfaceKHR));
     }
 
     vulkan::PhysicalDevice Window::choosePhysicalDevice(const std::vector<vulkan::PhysicalDevice>& physical_devices) const {
@@ -170,7 +170,7 @@ namespace stirling {
         if (!indices.isComplete()) return false;
 
         std::set<std::string> required_extensions(g_device_extensions.begin(), g_device_extensions.end());
-        for (const auto& available_extension : physical_device.getExtensions()) {
+        for (const auto& available_extension : physical_device.extensions) {
             required_extensions.erase(available_extension.extensionName);
         }
         if (!required_extensions.empty()) return false;
@@ -187,7 +187,7 @@ namespace stirling {
     }
 
     vulkan::Buffer Window::initDynamicUniformBuffer(const vulkan::Device& device, int max_number_of_objects) {
-        size_t ubo_alignment = m_physical_device.getProperties().limits.minUniformBufferOffsetAlignment;
+        size_t ubo_alignment = m_physical_device.properties.limits.minUniformBufferOffsetAlignment;
 
         m_dynamic_alignment = (sizeof(glm::mat4) / ubo_alignment) * ubo_alignment + ((sizeof(glm::mat4) % ubo_alignment) > 0 ? ubo_alignment : 0);
 

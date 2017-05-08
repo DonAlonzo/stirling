@@ -2,15 +2,15 @@
 #include "instance.h"
 
 namespace stirling {
-	namespace vulkan {
+    namespace vulkan {
 
-		Surface::Surface(const Instance& instance, VkSurfaceKHR surface) :
-			m_surface (Deleter<VkSurfaceKHR>(surface, instance, vkDestroySurfaceKHR)) {
-		}
+        Surface::Surface(vulkan::Deleter<VkSurfaceKHR> surface) :
+            surface (std::move(surface)) {
+        }
 
-		Surface::operator VkSurfaceKHR() const {
-			return m_surface;
-		}
+        Surface::operator const VkSurfaceKHR&() const {
+            return surface;
+        }
 
-	}
+    }
 }

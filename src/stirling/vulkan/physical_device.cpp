@@ -19,24 +19,27 @@ namespace stirling {
     namespace vulkan {
     
         PhysicalDevice::PhysicalDevice(VkPhysicalDevice physical_device) :
-            m_physical_device (physical_device) {
+            physical_device (physical_device) {
 
-            vkGetPhysicalDeviceProperties(m_physical_device, &m_properties);
+            // Properties
+            vkGetPhysicalDeviceProperties(physical_device, &properties);
+
+            // Extensions
+            uint32_t extension_count;
+            vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, nullptr);
+            extensions.resize(extension_count);
+            vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, extensions.data());
         }
 
         PhysicalDevice::operator VkPhysicalDevice() const {
-            return m_physical_device;
-        }
-
-        const VkPhysicalDeviceProperties& PhysicalDevice::getProperties() const {
-            return m_properties;
+            return physical_device;
         }
 
         QueueFamilyIndices PhysicalDevice::findQueueFamilies(const Surface& surface) const {
             uint32_t queue_family_count = 0;
-            vkGetPhysicalDeviceQueueFamilyProperties(m_physical_device, &queue_family_count, nullptr);
+            vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, nullptr);
             std::vector<VkQueueFamilyProperties> queue_families{ queue_family_count };
-            vkGetPhysicalDeviceQueueFamilyProperties(m_physical_device, &queue_family_count, queue_families.data());
+            vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, queue_families.data());
 
             QueueFamilyIndices indices = {};
             for (int i = 0; i < queue_families.size(); ++i) {
@@ -47,7 +50,7 @@ namespace stirling {
                 }
 
                 VkBool32 present_support = false;
-                vkGetPhysicalDeviceSurfaceSupportKHR(m_physical_device, i, surface, &present_support);
+                vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, surface, &present_support);
 
                 if (queue_families[i].queueCount > 0 && present_support) {
                     indices.present_family_index = i;
@@ -90,41 +93,33 @@ namespace stirling {
             create_info.ppEnabledLayerNames     = ENABLE_VALIDATION_LAYERS ? g_validation_layers.data() : nullptr;
 
             VkDevice device;
-            if (vkCreateDevice(m_physical_device, &create_info, nullptr, &device) != VK_SUCCESS) {
+            if (vkCreateDevice(physical_device, &create_info, nullptr, &device) != VK_SUCCESS) {
                 throw std::runtime_error("Failed to create logical device.");
             }
 
             return Device(*this, device, indices);
         }
 
-        std::vector<VkExtensionProperties> PhysicalDevice::getExtensions() const {
-            uint32_t extension_count;
-            vkEnumerateDeviceExtensionProperties(m_physical_device, nullptr, &extension_count, nullptr);
-            std::vector<VkExtensionProperties> extensions{extension_count};
-            vkEnumerateDeviceExtensionProperties(m_physical_device, nullptr, &extension_count, extensions.data());
-            return extensions;
-        }
-
         VkSurfaceCapabilitiesKHR PhysicalDevice::getSurfaceCapabilities(const Surface& surface) const {
             VkSurfaceCapabilitiesKHR capabilities;
-            vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physical_device, surface, &capabilities);
+            vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface, &capabilities);
             return capabilities;
         }
 
 
         std::vector<VkSurfaceFormatKHR> PhysicalDevice::getSurfaceFormats(const Surface& surface) const {
             uint32_t format_count;
-            vkGetPhysicalDeviceSurfaceFormatsKHR(m_physical_device, surface, &format_count, nullptr);
+            vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, surface, &format_count, nullptr);
             std::vector<VkSurfaceFormatKHR> formats{format_count};
-            vkGetPhysicalDeviceSurfaceFormatsKHR(m_physical_device, surface, &format_count, formats.data());
+            vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, surface, &format_count, formats.data());
             return formats;
         }
 
         std::vector<VkPresentModeKHR> PhysicalDevice::getSurfacePresentModes(const Surface& surface) const {
             uint32_t present_mode_count;
-            vkGetPhysicalDeviceSurfacePresentModesKHR(m_physical_device, surface, &present_mode_count, nullptr);
+            vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, surface, &present_mode_count, nullptr);
             std::vector<VkPresentModeKHR> present_modes{present_mode_count};
-            vkGetPhysicalDeviceSurfacePresentModesKHR(m_physical_device, surface, &present_mode_count, present_modes.data());
+            vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, surface, &present_mode_count, present_modes.data());
             return present_modes;
         }
 
