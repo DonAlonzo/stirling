@@ -156,7 +156,6 @@
     <ClCompile Include="src\stirling\util\io.cpp" />
     <ClCompile Include="src\stirling\vulkan\depth_image.cpp" />
     <ClCompile Include="src\stirling\vulkan\model.cpp" />
-    <ClCompile Include="src\stirling\vulkan\sampler.cpp" />
     <ClCompile Include="src\stirling\vulkan\image.cpp" />
     <ClCompile Include="src\stirling\vulkan\descriptor_pool.cpp" />
     <ClCompile Include="src\stirling\vulkan\buffer.cpp" />
@@ -167,7 +166,6 @@
     <ClCompile Include="src\stirling\vulkan\pipeline.cpp" />
     <ClCompile Include="src\stirling\vulkan\semaphore.cpp" />
     <ClCompile Include="src\stirling\vulkan\shader_module.cpp" />
-    <ClCompile Include="src\stirling\vulkan\image_view.cpp" />
     <ClCompile Include="src\stirling\vulkan\queue.cpp" />
     <ClCompile Include="src\stirling\vulkan\device.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -195,7 +193,6 @@
     <ClInclude Include="src\stirling\vulkan\deleter.h" />
     <ClInclude Include="src\stirling\vulkan\depth_image.h" />
     <ClInclude Include="src\stirling\vulkan\model.h" />
-    <ClInclude Include="src\stirling\vulkan\sampler.h" />
     <ClInclude Include="src\stirling\vulkan\image.h" />
     <ClInclude Include="src\stirling\vulkan\descriptor_pool.h" />
     <ClInclude Include="src\stirling\vulkan\buffer.h" />
@@ -206,7 +203,6 @@
     <ClInclude Include="src\stirling\vulkan\pipeline.h" />
     <ClInclude Include="src\stirling\vulkan\semaphore.h" />
     <ClInclude Include="src\stirling\vulkan\shader_module.h" />
-    <ClInclude Include="src\stirling\vulkan\image_view.h" />
     <ClInclude Include="src\stirling\vulkan\queue.h" />
     <ClInclude Include="src\stirling\vulkan\device.h" />
     <ClInclude Include="src\stirling\vulkan\instance.h" />

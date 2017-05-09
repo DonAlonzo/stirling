@@ -2,6 +2,7 @@
 #include "device.h"
 #include "surface.h"
 
+#include <assert.h>
 #include <vector>
 #include <set>
 
@@ -18,8 +19,8 @@ const std::vector<const char*> g_validation_layers = {
 namespace stirling {
     namespace vulkan {
     
-        PhysicalDevice::PhysicalDevice(VkPhysicalDevice physical_device) :
-            physical_device (physical_device) {
+        PhysicalDevice::PhysicalDevice(VkPhysicalDevice physical_device) {
+            this->physical_device = physical_device;
 
             // Properties
             vkGetPhysicalDeviceProperties(physical_device, &properties);
@@ -29,6 +30,13 @@ namespace stirling {
             vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, nullptr);
             extensions.resize(extension_count);
             vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, extensions.data());
+
+            // Queue family properties
+            uint32_t queue_family_count;
+            vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, nullptr);
+            assert(queueFamilyCount > 0);
+            queue_family_properties.resize(queue_family_count);
+            vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, queue_family_properties.data());
         }
 
         PhysicalDevice::operator VkPhysicalDevice() const {
@@ -64,12 +72,12 @@ namespace stirling {
         Device PhysicalDevice::createDevice(const Surface& surface, const std::vector<const char*> extensions) const {
             QueueFamilyIndices indices = findQueueFamilies(surface);
 
-            std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
             std::set<int> queue_family_indices = {
                 indices.graphics_family_index,
                 indices.present_family_index
             };
 
+            std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
             float queue_priority = 1.0f;
             for (int queue_family_index : queue_family_indices) {
                 VkDeviceQueueCreateInfo queue_create_info = {};
@@ -96,7 +104,6 @@ namespace stirling {
             if (vkCreateDevice(physical_device, &create_info, nullptr, &device) != VK_SUCCESS) {
                 throw std::runtime_error("Failed to create logical device.");
             }
-
             return Device(*this, device, indices);
         }
 
@@ -124,8 +131,35 @@ namespace stirling {
         }
 
         bool QueueFamilyIndices::isComplete() const {
-            return graphics_family_index >= 0
-                && present_family_index >= 0;
+            return graphics_family_index >= 0 && present_family_index >= 0;
+        }
+
+        uint32_t PhysicalDevice::findQueueFamilyIndex(VkQueueFlagBits queue_flags) const {
+            if (queue_flags & VK_QUEUE_COMPUTE_BIT) {
+                for (uint32_t i = 0; i < static_cast<uint32_t>(queue_family_properties.size()); ++i) {
+                    if ((queue_family_properties[i].queueFlags & queue_flags) &&
+                        (queue_family_properties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) == 0) {
+                        return i;
+                    }
+                }
+            }
+
+            if (queue_flags & VK_QUEUE_TRANSFER_BIT) {
+                for (uint32_t i = 0; i < static_cast<uint32_t>(queue_family_properties.size()); ++i) {
+                    if ((queue_family_properties[i].queueFlags & queue_flags) &&
+                        (queue_family_properties[i].queueFlags & (VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT) == 0)) {
+                        return i;
+                    }
+                }
+            }
+
+            for (uint32_t i = 0; i < static_cast<uint32_t>(queue_family_properties.size()); ++i) {
+                if (queue_family_properties[i].queueFlags & queue_flags) {
+                    return i;
+                }
+            }
+
+            throw std::runtime_error("Could not find queue family index.");
         }
 
     }

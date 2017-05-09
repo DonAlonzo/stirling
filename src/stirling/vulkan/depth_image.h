@@ -2,34 +2,27 @@
 
 #include "vulkan/vulkan.h"
 
-namespace stirling {
-	namespace vulkan {
-		class Device;
-	}
-}
+#include "deleter.h"
+#include "device.h"
 #include "image.h"
-#include "image_view.h"
 
 #include <vector>
 
 namespace stirling {
-	namespace vulkan {
-		class DepthImage {
-		public:
-			DepthImage(const Device& device, const VkExtent2D& extent);
+    namespace vulkan {
+        class DepthImage {
+        public:
+            VkFormat             image_format;
+            Image                image;
+            Deleter<VkImageView> image_view;
 
-			const VkFormat&  getImageFormat() const;
-			const Image&     getImage() const;
-			const ImageView& getImageView() const;
+            DepthImage(const Device& device, const VkExtent2D& extent);
 
-		private:
-			VkFormat  m_image_format;
-			Image     m_image;
-			ImageView m_image_view;
+        private:
 
-			VkFormat  findImageFormat(const Device& device);
-			Image     createImage(const Device& device, const VkExtent2D& extent);
-			ImageView createImageView(const Device& device);
-		};
-	}
+            VkFormat             findImageFormat(const Device& device);
+            Image                createImage(const Device& device, const VkExtent2D& extent);
+            Deleter<VkImageView> createImageView(const Device& device);
+        };
+    }
 }

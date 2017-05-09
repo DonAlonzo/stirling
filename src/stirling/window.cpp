@@ -80,8 +80,8 @@ namespace stirling {
         m_device                    (m_physical_device.createDevice(m_surface, g_device_extensions)),
         m_swapchain                 (vulkan::Swapchain(m_device, m_surface, getSize())),
         m_depth_image               (vulkan::DepthImage(m_device, m_swapchain.getExtent())),
-        m_render_pass               (vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.getImageFormat())),
-        m_framebuffers              (m_swapchain.createFramebuffers(m_render_pass, m_depth_image.getImageView())),
+        m_render_pass               (vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.image_format)),
+        m_framebuffers              (m_swapchain.createFramebuffers(m_render_pass, m_depth_image.image_view)),
         m_command_pool              (m_device.getGraphicsQueue().createCommandPool()),
         m_image_available_semaphore (m_device.createSemaphore()),
         m_render_finished_semaphore (m_device.createSemaphore()),
@@ -240,8 +240,8 @@ namespace stirling {
 
         VkDescriptorImageInfo image_info = {};
         image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        image_info.imageView   = model.getTexture().getImageView();
-        image_info.sampler     = model.getTexture().getSampler();
+        image_info.imageView   = model.texture.image_view;
+        image_info.sampler     = model.texture.sampler;
 
         std::array<VkWriteDescriptorSet, 3> write_descriptor_sets = {
             vulkan::initializers::writeDescriptorSet(descriptor_set, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, &m_static_uniform_buffer.m_descriptor),
@@ -295,31 +295,31 @@ namespace stirling {
                 vkCmdBindPipeline(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
 
                 {
-                    VkBuffer vertex_buffers[] = { m_house_model_component->model.getVertexBuffer() };
+                    VkBuffer vertex_buffers[] = { m_house_model_component->model.vertex_buffer };
                     VkDeviceSize offsets[] = { 0 };
                     vkCmdBindVertexBuffers(command_buffers[i], 0, 1, vertex_buffers, offsets);
-                    vkCmdBindIndexBuffer(command_buffers[i], m_house_model_component->model.getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+                    vkCmdBindIndexBuffer(command_buffers[i], m_house_model_component->model.index_buffer, 0, VK_INDEX_TYPE_UINT32);
 
                     for (uint32_t dynamic_index = 0; dynamic_index < 2; ++dynamic_index) {
                         uint32_t dynamic_offset = dynamic_index * static_cast<uint32_t>(m_dynamic_alignment);
 
                         vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.getLayout(), 0, 1, &m_house_model_component->descriptor_set, 1, &dynamic_offset);
 
-                        vkCmdDrawIndexed(command_buffers[i], m_house_model_component->model.getIndexBuffer().size(), 1, 0, 0, 0);
+                        vkCmdDrawIndexed(command_buffers[i], m_house_model_component->model.index_buffer.size(), 1, 0, 0, 0);
                     }
                 }
                 {
-                    VkBuffer vertex_buffers[] = { m_gladiator_model_component->model.getVertexBuffer() };
+                    VkBuffer vertex_buffers[] = { m_gladiator_model_component->model.vertex_buffer };
                     VkDeviceSize offsets[] = { 0 };
                     vkCmdBindVertexBuffers(command_buffers[i], 0, 1, vertex_buffers, offsets);
-                    vkCmdBindIndexBuffer(command_buffers[i], m_gladiator_model_component->model.getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+                    vkCmdBindIndexBuffer(command_buffers[i], m_gladiator_model_component->model.index_buffer, 0, VK_INDEX_TYPE_UINT32);
 
                     for (uint32_t dynamic_index = 2; dynamic_index < 4; ++dynamic_index) {
                         uint32_t dynamic_offset = dynamic_index * static_cast<uint32_t>(m_dynamic_alignment);
 
                         vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.getLayout(), 0, 1, &m_gladiator_model_component->descriptor_set, 1, &dynamic_offset);
 
-                        vkCmdDrawIndexed(command_buffers[i], m_gladiator_model_component->model.getIndexBuffer().size(), 1, 0, 0, 0);
+                        vkCmdDrawIndexed(command_buffers[i], m_gladiator_model_component->model.index_buffer.size(), 1, 0, 0, 0);
                     }
                 }
             }
@@ -359,8 +359,8 @@ namespace stirling {
 
         m_swapchain.reset(getSize());
         m_depth_image  = vulkan::DepthImage(m_device, m_swapchain.getExtent());
-        m_render_pass  = vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.getImageFormat());
-        m_framebuffers = m_swapchain.createFramebuffers(m_render_pass, m_depth_image.getImageView());
+        m_render_pass  = vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.image_format);
+        m_framebuffers = m_swapchain.createFramebuffers(m_render_pass, m_depth_image.image_view);
 
         m_pipeline = vulkan::Pipeline(m_device, { m_descriptor_set_layout }, m_render_pass, m_swapchain.getExtent(), "shaders/vert.spv", "shaders/frag.spv");
 

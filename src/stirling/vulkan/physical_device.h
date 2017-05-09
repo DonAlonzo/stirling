@@ -26,13 +26,15 @@ namespace stirling {
 
         class PhysicalDevice {
         public:
-            std::vector<VkExtensionProperties> extensions;
-            VkPhysicalDeviceProperties         properties;
+            std::vector<VkExtensionProperties>   extensions;
+            VkPhysicalDeviceProperties           properties;
+            std::vector<VkQueueFamilyProperties> queue_family_properties;
 
             PhysicalDevice(VkPhysicalDevice physical_device);
         
             operator VkPhysicalDevice() const;
 
+            uint32_t findQueueFamilyIndex(VkQueueFlagBits queue_flags) const;
             QueueFamilyIndices findQueueFamilies(const Surface& surface) const;
 
             Device createDevice(const Surface& surface, const std::vector<const char*> extensions) const;

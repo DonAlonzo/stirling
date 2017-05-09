@@ -112,8 +112,8 @@ namespace stirling {
             }
         }
 
-        std::vector<ImageView> Swapchain::initImageViews(uint32_t image_count) const {
-            std::vector<ImageView> image_views;
+        std::vector<Deleter<VkImageView>> Swapchain::initImageViews(uint32_t image_count) const {
+            std::vector<Deleter<VkImageView>> image_views;
             image_views.reserve(m_swapchain_images.size());
 
             for (uint32_t i = 0; i < m_swapchain_images.size(); ++i) {
@@ -136,7 +136,7 @@ namespace stirling {
                 if (vkCreateImageView(*m_device, &create_info, nullptr, &image_view) != VK_SUCCESS) {
                     throw std::runtime_error("Failed to create image views.");
                 }
-                image_views.push_back(ImageView(*m_device, image_view));
+                image_views.push_back(Deleter<VkImageView>(image_view, *m_device, vkDestroyImageView));
             }
 
             return image_views;
@@ -187,7 +187,7 @@ namespace stirling {
             if (m_swapchain != VK_NULL_HANDLE) vkDestroySwapchainKHR(*m_device, m_swapchain, nullptr);
         }
 
-        std::vector<Framebuffer> Swapchain::createFramebuffers(const RenderPass& render_pass, const ImageView& depth_image_view) const {
+        std::vector<Framebuffer> Swapchain::createFramebuffers(const RenderPass& render_pass, VkImageView depth_image_view) const {
             std::vector<Framebuffer> framebuffers;
             framebuffers.reserve(m_swapchain_image_views.size());
 

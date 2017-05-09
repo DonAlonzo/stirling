@@ -11,9 +11,9 @@ namespace stirling {
         class Surface;
     }
 }
+#include "deleter.h"
 #include "device.h"
 #include "framebuffer.h"
-#include "image_view.h"
 
 #include <vector>
 
@@ -37,7 +37,7 @@ namespace stirling {
 
             void reset(const VkExtent2D& actual_extent);
 
-            std::vector<Framebuffer> createFramebuffers(const RenderPass& render_pass, const ImageView& depth_image_view) const;
+            std::vector<Framebuffer> createFramebuffers(const RenderPass& render_pass, VkImageView depth_image_view) const;
 
             operator VkSwapchainKHR() const;
             const VkExtent2D& getExtent() const;
@@ -48,20 +48,20 @@ namespace stirling {
             const Device*           m_device;
             const Surface*          m_surface;
 
-            SwapchainSupportDetails m_support_details;
-            VkExtent2D              m_swapchain_extent;
-            VkSurfaceFormatKHR      m_surface_format;
-            VkSwapchainKHR          m_swapchain;
-            std::vector<VkImage>    m_swapchain_images;
-            VkFormat                m_swapchain_image_format;
-            std::vector<ImageView>  m_swapchain_image_views;
+            SwapchainSupportDetails           m_support_details;
+            VkExtent2D                        m_swapchain_extent;
+            VkSurfaceFormatKHR                m_surface_format;
+            VkSwapchainKHR                    m_swapchain;
+            std::vector<VkImage>              m_swapchain_images;
+            VkFormat                          m_swapchain_image_format;
+            std::vector<Deleter<VkImageView>> m_swapchain_image_views;
 
-            VkSwapchainKHR          initSwapchain(VkSwapchainKHR old_swapchain);
-            SwapchainSupportDetails fetchSupportDetails(const PhysicalDevice& physical_device, const Surface& surface) const;
-            VkSurfaceFormatKHR      chooseSwapSurfaceFormat() const;
-            VkPresentModeKHR        chooseSwapPresentMode(const std::vector<VkPresentModeKHR> available_present_modes) const;
-            VkExtent2D              chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, VkExtent2D actual_extent) const;
-            std::vector<ImageView>  initImageViews(uint32_t image_count) const;
+            VkSwapchainKHR                    initSwapchain(VkSwapchainKHR old_swapchain);
+            SwapchainSupportDetails           fetchSupportDetails(const PhysicalDevice& physical_device, const Surface& surface) const;
+            VkSurfaceFormatKHR                chooseSwapSurfaceFormat() const;
+            VkPresentModeKHR                  chooseSwapPresentMode(const std::vector<VkPresentModeKHR> available_present_modes) const;
+            VkExtent2D                        chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, VkExtent2D actual_extent) const;
+            std::vector<Deleter<VkImageView>> initImageViews(uint32_t image_count) const;
         };
 
     }

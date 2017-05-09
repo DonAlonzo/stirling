@@ -2,33 +2,23 @@
 
 #include "vulkan/vulkan.h"
 
-namespace stirling {
-	namespace vulkan {
-		class Device;
-	}
-}
+#include "deleter.h"
+#include "device.h"
 #include "image.h"
-#include "image_view.h"
-#include "sampler.h"
 
 namespace stirling {
-	namespace vulkan {
-		class Texture {
-		public:
-			Texture(const Device& device, Image&& image);
+    namespace vulkan {
+        class Texture {
+        public:
+            Image                image;
+            Deleter<VkImageView> image_view;
+            Deleter<VkSampler>   sampler;
 
-			const Image& getImage() const;
-			const ImageView& getImageView() const;
-			const Sampler& getSampler() const;
+            Texture(const Device& device, Image&& image);
 
-		private:
-			const Device* m_device;
-			Image         m_image;
-			ImageView     m_image_view;
-			Sampler       m_sampler;
-
-			ImageView     initImageView() const;
-			Sampler       initSampler() const;
-		};
-	}
+        private:
+            Deleter<VkImageView> initImageView(const Device& device) const;
+            Deleter<VkSampler>   initSampler(const Device& device) const;
+        };
+    }
 }

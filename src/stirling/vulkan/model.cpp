@@ -58,21 +58,9 @@ namespace stirling {
         }
 
         Model::Model(VertexBuffer&& vertex_buffer, IndexBuffer&& index_buffer, Texture&& texture) :
-            m_vertex_buffer (std::move(vertex_buffer)),
-            m_index_buffer  (std::move(index_buffer)),
-            m_texture       (std::move(texture)) {
-        }
-
-        const VertexBuffer& Model::getVertexBuffer() const {
-            return m_vertex_buffer;
-        }
-
-        const IndexBuffer& Model::getIndexBuffer() const {
-            return m_index_buffer;
-        }
-
-        const Texture& Model::getTexture() const {
-            return m_texture;
+            vertex_buffer (std::move(vertex_buffer)),
+            index_buffer  (std::move(index_buffer)),
+            texture       (std::move(texture)) {
         }
 
     }
