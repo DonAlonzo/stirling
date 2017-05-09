@@ -1,10 +1,9 @@
 #include "descriptor_pool.h"
-#include "device.h"
 
 namespace stirling {
     namespace vulkan {
 
-        DescriptorPool::DescriptorPool(const Device& device, const std::vector<VkDescriptorPoolSize>& pool_sizes, int max_sets) :
+        DescriptorPool::DescriptorPool(VkDevice device, const std::vector<VkDescriptorPoolSize>& pool_sizes, int max_sets) :
             m_device          (device),
             m_descriptor_pool (initDescriptorPool(pool_sizes, max_sets)) {
         }

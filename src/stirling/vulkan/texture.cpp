@@ -4,13 +4,12 @@
 namespace stirling {
     namespace vulkan {
 
-        Texture::Texture(const Device& device, Image&& image) :
-            image      (std::move(image)),
-            image_view (initImageView(device)),
+        Texture::Texture(VkDevice device, VkImage image) :
+            image_view (initImageView(device, image)),
             sampler    (initSampler(device)) {
         }
 
-        Deleter<VkImageView> Texture::initImageView(const Device& device) const {
+        Deleter<VkImageView> Texture::initImageView(VkDevice device, VkImage image) const {
             VkImageViewCreateInfo create_info = {};
             create_info.sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
             create_info.image                           = image;
@@ -29,7 +28,7 @@ namespace stirling {
             return Deleter<VkImageView>(image_view, device, vkDestroyImageView);
         }
 
-        Deleter<VkSampler> Texture::initSampler(const Device& device) const {
+        Deleter<VkSampler> Texture::initSampler(VkDevice device) const {
             VkSamplerCreateInfo create_info = {};
             create_info.sType                   = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
             create_info.magFilter               = VK_FILTER_LINEAR;

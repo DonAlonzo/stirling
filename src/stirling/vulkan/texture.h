@@ -10,15 +10,14 @@ namespace stirling {
     namespace vulkan {
         class Texture {
         public:
-            Image                image;
             Deleter<VkImageView> image_view;
             Deleter<VkSampler>   sampler;
 
-            Texture(const Device& device, Image&& image);
+            Texture(VkDevice device, VkImage image);
 
         private:
-            Deleter<VkImageView> initImageView(const Device& device) const;
-            Deleter<VkSampler>   initSampler(const Device& device) const;
+            Deleter<VkImageView> initImageView(VkDevice device, VkImage image) const;
+            Deleter<VkSampler>   initSampler(VkDevice device) const;
         };
     }
 }
