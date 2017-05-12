@@ -1,6 +1,5 @@
 #include "physical_device.h"
 #include "device.h"
-#include "surface.h"
 
 #include <assert.h>
 #include <vector>
@@ -43,7 +42,7 @@ namespace stirling {
             return physical_device;
         }
 
-        QueueFamilyIndices PhysicalDevice::findQueueFamilies(const Surface& surface) const {
+        QueueFamilyIndices PhysicalDevice::findQueueFamilies(VkSurfaceKHR surface) const {
             uint32_t queue_family_count = 0;
             vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, nullptr);
             std::vector<VkQueueFamilyProperties> queue_families{ queue_family_count };
@@ -69,7 +68,7 @@ namespace stirling {
             return indices;
         }
 
-        Device PhysicalDevice::createDevice(const Surface& surface, const std::vector<const char*> extensions) const {
+        Device PhysicalDevice::createDevice(VkSurfaceKHR surface, const std::vector<const char*> extensions) const {
             QueueFamilyIndices indices = findQueueFamilies(surface);
 
             std::set<int> queue_family_indices = {
@@ -107,14 +106,14 @@ namespace stirling {
             return Device(*this, device, indices);
         }
 
-        VkSurfaceCapabilitiesKHR PhysicalDevice::getSurfaceCapabilities(const Surface& surface) const {
+        VkSurfaceCapabilitiesKHR PhysicalDevice::getSurfaceCapabilities(VkSurfaceKHR surface) const {
             VkSurfaceCapabilitiesKHR capabilities;
             vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface, &capabilities);
             return capabilities;
         }
 
 
-        std::vector<VkSurfaceFormatKHR> PhysicalDevice::getSurfaceFormats(const Surface& surface) const {
+        std::vector<VkSurfaceFormatKHR> PhysicalDevice::getSurfaceFormats(VkSurfaceKHR surface) const {
             uint32_t format_count;
             vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, surface, &format_count, nullptr);
             std::vector<VkSurfaceFormatKHR> formats{format_count};
@@ -122,7 +121,7 @@ namespace stirling {
             return formats;
         }
 
-        std::vector<VkPresentModeKHR> PhysicalDevice::getSurfacePresentModes(const Surface& surface) const {
+        std::vector<VkPresentModeKHR> PhysicalDevice::getSurfacePresentModes(VkSurfaceKHR surface) const {
             uint32_t present_mode_count;
             vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, surface, &present_mode_count, nullptr);
             std::vector<VkPresentModeKHR> present_modes{present_mode_count};

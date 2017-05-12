@@ -35,13 +35,13 @@ namespace stirling {
             operator VkPhysicalDevice() const;
 
             uint32_t findQueueFamilyIndex(VkQueueFlagBits queue_flags) const;
-            QueueFamilyIndices findQueueFamilies(const Surface& surface) const;
+            QueueFamilyIndices findQueueFamilies(VkSurfaceKHR surface) const;
 
-            Device createDevice(const Surface& surface, const std::vector<const char*> extensions) const;
+            Device createDevice(VkSurfaceKHR surface, const std::vector<const char*> extensions) const;
 
-            VkSurfaceCapabilitiesKHR getSurfaceCapabilities(const Surface& surface) const;
-            std::vector<VkSurfaceFormatKHR> getSurfaceFormats(const Surface& surface) const;
-            std::vector<VkPresentModeKHR> getSurfacePresentModes(const Surface& surface) const;
+            VkSurfaceCapabilitiesKHR getSurfaceCapabilities(VkSurfaceKHR surface) const;
+            std::vector<VkSurfaceFormatKHR> getSurfaceFormats(VkSurfaceKHR surface) const;
+            std::vector<VkPresentModeKHR> getSurfacePresentModes(VkSurfaceKHR surface) const;
 
         private:
             VkPhysicalDevice physical_device;

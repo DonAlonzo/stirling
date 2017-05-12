@@ -13,7 +13,6 @@ namespace stirling {
 }
 #include "deleter.h"
 #include "device.h"
-#include "framebuffer.h"
 
 #include <vector>
 
@@ -28,7 +27,7 @@ namespace stirling {
 
         class Swapchain {
         public:
-            Swapchain(const Device& device, const Surface& surface, const VkExtent2D& actual_extent);
+            Swapchain(const Device& device, VkSurfaceKHR surface, const VkExtent2D& actual_extent);
             ~Swapchain();
             Swapchain(Swapchain&&);
             Swapchain(const Swapchain&) = delete;
@@ -37,7 +36,7 @@ namespace stirling {
 
             void reset(const VkExtent2D& actual_extent);
 
-            std::vector<Framebuffer> createFramebuffers(const RenderPass& render_pass, VkImageView depth_image_view) const;
+            std::vector<VkFramebuffer> createFramebuffers(const RenderPass& render_pass, VkImageView depth_image_view) const;
 
             operator VkSwapchainKHR() const;
             const VkExtent2D& getExtent() const;
@@ -45,8 +44,8 @@ namespace stirling {
             uint32_t          getImageCount() const;
 
         private:
-            const Device*           m_device;
-            const Surface*          m_surface;
+            const Device*                     m_device;
+            VkSurfaceKHR                      m_surface;
 
             SwapchainSupportDetails           m_support_details;
             VkExtent2D                        m_swapchain_extent;
@@ -57,7 +56,7 @@ namespace stirling {
             std::vector<Deleter<VkImageView>> m_swapchain_image_views;
 
             VkSwapchainKHR                    initSwapchain(VkSwapchainKHR old_swapchain);
-            SwapchainSupportDetails           fetchSupportDetails(const PhysicalDevice& physical_device, const Surface& surface) const;
+            SwapchainSupportDetails           fetchSupportDetails(const PhysicalDevice& physical_device, VkSurfaceKHR surface) const;
             VkSurfaceFormatKHR                chooseSwapSurfaceFormat() const;
             VkPresentModeKHR                  chooseSwapPresentMode(const std::vector<VkPresentModeKHR> available_present_modes) const;
             VkExtent2D                        chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, VkExtent2D actual_extent) const;

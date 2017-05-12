@@ -160,7 +160,6 @@
     <ClCompile Include="src\stirling\vulkan\descriptor_pool.cpp" />
     <ClCompile Include="src\stirling\vulkan\buffer.cpp" />
     <ClCompile Include="src\stirling\vulkan\command_pool.cpp" />
-    <ClCompile Include="src\stirling\vulkan\framebuffer.cpp" />
     <ClCompile Include="src\stirling\vulkan\index_buffer.cpp" />
     <ClCompile Include="src\stirling\vulkan\render_pass.cpp" />
     <ClCompile Include="src\stirling\vulkan\pipeline.cpp" />
@@ -171,11 +170,10 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\stirling\vulkan\instance.cpp" />
     <ClCompile Include="src\stirling\vulkan\physical_device.cpp" />
-    <ClCompile Include="src\stirling\vulkan\surface.cpp" />
+    <ClCompile Include="src\stirling\vulkan\swapchain.cpp" />
     <ClCompile Include="src\stirling\vulkan\vertex_buffer.cpp" />
     <ClCompile Include="src\stirling\window.cpp" />
     <ClCompile Include="src\stirling\vulkan\validator.cpp" />
-    <ClCompile Include="src\stirling\vulkan\swapchain.cpp" />
     <ClCompile Include="src\stirling\vulkan\texture.cpp" />
     <ClCompile Include="src\stirling\vulkan\vertex.cpp" />
     <ClCompile Include="src\stirling\vulkan\transform.cpp" />
@@ -197,7 +195,6 @@
     <ClInclude Include="src\stirling\vulkan\descriptor_pool.h" />
     <ClInclude Include="src\stirling\vulkan\buffer.h" />
     <ClInclude Include="src\stirling\vulkan\command_pool.h" />
-    <ClInclude Include="src\stirling\vulkan\framebuffer.h" />
     <ClInclude Include="src\stirling\vulkan\index_buffer.h" />
     <ClInclude Include="src\stirling\vulkan\render_pass.h" />
     <ClInclude Include="src\stirling\vulkan\pipeline.h" />
@@ -208,13 +205,12 @@
     <ClInclude Include="src\stirling\vulkan\instance.h" />
     <ClInclude Include="src\stirling\vulkan\physical_device.h" />
     <ClInclude Include="src\stirling\stirling.h" />
-    <ClInclude Include="src\stirling\vulkan\surface.h" />
     <ClInclude Include="src\stirling\vulkan\initializers.h" />
+    <ClInclude Include="src\stirling\vulkan\swapchain.h" />
     <ClInclude Include="src\stirling\vulkan\vertex.h" />
     <ClInclude Include="src\stirling\vulkan\vertex_buffer.h" />
     <ClInclude Include="src\stirling\window.h" />
     <ClInclude Include="src\stirling\vulkan\validator.h" />
-    <ClInclude Include="src\stirling\vulkan\swapchain.h" />
     <ClInclude Include="src\stirling\stb_image.h" />
     <ClInclude Include="src\stirling\vulkan\texture.h" />
     <ClInclude Include="src\stirling\vulkan\transform.h" />

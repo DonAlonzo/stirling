@@ -34,13 +34,13 @@ namespace stirling {
     private:
         GLFWwindow*                       m_window;
         vulkan::Instance                  m_instance;
-        vulkan::Surface                   m_surface;
+        vulkan::Deleter<VkSurfaceKHR>     m_surface;
         vulkan::PhysicalDevice            m_physical_device;
         vulkan::Device                    m_device;
         vulkan::Swapchain                 m_swapchain;
         vulkan::DepthImage                m_depth_image;
         vulkan::RenderPass                m_render_pass;
-        std::vector<vulkan::Framebuffer>  m_framebuffers;
+        std::vector<VkFramebuffer>        m_framebuffers;
         vulkan::CommandPool               m_command_pool;
         vulkan::Semaphore                 m_image_available_semaphore;
         vulkan::Semaphore                 m_render_finished_semaphore;
@@ -69,7 +69,7 @@ namespace stirling {
         // Initializer methods
 
         GLFWwindow*                       initWindow(int width, int height);
-        vulkan::Surface                   initSurface() const;
+        vulkan::Deleter<VkSurfaceKHR>     initSurface() const;
         vulkan::PhysicalDevice            choosePhysicalDevice(const std::vector<vulkan::PhysicalDevice>& physical_devices) const;
         bool                              isPhysicalDeviceSuitable(const vulkan::PhysicalDevice& physical_device) const;
         vulkan::Buffer                    initStaticUniformBuffer(const vulkan::Device& device);

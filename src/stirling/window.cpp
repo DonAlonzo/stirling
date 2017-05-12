@@ -74,13 +74,13 @@ namespace stirling {
 
     Window::Window(int width, int height) :
         m_window                    (initWindow(width, height)),
-        m_instance                  (vulkan::Instance(getRequiredExtensions())),
+        m_instance                  (getRequiredExtensions()),
         m_surface                   (initSurface()),
         m_physical_device           (choosePhysicalDevice(m_instance.getPhysicalDevices())),
         m_device                    (m_physical_device.createDevice(m_surface, g_device_extensions)),
-        m_swapchain                 (vulkan::Swapchain(m_device, m_surface, getSize())),
-        m_depth_image               (vulkan::DepthImage(m_device, m_swapchain.getExtent())),
-        m_render_pass               (vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.image_format)),
+        m_swapchain                 (m_device, m_surface, getSize()),
+        m_depth_image               (m_device, m_swapchain.getExtent()),
+        m_render_pass               (m_device, m_swapchain.getImageFormat(), m_depth_image.image_format),
         m_framebuffers              (m_swapchain.createFramebuffers(m_render_pass, m_depth_image.image_view)),
         m_command_pool              (m_device.getGraphicsQueue().createCommandPool()),
         m_image_available_semaphore (m_device.createSemaphore()),
@@ -91,7 +91,7 @@ namespace stirling {
         m_descriptor_set_layout     (initDescriptorSetLayout()),
         m_descriptor_pool           (initDescriptorPool()),
 
-        m_pipeline                  (vulkan::Pipeline(m_device, { m_descriptor_set_layout }, m_render_pass, m_swapchain.getExtent(), "shaders/vert.spv", "shaders/frag.spv")),
+        m_pipeline                  (m_device, { m_descriptor_set_layout }, m_render_pass, m_swapchain.getExtent(), "shaders/vert.spv", "shaders/frag.spv"),
 
         m_house_model_component     (createModelComponent("models/chalet.obj", "textures/chalet.jpg")),
         m_gladiator_model_component (createModelComponent("models/gladiators.obj", "textures/gladiators.jpg")),
@@ -105,7 +105,7 @@ namespace stirling {
 
         addControls();
 
-        m_camera = std::unique_ptr<Camera>(new Camera(glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.01f, 10.0f));
+        m_camera.reset(new Camera(glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.01f, 10.0f));
 
         glfwMaximizeWindow(m_window);
 
@@ -148,12 +148,12 @@ namespace stirling {
         return window;
     }
 
-    vulkan::Surface Window::initSurface() const {
+    vulkan::Deleter<VkSurfaceKHR> Window::initSurface() const {
         VkSurfaceKHR surface;
         if (glfwCreateWindowSurface(m_instance, m_window, nullptr, &surface) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create window surface.");
         }
-        return vulkan::Surface(vulkan::Deleter<VkSurfaceKHR>(surface, m_instance, vkDestroySurfaceKHR));
+        return vulkan::Deleter<VkSurfaceKHR>(surface, m_instance, vkDestroySurfaceKHR);
     }
 
     vulkan::PhysicalDevice Window::choosePhysicalDevice(const std::vector<vulkan::PhysicalDevice>& physical_devices) const {

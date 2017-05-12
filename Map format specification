@@ -1,0 +1,15 @@
+[Format version]
+Object: {
+	Position: [X, Y, Z]
+	Rotation: [X, Y, Z]
+	Scale:    [X, Y, Z]
+	Components: {
+		ModelComponent {
+			Texture:     [file]
+			Vertex data: [file]	
+		}
+		PhysicsComponent {
+
+		}
+	}	
+}

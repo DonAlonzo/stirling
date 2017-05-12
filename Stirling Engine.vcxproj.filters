@@ -45,12 +45,6 @@
     <ClCompile Include="src\stirling\vulkan\queue.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="src\stirling\vulkan\surface.cpp">
-      <Filter>Source Files\vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\stirling\vulkan\swapchain.cpp">
-      <Filter>Source Files\vulkan</Filter>
-    </ClCompile>
     <ClCompile Include="src\stirling\vulkan\shader_module.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
@@ -58,9 +52,6 @@
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\stirling\vulkan\render_pass.cpp">
-      <Filter>Source Files\vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\stirling\vulkan\framebuffer.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\stirling\vulkan\command_pool.cpp">
@@ -123,6 +114,9 @@
     <ClCompile Include="src\stirling\util\io.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
+    <ClCompile Include="src\stirling\vulkan\swapchain.cpp">
+      <Filter>Source Files\vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\stirling\vulkan\instance.h">
@@ -140,12 +134,6 @@
     <ClInclude Include="src\stirling\vulkan\queue.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\stirling\vulkan\surface.h">
-      <Filter>Header Files\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\stirling\vulkan\swapchain.h">
-      <Filter>Header Files\vulkan</Filter>
-    </ClInclude>
     <ClInclude Include="src\stirling\vulkan\shader_module.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
@@ -153,9 +141,6 @@
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\stirling\vulkan\render_pass.h">
-      <Filter>Header Files\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\stirling\vulkan\framebuffer.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\stirling\vulkan\command_pool.h">
@@ -234,6 +219,9 @@
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\stirling\vulkan\initializers.h">
+      <Filter>Header Files\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stirling\vulkan\swapchain.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
   </ItemGroup>

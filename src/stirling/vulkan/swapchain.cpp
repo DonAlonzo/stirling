@@ -3,7 +3,6 @@
 #include "device.h"
 #include "physical_device.h"
 #include "render_pass.h"
-#include "surface.h"
 
 #include <algorithm>
 #include <array>
@@ -11,10 +10,10 @@
 namespace stirling {
     namespace vulkan {
 
-        Swapchain::Swapchain(const Device& device, const Surface& surface, const VkExtent2D& actual_extent) :
+        Swapchain::Swapchain(const Device& device, VkSurfaceKHR surface, const VkExtent2D& actual_extent) :
             m_device                 (&device),
-            m_surface                (&surface),
-            m_support_details        (fetchSupportDetails(m_device->getPhysicalDevice(), *m_surface)),
+            m_surface                (surface),
+            m_support_details        (fetchSupportDetails(m_device->getPhysicalDevice(), m_surface)),
             m_swapchain_extent       (chooseSwapExtent(m_support_details.capabilities, actual_extent)),
             m_surface_format         (chooseSwapSurfaceFormat()),
             m_swapchain              (initSwapchain(VK_NULL_HANDLE)),
@@ -26,7 +25,7 @@ namespace stirling {
         VkSwapchainKHR Swapchain::initSwapchain(VkSwapchainKHR old_swapchain) {
             VkSwapchainCreateInfoKHR create_info = {};
             create_info.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-            create_info.surface          = *m_surface;
+            create_info.surface          = m_surface;
             create_info.minImageCount    = getImageCount();
             create_info.imageFormat      = m_surface_format.format;
             create_info.imageColorSpace  = m_surface_format.colorSpace;
@@ -34,7 +33,7 @@ namespace stirling {
             create_info.imageArrayLayers = 1;
             create_info.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-            auto indices = m_device->getPhysicalDevice().findQueueFamilies(*m_surface);
+            auto indices = m_device->getPhysicalDevice().findQueueFamilies(m_surface);
             if (indices.graphics_family_index != indices.present_family_index) {
                 uint32_t queue_family_indices[] = {
                     (uint32_t)indices.graphics_family_index,
@@ -49,7 +48,7 @@ namespace stirling {
 
             create_info.preTransform   = m_support_details.capabilities.currentTransform;
             create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-            create_info.presentMode    = chooseSwapPresentMode(m_device->getPhysicalDevice().getSurfacePresentModes(*m_surface));
+            create_info.presentMode    = chooseSwapPresentMode(m_device->getPhysicalDevice().getSurfacePresentModes(m_surface));
             create_info.clipped        = VK_TRUE;
             create_info.oldSwapchain   = old_swapchain;
 
@@ -60,7 +59,7 @@ namespace stirling {
             return swapchain;
         }
 
-        SwapchainSupportDetails Swapchain::fetchSupportDetails(const PhysicalDevice& physical_device, const Surface& surface) const {
+        SwapchainSupportDetails Swapchain::fetchSupportDetails(const PhysicalDevice& physical_device, VkSurfaceKHR surface) const {
             SwapchainSupportDetails support_details = {};
             support_details.capabilities  = physical_device.getSurfaceCapabilities(surface);
             support_details.formats       = physical_device.getSurfaceFormats(surface);
@@ -69,7 +68,7 @@ namespace stirling {
         }
     
         VkSurfaceFormatKHR Swapchain::chooseSwapSurfaceFormat() const {
-            auto available_formats = m_device->getPhysicalDevice().getSurfaceFormats(*m_surface);
+            auto available_formats = m_device->getPhysicalDevice().getSurfaceFormats(m_surface);
 
             if (available_formats.size() == 1 && available_formats[0].format == VK_FORMAT_UNDEFINED) {
                 return {
@@ -143,7 +142,7 @@ namespace stirling {
         }
 
         void Swapchain::reset(const VkExtent2D& actual_extent) {
-            m_support_details        = fetchSupportDetails(m_device->getPhysicalDevice(), *m_surface);
+            m_support_details        = fetchSupportDetails(m_device->getPhysicalDevice(), m_surface);
             m_swapchain_extent       = chooseSwapExtent(m_support_details.capabilities, actual_extent);
             m_surface_format         = chooseSwapSurfaceFormat();
             m_swapchain              = initSwapchain(m_swapchain);
@@ -187,8 +186,8 @@ namespace stirling {
             if (m_swapchain != VK_NULL_HANDLE) vkDestroySwapchainKHR(*m_device, m_swapchain, nullptr);
         }
 
-        std::vector<Framebuffer> Swapchain::createFramebuffers(const RenderPass& render_pass, VkImageView depth_image_view) const {
-            std::vector<Framebuffer> framebuffers;
+        std::vector<VkFramebuffer> Swapchain::createFramebuffers(const RenderPass& render_pass, VkImageView depth_image_view) const {
+            std::vector<VkFramebuffer> framebuffers;
             framebuffers.reserve(m_swapchain_image_views.size());
 
             for (size_t i = 0; i < m_swapchain_image_views.size(); ++i) {
@@ -210,7 +209,7 @@ namespace stirling {
                 if (vkCreateFramebuffer(*m_device, &create_info, nullptr, &framebuffer) != VK_SUCCESS) {
                     throw std::runtime_error("Failed to create framebuffer.");
                 }
-                framebuffers.push_back(Framebuffer(*m_device, framebuffer));
+                framebuffers.push_back(framebuffer);
             }
             return framebuffers;
         }
