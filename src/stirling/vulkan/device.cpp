@@ -46,15 +46,7 @@ namespace stirling {
             return images;
         }
 
-        VkSwapchainKHR Device::createSwapchain(VkSwapchainCreateInfoKHR create_info) const {
-            VkSwapchainKHR swapchain;
-            if (vkCreateSwapchainKHR(m_device, &create_info, nullptr, &swapchain) != VK_SUCCESS) {
-                throw std::runtime_error("Failed to create swap chain.");
-            }
-            return swapchain;
-        }
-
-        Buffer Device::createBuffer(VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkDeviceSize size, void *data) const {
+        Buffer Device::createBuffer(VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkDeviceSize size, void* data) const {
             return Buffer(*this, usage, properties, size);
         }
 

@@ -28,12 +28,7 @@ namespace stirling {
         class Swapchain {
         public:
             Swapchain(const Device& device, VkSurfaceKHR surface, const VkExtent2D& actual_extent);
-            ~Swapchain();
-            Swapchain(Swapchain&&);
-            Swapchain(const Swapchain&) = delete;
-            Swapchain& operator=(Swapchain&&);
-            Swapchain& operator=(const Swapchain&) = delete;
-
+            
             void reset(const VkExtent2D& actual_extent);
 
             std::vector<VkFramebuffer> createFramebuffers(const RenderPass& render_pass, VkImageView depth_image_view) const;
@@ -50,12 +45,12 @@ namespace stirling {
             SwapchainSupportDetails           m_support_details;
             VkExtent2D                        m_swapchain_extent;
             VkSurfaceFormatKHR                m_surface_format;
-            VkSwapchainKHR                    m_swapchain;
+            Deleter<VkSwapchainKHR>           m_swapchain;
             std::vector<VkImage>              m_swapchain_images;
             VkFormat                          m_swapchain_image_format;
             std::vector<Deleter<VkImageView>> m_swapchain_image_views;
 
-            VkSwapchainKHR                    initSwapchain(VkSwapchainKHR old_swapchain);
+            Deleter<VkSwapchainKHR>           initSwapchain(VkSwapchainKHR old_swapchain);
             SwapchainSupportDetails           fetchSupportDetails(const PhysicalDevice& physical_device, VkSurfaceKHR surface) const;
             VkSurfaceFormatKHR                chooseSwapSurfaceFormat() const;
             VkPresentModeKHR                  chooseSwapPresentMode(const std::vector<VkPresentModeKHR> available_present_modes) const;

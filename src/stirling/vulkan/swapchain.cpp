@@ -22,7 +22,7 @@ namespace stirling {
             m_swapchain_image_views  (initImageViews(getImageCount())) {
         }
 
-        VkSwapchainKHR Swapchain::initSwapchain(VkSwapchainKHR old_swapchain) {
+        Deleter<VkSwapchainKHR> Swapchain::initSwapchain(VkSwapchainKHR old_swapchain) {
             VkSwapchainCreateInfoKHR create_info = {};
             create_info.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
             create_info.surface          = m_surface;
@@ -56,7 +56,7 @@ namespace stirling {
             if (vkCreateSwapchainKHR(*m_device, &create_info, nullptr, &swapchain) != VK_SUCCESS) {
                 throw std::runtime_error("Failed to create swap chain.");
             }
-            return swapchain;
+            return Deleter<VkSwapchainKHR>(swapchain, *m_device, vkDestroySwapchainKHR);
         }
 
         SwapchainSupportDetails Swapchain::fetchSupportDetails(const PhysicalDevice& physical_device, VkSurfaceKHR surface) const {
@@ -149,41 +149,6 @@ namespace stirling {
             m_swapchain_images       = m_device->getSwapchainImages(m_swapchain, getImageCount());
             m_swapchain_image_format = m_surface_format.format;
             m_swapchain_image_views  = initImageViews(getImageCount());
-        }
-
-        Swapchain::Swapchain(Swapchain&& rhs) :
-            m_device                 (std::move(rhs.m_device)),
-            m_surface                (std::move(rhs.m_surface)),
-            m_support_details        (std::move(rhs.m_support_details)),
-            m_swapchain_extent       (std::move(rhs.m_swapchain_extent)),
-            m_surface_format         (std::move(rhs.m_surface_format)),
-            m_swapchain              (std::move(rhs.m_swapchain)),
-            m_swapchain_images       (std::move(rhs.m_swapchain_images)),
-            m_swapchain_image_format (std::move(rhs.m_swapchain_image_format)),
-            m_swapchain_image_views  (std::move(rhs.m_swapchain_image_views)) {
-
-            rhs.m_swapchain = VK_NULL_HANDLE;
-        }
-
-        Swapchain& Swapchain::operator=(Swapchain&& rhs) {
-            m_swapchain_image_views  = std::move(rhs.m_swapchain_image_views);
-            m_swapchain_image_format = std::move(rhs.m_swapchain_image_format);
-            m_swapchain_images       = std::move(rhs.m_swapchain_images);
-            if (m_swapchain != VK_NULL_HANDLE) vkDestroySwapchainKHR(*m_device, m_swapchain, nullptr);
-            m_swapchain              = std::move(rhs.m_swapchain);
-            m_surface_format         = std::move(rhs.m_surface_format);
-            m_swapchain_extent       = std::move(rhs.m_swapchain_extent);
-            m_support_details        = std::move(rhs.m_support_details);
-            m_surface                = std::move(rhs.m_surface);
-            m_device                 = std::move(rhs.m_device);
-
-            rhs.m_swapchain = VK_NULL_HANDLE;
-
-            return *this;
-        }
-
-        Swapchain::~Swapchain() {
-            if (m_swapchain != VK_NULL_HANDLE) vkDestroySwapchainKHR(*m_device, m_swapchain, nullptr);
         }
 
         std::vector<VkFramebuffer> Swapchain::createFramebuffers(const RenderPass& render_pass, VkImageView depth_image_view) const {
