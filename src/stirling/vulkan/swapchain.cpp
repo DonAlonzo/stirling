@@ -10,22 +10,21 @@
 namespace stirling {
     namespace vulkan {
 
-        Swapchain::Swapchain(const Device& device, VkSurfaceKHR surface, const VkExtent2D& actual_extent) :
-            m_device                 (&device),
-            m_surface                (surface),
-            m_support_details        (fetchSupportDetails(m_device->getPhysicalDevice(), m_surface)),
+        Swapchain::Swapchain(const vulkan::Device& device, VkSurfaceKHR surface, VkExtent2D actual_extent, VkSwapchainKHR old_swapchain) :
+            m_device                 (device),
+            m_support_details        (fetchSupportDetails(device.getPhysicalDevice(), surface)),
             m_swapchain_extent       (chooseSwapExtent(m_support_details.capabilities, actual_extent)),
-            m_surface_format         (chooseSwapSurfaceFormat()),
-            m_swapchain              (initSwapchain(VK_NULL_HANDLE)),
-            m_swapchain_images       (m_device->getSwapchainImages(m_swapchain, getImageCount())),
+            m_surface_format         (chooseSwapSurfaceFormat(device.getPhysicalDevice().getSurfaceFormats(surface))),
+            m_swapchain              (initSwapchain(device, surface, old_swapchain)),
+            m_swapchain_images       (device.getSwapchainImages(m_swapchain, getImageCount())),
             m_swapchain_image_format (m_surface_format.format),
             m_swapchain_image_views  (initImageViews(getImageCount())) {
         }
 
-        Deleter<VkSwapchainKHR> Swapchain::initSwapchain(VkSwapchainKHR old_swapchain) {
+        Deleter<VkSwapchainKHR> Swapchain::initSwapchain(const Device& device, VkSurfaceKHR surface, VkSwapchainKHR old_swapchain) {
             VkSwapchainCreateInfoKHR create_info = {};
             create_info.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-            create_info.surface          = m_surface;
+            create_info.surface          = surface;
             create_info.minImageCount    = getImageCount();
             create_info.imageFormat      = m_surface_format.format;
             create_info.imageColorSpace  = m_surface_format.colorSpace;
@@ -33,7 +32,7 @@ namespace stirling {
             create_info.imageArrayLayers = 1;
             create_info.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-            auto indices = m_device->getPhysicalDevice().findQueueFamilies(m_surface);
+            auto indices = device.getPhysicalDevice().findQueueFamilies(surface);
             if (indices.graphics_family_index != indices.present_family_index) {
                 uint32_t queue_family_indices[] = {
                     (uint32_t)indices.graphics_family_index,
@@ -48,15 +47,15 @@ namespace stirling {
 
             create_info.preTransform   = m_support_details.capabilities.currentTransform;
             create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-            create_info.presentMode    = chooseSwapPresentMode(m_device->getPhysicalDevice().getSurfacePresentModes(m_surface));
+            create_info.presentMode    = chooseSwapPresentMode(device.getPhysicalDevice().getSurfacePresentModes(surface));
             create_info.clipped        = VK_TRUE;
             create_info.oldSwapchain   = old_swapchain;
 
             VkSwapchainKHR swapchain;
-            if (vkCreateSwapchainKHR(*m_device, &create_info, nullptr, &swapchain) != VK_SUCCESS) {
+            if (vkCreateSwapchainKHR(m_device, &create_info, nullptr, &swapchain) != VK_SUCCESS) {
                 throw std::runtime_error("Failed to create swap chain.");
             }
-            return Deleter<VkSwapchainKHR>(swapchain, *m_device, vkDestroySwapchainKHR);
+            return Deleter<VkSwapchainKHR>(swapchain, m_device, vkDestroySwapchainKHR);
         }
 
         SwapchainSupportDetails Swapchain::fetchSupportDetails(const PhysicalDevice& physical_device, VkSurfaceKHR surface) const {
@@ -67,9 +66,7 @@ namespace stirling {
             return support_details;
         }
     
-        VkSurfaceFormatKHR Swapchain::chooseSwapSurfaceFormat() const {
-            auto available_formats = m_device->getPhysicalDevice().getSurfaceFormats(m_surface);
-
+        VkSurfaceFormatKHR Swapchain::chooseSwapSurfaceFormat(std::vector<VkSurfaceFormatKHR> available_formats) const {
             if (available_formats.size() == 1 && available_formats[0].format == VK_FORMAT_UNDEFINED) {
                 return {
                     VK_FORMAT_B8G8R8A8_UNORM,
@@ -132,23 +129,13 @@ namespace stirling {
                 create_info.subresourceRange.layerCount     = 1;
 
                 VkImageView image_view;
-                if (vkCreateImageView(*m_device, &create_info, nullptr, &image_view) != VK_SUCCESS) {
+                if (vkCreateImageView(m_device, &create_info, nullptr, &image_view) != VK_SUCCESS) {
                     throw std::runtime_error("Failed to create image views.");
                 }
-                image_views.push_back(Deleter<VkImageView>(image_view, *m_device, vkDestroyImageView));
+                image_views.push_back(Deleter<VkImageView>(image_view, m_device, vkDestroyImageView));
             }
 
             return image_views;
-        }
-
-        void Swapchain::reset(const VkExtent2D& actual_extent) {
-            m_support_details        = fetchSupportDetails(m_device->getPhysicalDevice(), m_surface);
-            m_swapchain_extent       = chooseSwapExtent(m_support_details.capabilities, actual_extent);
-            m_surface_format         = chooseSwapSurfaceFormat();
-            m_swapchain              = initSwapchain(m_swapchain);
-            m_swapchain_images       = m_device->getSwapchainImages(m_swapchain, getImageCount());
-            m_swapchain_image_format = m_surface_format.format;
-            m_swapchain_image_views  = initImageViews(getImageCount());
         }
 
         std::vector<VkFramebuffer> Swapchain::createFramebuffers(const RenderPass& render_pass, VkImageView depth_image_view) const {
@@ -171,7 +158,7 @@ namespace stirling {
                 create_info.layers          = 1;
 
                 VkFramebuffer framebuffer;
-                if (vkCreateFramebuffer(*m_device, &create_info, nullptr, &framebuffer) != VK_SUCCESS) {
+                if (vkCreateFramebuffer(m_device, &create_info, nullptr, &framebuffer) != VK_SUCCESS) {
                     throw std::runtime_error("Failed to create framebuffer.");
                 }
                 framebuffers.push_back(framebuffer);

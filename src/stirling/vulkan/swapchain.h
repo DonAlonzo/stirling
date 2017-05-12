@@ -27,10 +27,8 @@ namespace stirling {
 
         class Swapchain {
         public:
-            Swapchain(const Device& device, VkSurfaceKHR surface, const VkExtent2D& actual_extent);
+            Swapchain(const vulkan::Device& device, VkSurfaceKHR surface, VkExtent2D actual_extent, VkSwapchainKHR old_swapchain = VK_NULL_HANDLE);
             
-            void reset(const VkExtent2D& actual_extent);
-
             std::vector<VkFramebuffer> createFramebuffers(const RenderPass& render_pass, VkImageView depth_image_view) const;
 
             operator VkSwapchainKHR() const;
@@ -39,9 +37,7 @@ namespace stirling {
             uint32_t          getImageCount() const;
 
         private:
-            const Device*                     m_device;
-            VkSurfaceKHR                      m_surface;
-
+            VkDevice                          m_device;
             SwapchainSupportDetails           m_support_details;
             VkExtent2D                        m_swapchain_extent;
             VkSurfaceFormatKHR                m_surface_format;
@@ -50,9 +46,9 @@ namespace stirling {
             VkFormat                          m_swapchain_image_format;
             std::vector<Deleter<VkImageView>> m_swapchain_image_views;
 
-            Deleter<VkSwapchainKHR>           initSwapchain(VkSwapchainKHR old_swapchain);
+            Deleter<VkSwapchainKHR>           initSwapchain(const Device& device, VkSurfaceKHR surface, VkSwapchainKHR old_swapchain);
             SwapchainSupportDetails           fetchSupportDetails(const PhysicalDevice& physical_device, VkSurfaceKHR surface) const;
-            VkSurfaceFormatKHR                chooseSwapSurfaceFormat() const;
+            VkSurfaceFormatKHR                chooseSwapSurfaceFormat(std::vector<VkSurfaceFormatKHR> available_formats) const;
             VkPresentModeKHR                  chooseSwapPresentMode(const std::vector<VkPresentModeKHR> available_present_modes) const;
             VkExtent2D                        chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, VkExtent2D actual_extent) const;
             std::vector<Deleter<VkImageView>> initImageViews(uint32_t image_count) const;
