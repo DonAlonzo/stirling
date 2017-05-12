@@ -10,17 +10,13 @@ namespace stirling {
 
         Device::Device(const PhysicalDevice& physical_device, VkDevice device, QueueFamilyIndices indices) :
             m_physical_device (physical_device),
-            m_device          (device),
+            m_device          (device, vkDestroyDevice),
             m_graphics_queue  (initQueue(indices.graphics_family_index)),
             m_present_queue   (initQueue(indices.present_family_index)) {
         }
 
         Queue Device::initQueue(int queue_family_index) {
             return Queue(*this, queue_family_index);
-        }
-
-        Device::~Device() {
-            vkDestroyDevice(m_device, nullptr);
         }
 
         Device::operator VkDevice() const {

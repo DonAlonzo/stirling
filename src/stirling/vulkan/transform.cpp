@@ -9,36 +9,45 @@
 namespace stirling {
     namespace vulkan {
 
+        Transform::Transform() {
+            m_transform = new glm::mat4();
+        }
+
+        Transform::Transform(glm::mat4* transform) {
+            m_transform = transform;
+        }
+
         Transform::operator const glm::mat4&() {
             return transform();
         }
 
         void Transform::translate(const glm::vec3& translation) {
             m_position += translation;
-            m_update_transform = true;
+            update();
         }
 
         void Transform::moveTo(const glm::vec3& position) {
             m_position = position;
-            m_update_transform = true;
+            update();
         }
 
         void Transform::rotate(float angle, const glm::vec3& axis) {
             m_rotation *= glm::angleAxis(angle, axis);
-            m_update_transform = true;
+            update();
         }
 
         void Transform::lookAt(const glm::vec3& target, const glm::vec3& up) {
             m_rotation = glm::lookAt(target, m_position, up);
-            m_update_transform = true;
+            update();
         }
 
         void Transform::setScale(const glm::vec3& scale) {
             m_scale = scale;
+            update();
         }
 
         glm::vec3 Transform::left() const {
-            return glm::vec3(m_transform[0][0], m_transform[1][0], m_transform[2][0]) ;
+            return glm::vec3((*m_transform)[0][0], (*m_transform)[1][0], (*m_transform)[2][0]) ;
         }
 
         glm::vec3 Transform::right() const {
@@ -46,7 +55,7 @@ namespace stirling {
         }
 
         glm::vec3 Transform::down() const {
-            return glm::vec3(m_transform[0][1], m_transform[1][1], m_transform[2][1]) ;
+            return glm::vec3((*m_transform)[0][1], (*m_transform)[1][1], (*m_transform)[2][1]) ;
         }
 
         glm::vec3 Transform::up() const {
@@ -54,7 +63,7 @@ namespace stirling {
         }
 
         glm::vec3 Transform::forward() const {
-            return glm::vec3(m_transform[0][2], m_transform[1][2], m_transform[2][2]);
+            return glm::vec3((*m_transform)[0][2], (*m_transform)[1][2], (*m_transform)[2][2]);
         }
 
         glm::vec3 Transform::backward() const {
@@ -74,12 +83,11 @@ namespace stirling {
         }
 
         const glm::mat4& Transform::transform() {
-            if (m_update_transform) {
-                m_transform = glm::toMat4(m_rotation) * glm::scale(glm::mat4(), m_scale);
-                m_transform = glm::translate(m_transform, m_position);
-                m_update_transform = false;
-            }
-            return m_transform;
+            return *m_transform;
+        }
+
+        void Transform::update() {
+            *m_transform = glm::translate(glm::toMat4(m_rotation) * glm::scale(glm::mat4(), m_scale), m_position);
         }
 
     }

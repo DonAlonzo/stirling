@@ -80,7 +80,9 @@ namespace stirling {
         std::vector<VkCommandBuffer>      initCommandBuffers() const;
         ModelComponent*                   createModelComponent(const std::string& model_file, const std::string& texture_file) const;
         PhysicsComponent*                 createPhysicsComponent() const;
-        Entity*                           createEntity(ModelComponent* model_component, PhysicsComponent* physics_component) const;
+        Entity*                           createEntity(ModelComponent* model_component, PhysicsComponent* physics_component);
+
+        glm::mat4*                        allocateDynamicModelMatrix();
 
         void                              addControls();
         void                              recreateSwapchain();

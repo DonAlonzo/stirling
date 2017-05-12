@@ -6,7 +6,7 @@
 class StirlingDemo {
 public:
     StirlingDemo() :
-        m_window (initWindow()) {
+        m_window (800, 600) {
     }
 
     void run() {
@@ -18,10 +18,6 @@ public:
 
 private:
     stirling::Window m_window;
-
-    stirling::Window initWindow() {
-        return stirling::Window(800, 600);
-    }
 };
 
 int main() {

@@ -7,6 +7,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include <chrono>
 #include <iostream>
@@ -72,6 +73,11 @@ namespace stirling {
         glm::mat4* model = nullptr;
     } m_dynamic_ubo;
 
+    glm::mat4* Window::allocateDynamicModelMatrix() {
+        static uint64_t next_dynamic_model = 0;
+        return (glm::mat4*)(((uint64_t)m_dynamic_ubo.model + (next_dynamic_model++ * m_dynamic_alignment)));
+    }
+
     Window::Window(int width, int height) :
         m_window                    (initWindow(width, height)),
         m_instance                  (getRequiredExtensions()),
@@ -94,12 +100,12 @@ namespace stirling {
         m_pipeline                  (m_device, { m_descriptor_set_layout }, m_render_pass, m_swapchain.getExtent(), "shaders/vert.spv", "shaders/frag.spv"),
 
         m_house_model_component     (createModelComponent("models/chalet.obj", "textures/chalet.jpg")),
-        m_gladiator_model_component (createModelComponent("models/gladiators.obj", "textures/gladiators.jpg")),
+        //m_gladiator_model_component (createModelComponent("models/gladiators.obj", "textures/gladiators.jpg")),
         m_physics_component         (createPhysicsComponent()),
         m_house_entity_1            (createEntity(m_house_model_component.get(), m_physics_component.get())),
         m_house_entity_2            (createEntity(m_house_model_component.get(), m_physics_component.get())),
-        m_gladiator_entity_1        (createEntity(m_gladiator_model_component.get(), m_physics_component.get())),
-        m_gladiator_entity_2        (createEntity(m_gladiator_model_component.get(), m_physics_component.get())),
+        //m_gladiator_entity_1        (createEntity(m_gladiator_model_component.get(), m_physics_component.get())),
+        //m_gladiator_entity_2        (createEntity(m_gladiator_model_component.get(), m_physics_component.get())),
 
         m_command_buffers           (initCommandBuffers()) {
 
@@ -112,8 +118,8 @@ namespace stirling {
         m_world.addEntity(m_camera.get());
         m_world.addEntity(m_house_entity_1.get());
         m_world.addEntity(m_house_entity_2.get());
-        m_world.addEntity(m_gladiator_entity_1.get());
-        m_world.addEntity(m_gladiator_entity_2.get());
+        //m_world.addEntity(m_gladiator_entity_1.get());
+        //m_world.addEntity(m_gladiator_entity_2.get());
 
         m_camera->transform().moveTo(glm::vec3(2.f, -2.f, -2.f));
         m_camera->transform().lookAt(glm::vec3(0.f, 0.f, 0.f));
@@ -121,12 +127,12 @@ namespace stirling {
         m_house_entity_2->transform().moveTo(glm::vec3(-2.f, -2.f, 0.f));
         m_house_entity_2->transform().setScale(glm::vec3(0.5f, .5f, .5f));
 
-        m_gladiator_entity_1->transform().moveTo(glm::vec3(-10.f, -10.f, 0.f));
-        m_gladiator_entity_1->transform().setScale(glm::vec3(.2f, .2f, .2f));
+        //m_gladiator_entity_1->transform().moveTo(glm::vec3(-10.f, -10.f, 0.f));
+        //m_gladiator_entity_1->transform().setScale(glm::vec3(.2f, .2f, .2f));
 
-        m_gladiator_entity_2->transform().moveTo(glm::vec3(-10.f, 10.f, 0.f));
-        m_gladiator_entity_2->transform().setScale(glm::vec3(.2f, .2f, .2f));
-        m_gladiator_entity_2->transform().rotate(glm::radians(45.f), glm::vec3(0.f, 0.f, 1.f));
+        //m_gladiator_entity_2->transform().moveTo(glm::vec3(-10.f, 10.f, 0.f));
+        //m_gladiator_entity_2->transform().setScale(glm::vec3(.2f, .2f, .2f));
+        //m_gladiator_entity_2->transform().rotate(glm::radians(45.f), glm::vec3(0.f, 0.f, 1.f));
     }
 
     GLFWwindow* Window::initWindow(int width, int height) {
@@ -258,8 +264,8 @@ namespace stirling {
         return new PhysicsComponent();
     }
 
-    Entity* Window::createEntity(ModelComponent* model_component, PhysicsComponent* physics_component) const {
-        auto entity = new Entity();
+    Entity* Window::createEntity(ModelComponent* model_component, PhysicsComponent* physics_component) {
+        auto entity = new Entity(vulkan::Transform(allocateDynamicModelMatrix()));
 
         entity->addComponent(physics_component);
         entity->addComponent(model_component);
@@ -308,7 +314,7 @@ namespace stirling {
                         vkCmdDrawIndexed(command_buffers[i], m_house_model_component->model.index_buffer.size(), 1, 0, 0, 0);
                     }
                 }
-                {
+                if (false) {
                     VkBuffer vertex_buffers[] = { m_gladiator_model_component->model.vertex_buffer };
                     VkDeviceSize offsets[] = { 0 };
                     vkCmdBindVertexBuffers(command_buffers[i], 0, 1, vertex_buffers, offsets);
@@ -411,13 +417,6 @@ namespace stirling {
         }
 
         { // Update dynamic uniform buffer
-            {
-                *((glm::mat4*)(((uint64_t)m_dynamic_ubo.model + (0 * m_dynamic_alignment)))) = m_house_entity_1->transform().transform();
-                *((glm::mat4*)(((uint64_t)m_dynamic_ubo.model + (1 * m_dynamic_alignment)))) = m_house_entity_2->transform().transform();
-                *((glm::mat4*)(((uint64_t)m_dynamic_ubo.model + (2 * m_dynamic_alignment)))) = m_gladiator_entity_1->transform().transform();
-                *((glm::mat4*)(((uint64_t)m_dynamic_ubo.model + (3 * m_dynamic_alignment)))) = m_gladiator_entity_2->transform().transform();
-            }
-
             m_dynamic_uniform_buffer.memcpy(m_dynamic_ubo.model);
 
             // Flush dynamic uniform buffer memory

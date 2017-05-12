@@ -12,6 +12,7 @@ namespace stirling {
         struct QueueFamilyIndices;
     }
 }
+#include "deleter.h"
 #include "queue.h"
 
 #include <vector>
@@ -21,11 +22,6 @@ namespace stirling {
         class Device {
         public:
             Device(const PhysicalDevice& physical_device, VkDevice device, QueueFamilyIndices indices);
-            ~Device();
-            Device(Device&&) = default;
-            Device(const Device&) = delete;
-            Device& operator=(Device&&) = delete;
-            Device& operator=(const Device&) = delete;
 
             operator VkDevice() const;
 
@@ -40,7 +36,7 @@ namespace stirling {
         private:
             const PhysicalDevice& m_physical_device;
 
-            VkDevice              m_device;
+            Deleter<VkDevice>     m_device;
             Queue                 m_graphics_queue;
             Queue                 m_present_queue;
 

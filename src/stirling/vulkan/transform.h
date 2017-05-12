@@ -7,6 +7,9 @@ namespace stirling {
     namespace vulkan {
         class Transform {
         public:
+            Transform();
+            Transform(glm::mat4* transform);
+
             operator const glm::mat4&();
 
             void translate(const glm::vec3& translation);
@@ -31,9 +34,9 @@ namespace stirling {
             glm::vec3 m_position;
             glm::quat m_rotation;
             glm::vec3 m_scale{1.0f};
-            glm::mat4 m_transform;
+            glm::mat4* m_transform;
 
-            bool m_update_transform = true;
+            void update();
         };
     }
 }
