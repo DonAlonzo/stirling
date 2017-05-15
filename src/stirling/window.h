@@ -20,7 +20,7 @@ namespace stirling {
         friend WindowListener;
 
     public:
-        Window(int width, int height);
+        Window(int width, int height, Map map);
         ~Window();
         Window(Window&&) = default;
         Window(const Window&) = delete;
@@ -44,25 +44,10 @@ namespace stirling {
         vulkan::CommandPool               m_command_pool;
         vulkan::Semaphore                 m_image_available_semaphore;
         vulkan::Semaphore                 m_render_finished_semaphore;
-        vulkan::Buffer                    m_static_uniform_buffer;
-        vulkan::Buffer                    m_dynamic_uniform_buffer;
-        size_t                            m_dynamic_alignment;
 
-        std::unique_ptr<Camera>           m_camera;
+        Camera                            m_camera;
         World                             m_world;
-
-        VkDescriptorSetLayout             m_descriptor_set_layout;
-        vulkan::DescriptorPool            m_descriptor_pool;
-        
-        vulkan::Pipeline                  m_pipeline;
-
-        std::unique_ptr<ModelComponent>   m_house_model_component;
-        std::unique_ptr<ModelComponent>   m_gladiator_model_component;
-        std::unique_ptr<PhysicsComponent> m_physics_component;
-        std::unique_ptr<Entity>           m_house_entity_1;
-        std::unique_ptr<Entity>           m_house_entity_2;
-        std::unique_ptr<Entity>           m_gladiator_entity_1;
-        std::unique_ptr<Entity>           m_gladiator_entity_2;
+        MapInstance                       m_map_instance;
 
         std::vector<VkCommandBuffer>      m_command_buffers;
 
@@ -72,17 +57,7 @@ namespace stirling {
         vulkan::Deleter<VkSurfaceKHR>     initSurface() const;
         vulkan::PhysicalDevice            choosePhysicalDevice(const std::vector<vulkan::PhysicalDevice>& physical_devices) const;
         bool                              isPhysicalDeviceSuitable(const vulkan::PhysicalDevice& physical_device) const;
-        vulkan::Buffer                    initStaticUniformBuffer(const vulkan::Device& device);
-        vulkan::Buffer                    initDynamicUniformBuffer(const vulkan::Device& device, int max_number_of_objects);
-
-        VkDescriptorSetLayout             initDescriptorSetLayout() const;
-        vulkan::DescriptorPool            initDescriptorPool() const;
         std::vector<VkCommandBuffer>      initCommandBuffers() const;
-        ModelComponent*                   createModelComponent(const std::string& model_file, const std::string& texture_file) const;
-        PhysicsComponent*                 createPhysicsComponent() const;
-        Entity*                           createEntity(ModelComponent* model_component, PhysicsComponent* physics_component);
-
-        glm::mat4*                        allocateDynamicModelMatrix();
 
         void                              addControls();
         void                              recreateSwapchain();

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace stirling { class Entity; }
+#include "entity.h"
 
 namespace stirling {
     class Component {

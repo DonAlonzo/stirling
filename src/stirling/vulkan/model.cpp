@@ -24,7 +24,7 @@ namespace stirling {
                 throw std::runtime_error(err);
             }
 
-            std::unordered_map<Vertex, int> unique_vertices = {};
+            std::unordered_map<Vertex, uint32_t> unique_vertices = {};
             std::vector<Vertex> vertices;
             std::vector<uint32_t> indices;
 
@@ -54,7 +54,7 @@ namespace stirling {
                 }
             }
 
-            return Model(VertexBuffer(device, vertices), IndexBuffer(device, indices), Texture(device, Image::loadFromFile(device, texture_path)));
+            return Model(VertexBuffer(&device, vertices), IndexBuffer(&device, indices), Texture(device, Image::loadFromFile(device, texture_path)));
         }
 
         Model::Model(VertexBuffer&& vertex_buffer, IndexBuffer&& index_buffer, Texture&& texture) :

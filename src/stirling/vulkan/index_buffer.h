@@ -3,22 +3,22 @@
 #include "vulkan/vulkan.h"
 
 namespace stirling { namespace vulkan {
-	class Device;
+    class Device;
 }}
 #include "buffer.h"
 
 #include <vector>
 
 namespace stirling {
-	namespace vulkan {
-		class IndexBuffer : public Buffer {
-		public:
-			IndexBuffer(const Device& device, const std::vector<uint32_t>& indices);
+    namespace vulkan {
+        class IndexBuffer : public Buffer {
+        public:
+            IndexBuffer(const Device* device, const std::vector<uint32_t>& indices);
 
-			int size() const;
+            size_t size() const;
 
-		private:
-			int m_size;
-		};
-	}
+        private:
+            size_t m_size;
+        };
+    }
 }

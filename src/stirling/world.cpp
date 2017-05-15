@@ -5,7 +5,7 @@ namespace stirling {
     World::World() :
         m_number_of_entities(0) {
     }
-
+    
     void World::addEntity(Entity* entity) {
         assert(m_number_of_entities < MAX_NUMBER_OF_ENTITIES);
         m_entities[m_number_of_entities++] = entity;

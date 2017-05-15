@@ -13,10 +13,11 @@ namespace stirling {
             friend class Device;
 
         private:
-            const Device& m_device;
+            const Device* m_device;
 
         public:
-            Buffer(const Device& device, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkDeviceSize size);
+            Buffer();
+            Buffer(const Device* device, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkDeviceSize size);
 
             operator VkBuffer() const;
 
@@ -34,7 +35,7 @@ namespace stirling {
             Deleter<VkBuffer>       initBuffer(VkDeviceSize size, VkBufferUsageFlags usage) const;
             Deleter<VkDeviceMemory> allocateMemory(VkMemoryPropertyFlags properties) const;
             uint32_t                findMemoryType(uint32_t type_filter, VkMemoryPropertyFlags properties) const;
-            VkDescriptorBufferInfo  initDescriptor(const VkDeviceSize& size = VK_WHOLE_SIZE, const VkDeviceSize& offset = 0) const;
+            VkDescriptorBufferInfo  initDescriptor(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0) const;
         };
     }
 }

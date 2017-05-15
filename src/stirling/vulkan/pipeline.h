@@ -17,7 +17,7 @@ namespace stirling {
     namespace vulkan {
         class Pipeline {
         public:
-            Pipeline(const Device& device, const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts, const RenderPass& render_pass, const VkExtent2D& extent, const std::string& vertex_shader_path, const std::string& fragment_shader_path);
+            Pipeline(VkDevice device, std::vector<VkDescriptorSetLayout> descriptor_set_layouts, VkRenderPass render_pass, VkExtent2D extent, std::vector<VkPipelineShaderStageCreateInfo> shader_stages);
 
             operator const VkPipeline&() const;
 
@@ -27,8 +27,8 @@ namespace stirling {
             Deleter<VkPipelineLayout> m_pipeline_layout;
             Deleter<VkPipeline>       m_pipeline;
             
-            Deleter<VkPipelineLayout> initPipelineLayout(const Device& device, const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts) const;
-            Deleter<VkPipeline>       initPipeline(const Device& device, const RenderPass& render_pass, const VkExtent2D& extent, const std::string& vertex_shader_path, const std::string& fragment_shader_path) const;
+            Deleter<VkPipelineLayout> initPipelineLayout(VkDevice device, std::vector<VkDescriptorSetLayout> descriptor_set_layouts) const;
+            Deleter<VkPipeline>       initPipeline(VkDevice device, VkRenderPass render_pass, VkExtent2D extent, std::vector<VkPipelineShaderStageCreateInfo> shader_stages) const;
         };
     }
 }

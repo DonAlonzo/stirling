@@ -15,6 +15,7 @@ namespace stirling {
             void translate(const glm::vec3& translation);
             void moveTo(const glm::vec3& position);
             void lookAt(const glm::vec3& target, const glm::vec3& up = glm::vec3(0.0f, 0.0f, 1.0f));
+            void setRotation(const glm::vec3& rotation);
             void rotate(float angle, const glm::vec3& axis);
             void setScale(const glm::vec3& scale);
 

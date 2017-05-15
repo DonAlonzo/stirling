@@ -6,12 +6,12 @@
 namespace stirling {
     namespace vulkan {
 
-        Pipeline::Pipeline(const Device& device, const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts, const RenderPass& render_pass, const VkExtent2D& extent, const std::string& vertex_shader_path, const std::string& fragment_shader_path) :
+        Pipeline::Pipeline(VkDevice device, std::vector<VkDescriptorSetLayout> descriptor_set_layouts, VkRenderPass render_pass, VkExtent2D extent, std::vector<VkPipelineShaderStageCreateInfo> shader_stages) :
             m_pipeline_layout (initPipelineLayout(device, descriptor_set_layouts)),
-            m_pipeline        (initPipeline(device, render_pass, extent, vertex_shader_path, fragment_shader_path)) {
+            m_pipeline        (initPipeline(device, render_pass, extent, shader_stages)) {
         }
 
-        Deleter<VkPipelineLayout> Pipeline::initPipelineLayout(const Device& device, const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts) const {
+        Deleter<VkPipelineLayout> Pipeline::initPipelineLayout(VkDevice device, std::vector<VkDescriptorSetLayout> descriptor_set_layouts) const {
             VkPipelineLayoutCreateInfo pipeline_layout_info = {};
             pipeline_layout_info.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
             pipeline_layout_info.setLayoutCount         = descriptor_set_layouts.size();
@@ -26,15 +26,7 @@ namespace stirling {
             return Deleter<VkPipelineLayout>(pipeline_layout, device, vkDestroyPipelineLayout);
         }
 
-        Deleter<VkPipeline> Pipeline::initPipeline(const Device& device, const RenderPass& render_pass, const VkExtent2D& extent, const std::string& vertex_shader_path, const std::string& fragment_shader_path) const {
-            ShaderModule vertex_shader(device, vertex_shader_path);
-            ShaderModule fragment_shader(device, fragment_shader_path);
-            
-            std::array<VkPipelineShaderStageCreateInfo, 2> shader_stages = {
-                initializers::pipelineShaderStageCreateInfo(VK_SHADER_STAGE_VERTEX_BIT, vertex_shader, "main"),
-                initializers::pipelineShaderStageCreateInfo(VK_SHADER_STAGE_FRAGMENT_BIT, fragment_shader, "main"),
-            };
-
+        Deleter<VkPipeline> Pipeline::initPipeline(VkDevice device, VkRenderPass render_pass, VkExtent2D extent, std::vector<VkPipelineShaderStageCreateInfo> shader_stages) const {
             auto binding_description = Vertex::getBindingDescription();
             auto attribute_descriptions = Vertex::getAttributeDescriptions();
 

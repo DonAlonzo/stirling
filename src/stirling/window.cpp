@@ -19,19 +19,6 @@
 #define ENABLE_VALIDATION_LAYERS true
 #endif
 
-void* alignedAlloc(size_t size, size_t alignment) {
-    void *data = nullptr;
-#if defined(_MSC_VER) || defined(__MINGW32__)
-    data = _aligned_malloc(size, alignment);
-#else 
-    int res = posix_memalign(&data, alignment, size);
-    if (res != 0) {
-        data = nullptr;
-    }
-#endif
-    return data;
-}
-
 const std::vector<const char*> g_device_extensions = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
@@ -64,21 +51,7 @@ namespace stirling {
 
 namespace stirling {
 
-    struct StaticUniformBufferObject {
-        glm::mat4 projection;
-        glm::mat4 view;
-    } m_static_ubo;
-
-    struct DynamicUniformBufferObject {
-        glm::mat4* model = nullptr;
-    } m_dynamic_ubo;
-
-    glm::mat4* Window::allocateDynamicModelMatrix() {
-        static uint64_t next_dynamic_model = 0;
-        return (glm::mat4*)(((uint64_t)m_dynamic_ubo.model + (next_dynamic_model++ * m_dynamic_alignment)));
-    }
-
-    Window::Window(int width, int height) :
+    Window::Window(int width, int height, Map map) :
         m_window                    (initWindow(width, height)),
         m_instance                  (getRequiredExtensions()),
         m_surface                   (initSurface()),
@@ -91,57 +64,28 @@ namespace stirling {
         m_command_pool              (m_device.getGraphicsQueue().createCommandPool()),
         m_image_available_semaphore (m_device.createSemaphore()),
         m_render_finished_semaphore (m_device.createSemaphore()),
-        m_static_uniform_buffer     (initStaticUniformBuffer(m_device)),
-        m_dynamic_uniform_buffer    (initDynamicUniformBuffer(m_device, 256)),
-
-        m_descriptor_set_layout     (initDescriptorSetLayout()),
-        m_descriptor_pool           (initDescriptorPool()),
-
-        m_pipeline                  (m_device, { m_descriptor_set_layout }, m_render_pass, m_swapchain.getExtent(), "shaders/vert.spv", "shaders/frag.spv"),
-
-        m_house_model_component     (createModelComponent("models/chalet.obj", "textures/chalet.jpg")),
-        //m_gladiator_model_component (createModelComponent("models/gladiators.obj", "textures/gladiators.jpg")),
-        m_physics_component         (createPhysicsComponent()),
-        m_house_entity_1            (createEntity(m_house_model_component.get(), m_physics_component.get())),
-        m_house_entity_2            (createEntity(m_house_model_component.get(), m_physics_component.get())),
-        //m_gladiator_entity_1        (createEntity(m_gladiator_model_component.get(), m_physics_component.get())),
-        //m_gladiator_entity_2        (createEntity(m_gladiator_model_component.get(), m_physics_component.get())),
-
+        m_camera                    (glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.01f, 10.0f),
+        m_map_instance              (map.instantiate(m_device, m_render_pass, m_swapchain.getExtent())),
         m_command_buffers           (initCommandBuffers()) {
+        
+        // Add map entities to world
+        for (auto& entity : m_map_instance.entities) {
+            m_world.addEntity(&entity);
+        }
 
         addControls();
 
-        m_camera.reset(new Camera(glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.01f, 10.0f));
-
-        glfwMaximizeWindow(m_window);
-
-        m_world.addEntity(m_camera.get());
-        m_world.addEntity(m_house_entity_1.get());
-        m_world.addEntity(m_house_entity_2.get());
-        //m_world.addEntity(m_gladiator_entity_1.get());
-        //m_world.addEntity(m_gladiator_entity_2.get());
-
-        m_camera->transform().moveTo(glm::vec3(2.f, -2.f, -2.f));
-        m_camera->transform().lookAt(glm::vec3(0.f, 0.f, 0.f));
-
-        m_house_entity_2->transform().moveTo(glm::vec3(-2.f, -2.f, 0.f));
-        m_house_entity_2->transform().setScale(glm::vec3(0.5f, .5f, .5f));
-
-        //m_gladiator_entity_1->transform().moveTo(glm::vec3(-10.f, -10.f, 0.f));
-        //m_gladiator_entity_1->transform().setScale(glm::vec3(.2f, .2f, .2f));
-
-        //m_gladiator_entity_2->transform().moveTo(glm::vec3(-10.f, 10.f, 0.f));
-        //m_gladiator_entity_2->transform().setScale(glm::vec3(.2f, .2f, .2f));
-        //m_gladiator_entity_2->transform().rotate(glm::radians(45.f), glm::vec3(0.f, 0.f, 1.f));
+        // Add camera
+        m_camera.transform().moveTo(glm::vec3(2.f, -2.f, -2.f));
+        m_camera.transform().lookAt(glm::vec3(0.f, 0.f, 0.f));
+        m_world.addEntity(&m_camera);
     }
 
     GLFWwindow* Window::initWindow(int width, int height) {
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
-
-        auto window = glfwCreateWindow(width, height, "Stirling Engine", nullptr, nullptr);
+        
+        auto window = glfwCreateWindow(width, height, "Stirling Engine", glfwGetPrimaryMonitor(), nullptr);
         glfwSetWindowUserPointer(window, this);
         glfwSetWindowSizeCallback(window, WindowListener::onResized);
         glfwSetKeyCallback(window, WindowListener::onKeyInput);
@@ -186,93 +130,6 @@ namespace stirling {
         return !formats.empty() && !present_modes.empty();
     }
 
-    vulkan::Buffer Window::initStaticUniformBuffer(const vulkan::Device& device) {
-        auto buffer = device.createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, sizeof(StaticUniformBufferObject));
-        buffer.map();
-        return buffer;
-    }
-
-    vulkan::Buffer Window::initDynamicUniformBuffer(const vulkan::Device& device, int max_number_of_objects) {
-        size_t ubo_alignment = m_physical_device.properties.limits.minUniformBufferOffsetAlignment;
-
-        m_dynamic_alignment = (sizeof(glm::mat4) / ubo_alignment) * ubo_alignment + ((sizeof(glm::mat4) % ubo_alignment) > 0 ? ubo_alignment : 0);
-
-        size_t buffer_size = max_number_of_objects * m_dynamic_alignment;
-        m_dynamic_ubo.model = (glm::mat4*)alignedAlloc(buffer_size, m_dynamic_alignment);
-
-        auto buffer = device.createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, buffer_size);
-        buffer.map();
-        return buffer;
-    }
-
-    VkDescriptorSetLayout Window::initDescriptorSetLayout() const {
-        std::array<VkDescriptorSetLayoutBinding, 3> bindings = {
-            vulkan::initializers::descriptorSetLayoutBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT),
-            vulkan::initializers::descriptorSetLayoutBinding(1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, VK_SHADER_STAGE_VERTEX_BIT),
-            vulkan::initializers::descriptorSetLayoutBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-        };
-
-        VkDescriptorSetLayoutCreateInfo create_info = {};
-        create_info.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        create_info.bindingCount = bindings.size();
-        create_info.pBindings    = bindings.data();
-
-        VkDescriptorSetLayout descriptor_set_layout;
-        if (vkCreateDescriptorSetLayout(m_device, &create_info, nullptr, &descriptor_set_layout) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create descriptor set layout.");
-        }
-        return descriptor_set_layout;
-    }
-
-    vulkan::DescriptorPool Window::initDescriptorPool() const {
-        std::vector<VkDescriptorPoolSize> pool_sizes{3};
-
-        pool_sizes[0].type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        pool_sizes[0].descriptorCount = 1;
-
-        pool_sizes[1].type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-        pool_sizes[1].descriptorCount = 1;
-
-        pool_sizes[2].type            = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        pool_sizes[2].descriptorCount = 1;
-
-        return vulkan::DescriptorPool(m_device, pool_sizes, 2);
-    }
-
-    ModelComponent* Window::createModelComponent(const std::string& model_file, const std::string& texture_file) const {
-        auto model = vulkan::Model::loadFromFile(m_device, model_file, texture_file);
-
-        auto descriptor_set = m_descriptor_pool.allocateDescriptorSet(m_descriptor_set_layout);
-
-        VkDescriptorImageInfo image_info = {};
-        image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        image_info.imageView   = model.texture.image_view;
-        image_info.sampler     = model.texture.sampler;
-
-        std::array<VkWriteDescriptorSet, 3> write_descriptor_sets = {
-            vulkan::initializers::writeDescriptorSet(descriptor_set, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, &m_static_uniform_buffer.m_descriptor),
-            vulkan::initializers::writeDescriptorSet(descriptor_set, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, &m_dynamic_uniform_buffer.m_descriptor),
-            vulkan::initializers::writeDescriptorSet(descriptor_set, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &image_info)
-        };
-
-        vkUpdateDescriptorSets(m_device, write_descriptor_sets.size(), write_descriptor_sets.data(), 0, nullptr);
-
-        return new ModelComponent(std::move(model), descriptor_set);
-    }
-
-    PhysicsComponent* Window::createPhysicsComponent() const {
-        return new PhysicsComponent();
-    }
-
-    Entity* Window::createEntity(ModelComponent* model_component, PhysicsComponent* physics_component) {
-        auto entity = new Entity(vulkan::Transform(allocateDynamicModelMatrix()));
-
-        entity->addComponent(physics_component);
-        entity->addComponent(model_component);
-
-        return entity;
-    }
-
     std::vector<VkCommandBuffer> Window::initCommandBuffers() const {
         auto command_buffers = m_command_pool.allocateCommandBuffers(m_framebuffers.size());
         for (int i = 0; i < command_buffers.size(); ++i) {
@@ -295,41 +152,39 @@ namespace stirling {
             render_pass_info.pClearValues      = clear_values.data();
 
             vkCmdBeginRenderPass(command_buffers[i], &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
+            for (auto render_instruction : m_map_instance.render_instructions) {
+                vkCmdBindPipeline(
+                    command_buffers[i],
+                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    render_instruction.pipeline
+                );
 
-            uint32_t number_of_pipelines = 1;
-            for (uint32_t pipeline_index = 0; pipeline_index < number_of_pipelines; ++pipeline_index) {
-                vkCmdBindPipeline(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
+                vkCmdBindVertexBuffers(
+                    command_buffers[i], 0, 1,
+                    render_instruction.vertex_buffers.data(),
+                    render_instruction.vertex_buffer_offsets.data()
+                );
 
-                {
-                    VkBuffer vertex_buffers[] = { m_house_model_component->model.vertex_buffer };
-                    VkDeviceSize offsets[] = { 0 };
-                    vkCmdBindVertexBuffers(command_buffers[i], 0, 1, vertex_buffers, offsets);
-                    vkCmdBindIndexBuffer(command_buffers[i], m_house_model_component->model.index_buffer, 0, VK_INDEX_TYPE_UINT32);
+                vkCmdBindIndexBuffer(
+                    command_buffers[i],
+                    render_instruction.index_buffer,
+                    0, VK_INDEX_TYPE_UINT32
+                );
 
-                    for (uint32_t dynamic_index = 0; dynamic_index < 2; ++dynamic_index) {
-                        uint32_t dynamic_offset = dynamic_index * static_cast<uint32_t>(m_dynamic_alignment);
+                vkCmdBindDescriptorSets(
+                    command_buffers[i],
+                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    render_instruction.pipeline_layout, 0,
+                    render_instruction.descriptor_sets.size(), render_instruction.descriptor_sets.data(),
+                    render_instruction.dynamic_offsets.size(), render_instruction.dynamic_offsets.data()
+                );
 
-                        vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.getLayout(), 0, 1, &m_house_model_component->descriptor_set, 1, &dynamic_offset);
-
-                        vkCmdDrawIndexed(command_buffers[i], m_house_model_component->model.index_buffer.size(), 1, 0, 0, 0);
-                    }
-                }
-                if (false) {
-                    VkBuffer vertex_buffers[] = { m_gladiator_model_component->model.vertex_buffer };
-                    VkDeviceSize offsets[] = { 0 };
-                    vkCmdBindVertexBuffers(command_buffers[i], 0, 1, vertex_buffers, offsets);
-                    vkCmdBindIndexBuffer(command_buffers[i], m_gladiator_model_component->model.index_buffer, 0, VK_INDEX_TYPE_UINT32);
-
-                    for (uint32_t dynamic_index = 2; dynamic_index < 4; ++dynamic_index) {
-                        uint32_t dynamic_offset = dynamic_index * static_cast<uint32_t>(m_dynamic_alignment);
-
-                        vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.getLayout(), 0, 1, &m_gladiator_model_component->descriptor_set, 1, &dynamic_offset);
-
-                        vkCmdDrawIndexed(command_buffers[i], m_gladiator_model_component->model.index_buffer.size(), 1, 0, 0, 0);
-                    }
-                }
+                vkCmdDrawIndexed(
+                    command_buffers[i],
+                    render_instruction.index_count,
+                    1, 0, 0, 0
+                );
             }
-
             vkCmdEndRenderPass(command_buffers[i]);
 
             if (vkEndCommandBuffer(command_buffers[i]) != VK_SUCCESS) {
@@ -361,7 +216,8 @@ namespace stirling {
     }
 
     void Window::recreateSwapchain() {
-        vkDeviceWaitIdle(m_device);
+        throw std::runtime_error("Window::recreateSwapchain hasn't been implemented yet.");
+        /*vkDeviceWaitIdle(m_device);
 
         m_swapchain    = vulkan::Swapchain(m_device, m_surface, getSize(), m_swapchain);
         m_depth_image  = vulkan::DepthImage(m_device, m_swapchain.getExtent());
@@ -373,7 +229,7 @@ namespace stirling {
         vkFreeCommandBuffers(m_device, m_command_pool, m_command_buffers.size(), m_command_buffers.data());
         m_command_buffers = initCommandBuffers();
 
-        m_camera->setAspectRatio(m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height);
+        m_camera->setAspectRatio(m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height);*/
     }
 
     std::vector<const char*> Window::getRequiredExtensions() const {
@@ -411,19 +267,19 @@ namespace stirling {
 
     void Window::render() {
         { // Update static uniform buffer
-            m_static_ubo.view       = m_camera->transform();
-            m_static_ubo.projection = m_camera->getProjectionMatrix();
-            m_static_uniform_buffer.memcpy(&m_static_ubo);
+            m_map_instance.static_uniform_buffer_object.view       = m_camera.transform();
+            m_map_instance.static_uniform_buffer_object.projection = m_camera.getProjectionMatrix();
+            m_map_instance.static_uniform_buffer.memcpy(&m_map_instance.static_uniform_buffer_object);
         }
 
         { // Update dynamic uniform buffer
-            m_dynamic_uniform_buffer.memcpy(m_dynamic_ubo.model);
+            m_map_instance.dynamic_uniform_buffer.memcpy(m_map_instance.dynamic_uniform_buffer_object.model);
 
             // Flush dynamic uniform buffer memory
             VkMappedMemoryRange mapped_memory_range = {};
             mapped_memory_range.sType  = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-            mapped_memory_range.memory = m_dynamic_uniform_buffer.m_memory;
-            mapped_memory_range.size   = m_dynamic_uniform_buffer.m_size;
+            mapped_memory_range.memory = m_map_instance.dynamic_uniform_buffer.m_memory;
+            mapped_memory_range.size   = m_map_instance.dynamic_uniform_buffer.m_size;
             vkFlushMappedMemoryRanges(m_device, 1, &mapped_memory_range);
         }
 
@@ -500,12 +356,12 @@ namespace stirling {
         InputHandler::getInstance().onKeyInput(key, scancode, action, mods);
     }
 
-    float last_x, last_y;
+    double last_x, last_y;
     void Window::onMouseMovementInput(double x, double y) {
         double delta_x = last_x - x;
         double delta_y = last_y - y;
-        m_camera->transform().rotate(delta_y * 0.001f, m_camera->transform().right());
-        m_camera->transform().rotate(-delta_x * 0.001f, glm::vec3(0.0f, 0.0f, 1.0f));
+        m_camera.transform().rotate(delta_y * 0.001f, m_camera.transform().right());
+        m_camera.transform().rotate(-delta_x * 0.001f, glm::vec3(0.0f, 0.0f, 1.0f));
         last_x = x;
         last_y = y;
     }

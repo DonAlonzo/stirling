@@ -31,6 +31,11 @@ namespace stirling {
             update();
         }
 
+        void Transform::setRotation(const glm::vec3& rotation) {
+            m_rotation = rotation;
+            update();
+        }
+
         void Transform::rotate(float angle, const glm::vec3& axis) {
             m_rotation *= glm::angleAxis(angle, axis);
             update();

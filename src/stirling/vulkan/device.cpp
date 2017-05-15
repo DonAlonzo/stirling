@@ -43,7 +43,7 @@ namespace stirling {
         }
 
         Buffer Device::createBuffer(VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkDeviceSize size, void* data) const {
-            return Buffer(*this, usage, properties, size);
+            return Buffer(this, usage, properties, size);
         }
 
         Semaphore Device::createSemaphore() const {
