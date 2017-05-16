@@ -41,14 +41,14 @@ namespace stirling {
         vulkan::DepthImage                m_depth_image;
         vulkan::RenderPass                m_render_pass;
         std::vector<VkFramebuffer>        m_framebuffers;
-        vulkan::CommandPool               m_command_pool;
         vulkan::Semaphore                 m_image_available_semaphore;
         vulkan::Semaphore                 m_render_finished_semaphore;
 
         Camera                            m_camera;
         World                             m_world;
         MapInstance                       m_map_instance;
-
+        
+        vulkan::CommandPool               m_command_pool;
         std::vector<VkCommandBuffer>      m_command_buffers;
 
         // Initializer methods

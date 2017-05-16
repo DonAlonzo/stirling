@@ -23,7 +23,7 @@ public:
         create_info.vertex_shader_file   = "shaders/vert.spv";
         create_info.fragment_shader_file = "shaders/frag.spv";
         entity_create_info_list.push_back(create_info);
-        
+
         create_info = {};
         create_info.position             = glm::vec3(1.f, 0.f, 1.f);
         create_info.rotation             = glm::vec3(0.f, 0.f, 0.f);
@@ -33,7 +33,7 @@ public:
         create_info.vertex_shader_file   = "shaders/vert.spv";
         create_info.fragment_shader_file = "shaders/frag.spv";
         entity_create_info_list.push_back(create_info);
-        
+
         return entity_create_info_list;
     }
 

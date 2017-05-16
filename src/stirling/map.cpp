@@ -13,6 +13,8 @@
 
 #include <array>
 #include <iostream>
+#include <map>
+#include <string>
 
 namespace stirling {
 
@@ -29,7 +31,7 @@ namespace stirling {
         map_instance.static_uniform_buffer.map();
 
         // Dynamic uniform buffer
-        uint32_t number_of_dynamic_buffer_objects = 4;
+        uint32_t number_of_dynamic_buffer_objects = create_info_list.size();
         size_t ubo_alignment = device.getPhysicalDevice().properties.limits.minUniformBufferOffsetAlignment;
         size_t dynamic_alignment = (sizeof(glm::mat4) / ubo_alignment) * ubo_alignment + ((sizeof(glm::mat4) % ubo_alignment) > 0 ? ubo_alignment : 0);
         size_t buffer_size = number_of_dynamic_buffer_objects * dynamic_alignment;
@@ -39,6 +41,13 @@ namespace stirling {
         map_instance.dynamic_uniform_buffer.map();
 
         uint64_t next_dynamic_index = 0;
+
+        // Preload shaders
+        std::map<std::string, vulkan::ShaderModule> shader_modules;
+        for (auto create_info : create_info_list) {
+            shader_modules.try_emplace(create_info.fragment_shader_file, vulkan::ShaderModule(device, create_info.fragment_shader_file));
+            shader_modules.try_emplace(create_info.vertex_shader_file, vulkan::ShaderModule(device, create_info.vertex_shader_file));
+        }
 
         // Iterate through all entities to be created.
         for (auto create_info : create_info_list) {
@@ -50,11 +59,9 @@ namespace stirling {
             auto& descriptor_pool = map_instance.descriptor_pools.back();
 
             // Shaders
-            vulkan::ShaderModule vertex_shader(device, create_info.vertex_shader_file);
-            vulkan::ShaderModule fragment_shader(device, create_info.fragment_shader_file);
             std::vector<VkPipelineShaderStageCreateInfo> shader_stages = {
-                vulkan::initializers::pipelineShaderStageCreateInfo(VK_SHADER_STAGE_VERTEX_BIT, vertex_shader, "main"),
-                vulkan::initializers::pipelineShaderStageCreateInfo(VK_SHADER_STAGE_FRAGMENT_BIT, fragment_shader, "main"),
+                vulkan::initializers::pipelineShaderStageCreateInfo(VK_SHADER_STAGE_VERTEX_BIT, shader_modules.find(create_info.vertex_shader_file)->second, "main"),
+                vulkan::initializers::pipelineShaderStageCreateInfo(VK_SHADER_STAGE_FRAGMENT_BIT, shader_modules.find(create_info.fragment_shader_file)->second, "main"),
             };
 
             // Pipeline

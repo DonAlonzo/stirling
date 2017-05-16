@@ -61,11 +61,11 @@ namespace stirling {
         m_depth_image               (m_device, m_swapchain.getExtent()),
         m_render_pass               (m_device, m_swapchain.getImageFormat(), m_depth_image.image_format),
         m_framebuffers              (m_swapchain.createFramebuffers(m_render_pass, m_depth_image.image_view)),
-        m_command_pool              (m_device.getGraphicsQueue().createCommandPool()),
         m_image_available_semaphore (m_device.createSemaphore()),
         m_render_finished_semaphore (m_device.createSemaphore()),
         m_camera                    (glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.01f, 10.0f),
         m_map_instance              (map.instantiate(m_device, m_render_pass, m_swapchain.getExtent())),
+        m_command_pool              (m_device.getGraphicsQueue().createCommandPool()),
         m_command_buffers           (initCommandBuffers()) {
         
         // Add map entities to world
@@ -96,6 +96,20 @@ namespace stirling {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
         return window;
+    }
+
+    std::vector<const char*> Window::getRequiredExtensions() const {
+        std::vector<const char*> extensions;
+
+        unsigned int glfwExtensionCount = 0;
+        const char** glfwExtensions;
+        glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+        for (unsigned int i = 0; i < glfwExtensionCount; i++) {
+            extensions.push_back(glfwExtensions[i]);
+        }
+
+        return extensions;
     }
 
     vulkan::Deleter<VkSurfaceKHR> Window::initSurface() const {
@@ -152,7 +166,7 @@ namespace stirling {
             render_pass_info.pClearValues      = clear_values.data();
 
             vkCmdBeginRenderPass(command_buffers[i], &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
-            for (auto render_instruction : m_map_instance.render_instructions) {
+            for (auto& render_instruction : m_map_instance.render_instructions) {
                 vkCmdBindPipeline(
                     command_buffers[i],
                     VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -232,20 +246,6 @@ namespace stirling {
         m_camera->setAspectRatio(m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height);*/
     }
 
-    std::vector<const char*> Window::getRequiredExtensions() const {
-        std::vector<const char*> extensions;
-
-        unsigned int glfwExtensionCount = 0;
-        const char** glfwExtensions;
-        glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-
-        for (unsigned int i = 0; i < glfwExtensionCount; i++) {
-            extensions.push_back(glfwExtensions[i]);
-        }
-
-        return extensions;
-    }
-
     VkExtent2D Window::getSize() const {
         int width, height;
         glfwGetWindowSize(m_window, &width, &height);
@@ -261,7 +261,7 @@ namespace stirling {
         // Game loop
         static auto last_time = std::chrono::high_resolution_clock::now();
         auto current_time = std::chrono::high_resolution_clock::now();
-        m_world.update(std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_time).count() / 1000.0f);
+        m_world.update(std::chrono::duration_cast<std::chrono::microseconds>(current_time - last_time).count() / 1E6f);
         last_time = current_time;
     }
 
