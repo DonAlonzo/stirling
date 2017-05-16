@@ -48,7 +48,7 @@ namespace stirling {
     }
 
     void Camera::update(float delta_seconds) {
-        float meters_per_second = 1.0f;
+        float meters_per_second = 1.5f;
 
         glm::vec3 direction;
         if (InputHandler::getInstance()[Action::MOVE_FORWARD]) {

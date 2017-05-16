@@ -96,9 +96,6 @@
     <ClCompile Include="src\stirling\vulkan\model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\stirling\model_component.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\stirling\physics_component.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -195,9 +192,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\stirling\component.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\stirling\model_component.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\stirling\physics_component.h">

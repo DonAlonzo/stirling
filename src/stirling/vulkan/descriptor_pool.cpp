@@ -3,12 +3,12 @@
 namespace stirling {
     namespace vulkan {
 
-        DescriptorPool::DescriptorPool(VkDevice device, const std::vector<VkDescriptorPoolSize>& pool_sizes, int max_sets) :
+        DescriptorPool::DescriptorPool(VkDevice device, const std::vector<VkDescriptorPoolSize>& pool_sizes, uint32_t max_sets) :
             m_device          (device),
             m_descriptor_pool (initDescriptorPool(pool_sizes, max_sets)) {
         }
 
-        Deleter<VkDescriptorPool> DescriptorPool::initDescriptorPool(const std::vector<VkDescriptorPoolSize>& pool_sizes, int max_sets) const {
+        Deleter<VkDescriptorPool> DescriptorPool::initDescriptorPool(const std::vector<VkDescriptorPoolSize>& pool_sizes, uint32_t max_sets) const {
             VkDescriptorPoolCreateInfo create_info = {};
             create_info.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
             create_info.poolSizeCount = pool_sizes.size();

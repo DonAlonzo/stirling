@@ -63,7 +63,7 @@ namespace stirling {
         m_framebuffers              (m_swapchain.createFramebuffers(m_render_pass, m_depth_image.image_view)),
         m_image_available_semaphore (m_device.createSemaphore()),
         m_render_finished_semaphore (m_device.createSemaphore()),
-        m_camera                    (glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.01f, 10.0f),
+        m_camera                    (glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.01f, 100.0f),
         m_map_instance              (map.instantiate(m_device, m_render_pass, m_swapchain.getExtent())),
         m_command_pool              (m_device.getGraphicsQueue().createCommandPool()),
         m_command_buffers           (initCommandBuffers()) {

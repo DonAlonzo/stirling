@@ -10,7 +10,7 @@ namespace stirling {
     namespace vulkan {
         class DescriptorPool {
         public:
-            DescriptorPool(VkDevice device, const std::vector<VkDescriptorPoolSize>& pool_sizes, int max_sets);
+            DescriptorPool(VkDevice device, const std::vector<VkDescriptorPoolSize>& pool_sizes, uint32_t max_sets);
 
             operator VkDescriptorPool() const;
 
@@ -21,7 +21,7 @@ namespace stirling {
             VkDevice                  m_device;
             Deleter<VkDescriptorPool> m_descriptor_pool;
 
-            Deleter<VkDescriptorPool> initDescriptorPool(const std::vector<VkDescriptorPoolSize>& pool_sizes, int max_sets) const;
+            Deleter<VkDescriptorPool> initDescriptorPool(const std::vector<VkDescriptorPoolSize>& pool_sizes, uint32_t max_sets) const;
         };
     }
 }

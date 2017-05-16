@@ -1,8 +1,6 @@
 #include "model.h"
-#include "device.h"
-#include "image.h"
-#include "texture.h"
 
+#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -14,23 +12,23 @@
 namespace stirling {
     namespace vulkan {
 
-        Model Model::loadFromFile(const Device& device, const std::string& model_path, const std::string& texture_path) {
+        Model Model::loadFromFile(const std::string& path) {
             tinyobj::attrib_t attrib;
             std::vector<tinyobj::shape_t> shapes;
             std::vector<tinyobj::material_t> materials;
             std::string err;
 
-            if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &err, model_path.c_str())) {
+            if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &err, path.c_str())) {
                 throw std::runtime_error(err);
             }
 
-            std::unordered_map<Vertex, uint32_t> unique_vertices = {};
-            std::vector<Vertex> vertices;
-            std::vector<uint32_t> indices;
+            std::unordered_map<vulkan::Vertex, uint32_t> unique_vertices = {};
+
+            Model model = {};
 
             for (const auto& shape : shapes) {
                 for (const auto& index : shape.mesh.indices) {
-                    Vertex vertex = {};
+                    vulkan::Vertex vertex = {};
 
                     vertex.position = {
                         attrib.vertices[3 * index.vertex_index + 0],
@@ -46,21 +44,15 @@ namespace stirling {
                     vertex.color = { 1.0f, 1.0f, 1.0f };
 
                     if (unique_vertices.count(vertex) == 0) {
-                        unique_vertices[vertex] = vertices.size();
-                        vertices.push_back(vertex);
+                        unique_vertices[vertex] = model.vertices.size();
+                        model.vertices.push_back(vertex);
                     }
 
-                    indices.push_back(unique_vertices[vertex]);
+                    model.indices.push_back(unique_vertices[vertex]);
                 }
             }
 
-            return Model(VertexBuffer(&device, vertices), IndexBuffer(&device, indices), Texture(device, Image::loadFromFile(device, texture_path)));
-        }
-
-        Model::Model(VertexBuffer&& vertex_buffer, IndexBuffer&& index_buffer, Texture&& texture) :
-            vertex_buffer (std::move(vertex_buffer)),
-            index_buffer  (std::move(index_buffer)),
-            texture       (std::move(texture)) {
+            return model;
         }
 
     }

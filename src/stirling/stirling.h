@@ -27,6 +27,5 @@
 #include "input_handler.h"
 #include "entity.h"
 #include "map.h"
-#include "model_component.h"
 #include "physics_component.h"
 #include "world.h"

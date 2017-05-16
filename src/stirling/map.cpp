@@ -8,7 +8,6 @@
 #include "util/memory.h"
 
 #include "entity.h"
-#include "model_component.h"
 #include "physics_component.h"
 
 #include <array>
@@ -45,19 +44,58 @@ namespace stirling {
         // Preload shaders
         std::map<std::string, vulkan::ShaderModule> shader_modules;
         for (auto create_info : create_info_list) {
-            shader_modules.try_emplace(create_info.fragment_shader_file, vulkan::ShaderModule(device, create_info.fragment_shader_file));
-            shader_modules.try_emplace(create_info.vertex_shader_file, vulkan::ShaderModule(device, create_info.vertex_shader_file));
+            if (shader_modules.find(create_info.fragment_shader_file) == shader_modules.end()) {
+                std::cout << "Loading shader " << create_info.fragment_shader_file << std::endl;
+                shader_modules.try_emplace(create_info.fragment_shader_file, vulkan::ShaderModule(device, create_info.fragment_shader_file));
+            }
+            if (shader_modules.find(create_info.vertex_shader_file) == shader_modules.end()) {
+                std::cout << "Loading shader " << create_info.vertex_shader_file << std::endl;
+                shader_modules.try_emplace(create_info.vertex_shader_file, vulkan::ShaderModule(device, create_info.vertex_shader_file));
+            }
         }
+
+        // Preload textures
+        std::map<std::string, vulkan::Texture> textures;
+        for (auto create_info : create_info_list) {
+            if (textures.find(create_info.texture_file) == textures.end()) {
+                std::cout << "Loading texture " << create_info.texture_file << std::endl;
+                textures.try_emplace(create_info.texture_file, vulkan::Texture(device, vulkan::Image::loadFromFile(device, create_info.texture_file)));
+            }
+        }
+
+        // Preload models
+        std::map<std::string, vulkan::Model> models;
+        for (auto create_info : create_info_list) {
+            if (models.find(create_info.model_file) == models.end()) {
+                std::cout << "Loading model " << create_info.model_file << std::endl;
+                models.try_emplace(create_info.model_file, vulkan::Model::loadFromFile(create_info.model_file));
+            }
+        }
+        std::map<std::string, vulkan::VertexBuffer> vertex_buffers;
+        std::map<std::string, vulkan::IndexBuffer> index_buffers;
+        for (auto& model : models) {
+            if (vertex_buffers.find(model.first) == vertex_buffers.end()) {
+                std::cout << "Loading vertex buffer for " << model.first << std::endl;
+                vertex_buffers.emplace(model.first, vulkan::VertexBuffer(&device, model.second.vertices));
+            }
+            if (index_buffers.find(model.first) == index_buffers.end()) {
+                std::cout << "Loading index buffer for " << model.first << std::endl;
+                index_buffers.emplace(model.first, vulkan::IndexBuffer(&device, model.second.indices));
+            }
+        }
+
+        // Descriptor set layout
+        auto descriptor_set_layout = initDescriptorSetLayout(device);
+
+        // Descriptor pool
+        map_instance.descriptor_pools.emplace_back(initDescriptorPool(device, create_info_list.size()));
+        auto& descriptor_pool = map_instance.descriptor_pools.back();
+
+        // Components
+        auto physics_component = new PhysicsComponent();
 
         // Iterate through all entities to be created.
         for (auto create_info : create_info_list) {
-            // Descriptor set layout
-            auto descriptor_set_layout = initDescriptorSetLayout(device);
-
-            // Descriptor pool
-            map_instance.descriptor_pools.emplace_back(initDescriptorPool(device));
-            auto& descriptor_pool = map_instance.descriptor_pools.back();
-
             // Shaders
             std::vector<VkPipelineShaderStageCreateInfo> shader_stages = {
                 vulkan::initializers::pipelineShaderStageCreateInfo(VK_SHADER_STAGE_VERTEX_BIT, shader_modules.find(create_info.vertex_shader_file)->second, "main"),
@@ -65,16 +103,17 @@ namespace stirling {
             };
 
             // Pipeline
+            std::cout << "Creating pipeline" << std::endl;
             map_instance.pipelines.emplace_back(vulkan::Pipeline(device, { descriptor_set_layout }, render_pass, extent, shader_stages));
             auto& pipeline = map_instance.pipelines.back();
 
             // Model
-            auto model = vulkan::Model::loadFromFile(device, create_info.model_file, create_info.texture_file);
-            auto& vertex_buffer = model.vertex_buffer;
-            auto& index_buffer = model.index_buffer;
-            auto& texture = model.texture;
+            auto& vertex_buffer = vertex_buffers.find(create_info.model_file)->second;
+            auto& index_buffer = index_buffers.find(create_info.model_file)->second;
+            auto& texture = textures.find(create_info.texture_file)->second;
 
             // Descriptor set
+            std::cout << "Allocating descriptor set" << std::endl;
             auto descriptor_set = descriptor_pool.allocateDescriptorSet(descriptor_set_layout);
         
             VkDescriptorImageInfo image_info = {};
@@ -105,11 +144,7 @@ namespace stirling {
             render_instruction.dynamic_offsets       = { dynamic_offset };
             map_instance.render_instructions.emplace_back(render_instruction);
 
-            // Components
-            auto physics_component = new PhysicsComponent();
-            auto model_component = new ModelComponent(std::move(model), descriptor_set);
-
-            // Entity
+            // Compose entity
             map_instance.entities.emplace_back(Entity(vulkan::Transform(transform)));
             auto& entity = map_instance.entities.back();
 
@@ -118,7 +153,6 @@ namespace stirling {
             entity.transform().setScale(create_info.scale);
 
             entity.addComponent(physics_component);
-            entity.addComponent(model_component);
         }
 
         return map_instance;
@@ -143,19 +177,19 @@ namespace stirling {
         return descriptor_set_layout;
     }
 
-    vulkan::DescriptorPool Map::initDescriptorPool(VkDevice device) const {
+    vulkan::DescriptorPool Map::initDescriptorPool(VkDevice device, uint32_t max_sets) const {
         std::vector<VkDescriptorPoolSize> pool_sizes{3};
 
-        pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        pool_sizes[0].type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         pool_sizes[0].descriptorCount = 1;
 
-        pool_sizes[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+        pool_sizes[1].type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
         pool_sizes[1].descriptorCount = 1;
 
-        pool_sizes[2].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        pool_sizes[2].type            = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         pool_sizes[2].descriptorCount = 1;
 
-        return vulkan::DescriptorPool(device, pool_sizes, 1);
+        return vulkan::DescriptorPool(device, pool_sizes, max_sets);
     }
 
 }

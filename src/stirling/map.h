@@ -75,7 +75,7 @@ namespace stirling {
 
     private:
         VkDescriptorSetLayout initDescriptorSetLayout(VkDevice device) const;
-        vulkan::DescriptorPool initDescriptorPool(VkDevice device) const;
+        vulkan::DescriptorPool initDescriptorPool(VkDevice device, uint32_t max_sets) const;
     };
 
 }
