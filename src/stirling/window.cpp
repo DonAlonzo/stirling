@@ -249,7 +249,7 @@ namespace stirling {
     VkExtent2D Window::getSize() const {
         int width, height;
         glfwGetWindowSize(m_window, &width, &height);
-        return VkExtent2D { (uint32_t) width, (uint32_t) height };
+        return VkExtent2D{(uint32_t)width, (uint32_t)height};
     }
 
     bool Window::isRunning() const {
