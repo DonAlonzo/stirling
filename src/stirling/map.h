@@ -12,6 +12,7 @@ namespace stirling { namespace vulkan { class Device; } }
 
 #include <glm/glm.hpp>
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -51,18 +52,19 @@ namespace stirling {
     };
 
     struct MapInstance {
-        StaticUniformBufferObject           static_uniform_buffer_object;
-        DynamicUniformBufferObject          dynamic_uniform_buffer_object;
-        vulkan::Buffer                      static_uniform_buffer;
-        vulkan::Buffer                      dynamic_uniform_buffer;
-        std::vector<vulkan::ShaderModule>   shaders;
-        std::vector<vulkan::VertexBuffer>   vertex_buffers;
-        std::vector<vulkan::IndexBuffer>    index_buffers;
-        std::vector<vulkan::Texture>        textures;
-        std::vector<vulkan::DescriptorPool> descriptor_pools;
-        std::vector<vulkan::Pipeline>       pipelines;
-        std::vector<RenderInstruction>      render_instructions;
-        std::vector<Entity>                 entities;
+        StaticUniformBufferObject               static_uniform_buffer_object;
+        DynamicUniformBufferObject              dynamic_uniform_buffer_object;
+        vulkan::Buffer                          static_uniform_buffer;
+        vulkan::Buffer                          dynamic_uniform_buffer;
+        std::vector<vulkan::ShaderModule>       shaders;
+        std::vector<vulkan::VertexBuffer>       vertex_buffers;
+        std::vector<vulkan::IndexBuffer>        index_buffers;
+        std::vector<vulkan::Texture>            textures;
+        std::vector<vulkan::DescriptorPool>     descriptor_pools;
+        std::vector<vulkan::Pipeline>           pipelines;
+        std::vector<RenderInstruction>          render_instructions;
+        std::vector<std::unique_ptr<Component>> components;
+        std::vector<Entity>                     entities;
     };
 
     class Map {

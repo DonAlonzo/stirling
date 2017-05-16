@@ -92,7 +92,8 @@ namespace stirling {
         auto& descriptor_pool = map_instance.descriptor_pools.back();
 
         // Components
-        auto physics_component = new PhysicsComponent();
+        map_instance.components.emplace_back(new PhysicsComponent());
+        auto physics_component = map_instance.components.back().get();
 
         // Iterate through all entities to be created.
         for (auto create_info : create_info_list) {
