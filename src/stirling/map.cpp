@@ -17,7 +17,8 @@
 
 namespace stirling {
 
-    Map::Map(std::vector<EntityCreateInfo> create_info_list) :
+    Map::Map(MaterialPool&& material_pool, std::vector<EntityCreateInfo> create_info_list) :
+        material_pool    (std::move(material_pool)),
         create_info_list (create_info_list) {
     }
 
@@ -40,19 +41,6 @@ namespace stirling {
         map_instance.dynamic_uniform_buffer.map();
 
         uint64_t next_dynamic_index = 0;
-
-        // Preload shaders
-        std::map<std::string, vulkan::ShaderModule> shader_modules;
-        for (auto create_info : create_info_list) {
-            if (shader_modules.find(create_info.fragment_shader_file) == shader_modules.end()) {
-                std::cout << "Loading shader " << create_info.fragment_shader_file << std::endl;
-                shader_modules.try_emplace(create_info.fragment_shader_file, vulkan::ShaderModule(device, create_info.fragment_shader_file));
-            }
-            if (shader_modules.find(create_info.vertex_shader_file) == shader_modules.end()) {
-                std::cout << "Loading shader " << create_info.vertex_shader_file << std::endl;
-                shader_modules.try_emplace(create_info.vertex_shader_file, vulkan::ShaderModule(device, create_info.vertex_shader_file));
-            }
-        }
 
         // Preload textures
         std::map<std::string, vulkan::Texture> textures;
@@ -84,6 +72,18 @@ namespace stirling {
             }
         }
 
+        // Preload shaders
+        std::map<std::string, vulkan::ShaderModule> shader_modules;
+        for (auto& material : material_pool) {
+            for (auto shader_file : {
+                material->fragment_shader_file,
+                material->vertex_shader_file
+            }) if (shader_modules.find(shader_file) == shader_modules.end()) {
+                std::cout << "Loading shader " << shader_file << std::endl;
+                shader_modules.try_emplace(shader_file, vulkan::ShaderModule(device, shader_file));
+            }
+        }
+
         // Descriptor set layout
         auto descriptor_set_layout = initDescriptorSetLayout(device);
 
@@ -99,8 +99,8 @@ namespace stirling {
         for (auto create_info : create_info_list) {
             // Shaders
             std::vector<VkPipelineShaderStageCreateInfo> shader_stages = {
-                vulkan::initializers::pipelineShaderStageCreateInfo(VK_SHADER_STAGE_VERTEX_BIT, shader_modules.find(create_info.vertex_shader_file)->second, "main"),
-                vulkan::initializers::pipelineShaderStageCreateInfo(VK_SHADER_STAGE_FRAGMENT_BIT, shader_modules.find(create_info.fragment_shader_file)->second, "main"),
+                vulkan::initializers::pipelineShaderStageCreateInfo(VK_SHADER_STAGE_VERTEX_BIT, shader_modules.find(create_info.material->vertex_shader_file)->second, "main"),
+                vulkan::initializers::pipelineShaderStageCreateInfo(VK_SHADER_STAGE_FRAGMENT_BIT, shader_modules.find(create_info.material->fragment_shader_file)->second, "main"),
             };
 
             // Pipeline
@@ -108,21 +108,16 @@ namespace stirling {
             map_instance.pipelines.emplace_back(vulkan::Pipeline(device, { descriptor_set_layout }, render_pass, extent, shader_stages));
             auto& pipeline = map_instance.pipelines.back();
 
-            // Model
-            auto& vertex_buffer = vertex_buffers.find(create_info.model_file)->second;
-            auto& index_buffer = index_buffers.find(create_info.model_file)->second;
-            auto& texture = textures.find(create_info.texture_file)->second;
-
             // Descriptor set
             std::cout << "Allocating descriptor set" << std::endl;
             auto descriptor_set = descriptor_pool.allocateDescriptorSet(descriptor_set_layout);
         
             VkDescriptorImageInfo image_info = {};
             image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            image_info.imageView   = texture.image_view;
-            image_info.sampler     = texture.sampler;
+            image_info.imageView   = textures.find(create_info.texture_file)->second.image_view;
+            image_info.sampler     = textures.find(create_info.texture_file)->second.sampler;
 
-            std::array<VkWriteDescriptorSet, 3> write_descriptor_sets = {
+            std::vector<VkWriteDescriptorSet> write_descriptor_sets = {
                 vulkan::initializers::writeDescriptorSet(descriptor_set, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, &map_instance.static_uniform_buffer.m_descriptor),
                 vulkan::initializers::writeDescriptorSet(descriptor_set, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, &map_instance.dynamic_uniform_buffer.m_descriptor),
                 vulkan::initializers::writeDescriptorSet(descriptor_set, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &image_info)
@@ -137,10 +132,10 @@ namespace stirling {
             RenderInstruction render_instruction;
             render_instruction.pipeline_layout       = pipeline.getLayout();
             render_instruction.pipeline              = pipeline;
-            render_instruction.vertex_buffers        = { vertex_buffer };
+            render_instruction.vertex_buffers        = { vertex_buffers.find(create_info.model_file)->second };
             render_instruction.vertex_buffer_offsets = { 0 };
-            render_instruction.index_buffer          = index_buffer;
-            render_instruction.index_count           = index_buffer.size();
+            render_instruction.index_buffer          = index_buffers.find(create_info.model_file)->second;
+            render_instruction.index_count           = index_buffers.find(create_info.model_file)->second.size();
             render_instruction.descriptor_sets       = { descriptor_set };
             render_instruction.dynamic_offsets       = { dynamic_offset };
             map_instance.render_instructions.emplace_back(render_instruction);
@@ -160,7 +155,7 @@ namespace stirling {
     }
 
     VkDescriptorSetLayout Map::initDescriptorSetLayout(VkDevice device) const {
-        std::array<VkDescriptorSetLayoutBinding, 3> bindings = {
+        std::vector<VkDescriptorSetLayoutBinding> bindings = {
             vulkan::initializers::descriptorSetLayoutBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT),
             vulkan::initializers::descriptorSetLayoutBinding(1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, VK_SHADER_STAGE_VERTEX_BIT),
             vulkan::initializers::descriptorSetLayoutBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)

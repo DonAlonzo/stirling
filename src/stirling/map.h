@@ -26,18 +26,19 @@ namespace stirling {
     struct DynamicUniformBufferObject {
         glm::mat4* model = nullptr;
     };
-    
-    struct ComponentCreateInfo {
+
+    struct Material {
+        const char* vertex_shader_file;
+        const char* fragment_shader_file;
     };
 
     struct EntityCreateInfo {
-        glm::vec3 position;
-        glm::vec3 rotation;
-        glm::vec3 scale;
+        glm::vec3   position;
+        glm::vec3   rotation;
+        glm::vec3   scale;
         const char* model_file;
         const char* texture_file;
-        const char* vertex_shader_file;
-        const char* fragment_shader_file;
+        Material*   material;
     };
 
     struct RenderInstruction {
@@ -67,11 +68,31 @@ namespace stirling {
         std::vector<Entity>                     entities;
     };
 
+    struct MaterialPool {
+        MaterialPool() {}
+        ~MaterialPool() {
+            for (auto material : materials) delete material;
+        }
+        MaterialPool(MaterialPool&&) = default;
+        MaterialPool& operator=(MaterialPool&&) = default;
+
+        Material* allocate() {
+            materials.emplace_back(new Material());
+            return materials.back();
+        }
+
+        std::vector<Material*>::const_iterator begin() const { return materials.begin(); }
+        std::vector<Material*>::const_iterator end() const { return materials.end(); }
+    private:
+        std::vector<Material*> materials;
+    };
+
     class Map {
     public:
+        MaterialPool material_pool;
         std::vector<EntityCreateInfo> create_info_list;
 
-        Map(std::vector<EntityCreateInfo> create_info_list);
+        Map(MaterialPool&& material_pool, std::vector<EntityCreateInfo> create_info_list);
 
         MapInstance instantiate(const vulkan::Device& device, VkRenderPass render_pass, VkExtent2D extent) const;
 

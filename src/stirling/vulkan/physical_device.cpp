@@ -33,7 +33,7 @@ namespace stirling {
             // Queue family properties
             uint32_t queue_family_count;
             vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, nullptr);
-            assert(queueFamilyCount > 0);
+            assert(queue_family_count > 0);
             queue_family_properties.resize(queue_family_count);
             vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, queue_family_properties.data());
         }
