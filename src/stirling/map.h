@@ -27,9 +27,16 @@ namespace stirling {
         glm::mat4* model = nullptr;
     };
 
+    struct ShaderInfo {
+        const char*           file;
+        const char*           entry_point;
+        VkShaderStageFlagBits stage;
+    };
+
     struct Material {
-        const char* vertex_shader_file;
-        const char* fragment_shader_file;
+        std::vector<ShaderInfo> shaders;
+
+        void addShader(VkShaderStageFlagBits stage, const char* file, const char* entry_point);
     };
 
     struct EntityCreateInfo {

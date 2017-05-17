@@ -16,8 +16,8 @@ public:
         stirling::Map map;
 
         auto material = map.createMaterial();
-        material->vertex_shader_file   = "shaders/vert.spv";
-        material->fragment_shader_file = "shaders/frag.spv";
+        material->addShader(VK_SHADER_STAGE_VERTEX_BIT, "shaders/vert.spv", "main");
+        material->addShader(VK_SHADER_STAGE_FRAGMENT_BIT, "shaders/frag.spv", "main");
 
         for (int x = -1; x <= 1; ++x) {
             for (int y = -1; y <= 1; ++y) {

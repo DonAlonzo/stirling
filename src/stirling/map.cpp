@@ -26,6 +26,14 @@ namespace stirling {
         create_info_list.push_back(create_info);
     }
 
+    void Material::addShader(VkShaderStageFlagBits stage, const char* file, const char* entry_point) {
+        ShaderInfo shader_info = {};
+        shader_info.stage       = stage;
+        shader_info.file        = file;
+        shader_info.entry_point = entry_point;
+        shaders.emplace_back(shader_info);
+    }
+
     MapInstance Map::instantiate(const vulkan::Device& device, VkRenderPass render_pass, VkExtent2D extent) const {
         // Map instance
         MapInstance map_instance = {};
@@ -79,12 +87,11 @@ namespace stirling {
         // Preload shaders
         std::map<std::string, vulkan::ShaderModule> shader_modules;
         for (auto& material : materials) {
-            for (auto shader_file : {
-                material.fragment_shader_file,
-                material.vertex_shader_file
-            }) if (shader_modules.find(shader_file) == shader_modules.end()) {
-                std::cout << "Loading shader " << shader_file << std::endl;
-                shader_modules.try_emplace(shader_file, vulkan::ShaderModule(device, shader_file));
+            for (auto shader : material.shaders) {
+                if (shader_modules.find(shader.file) == shader_modules.end()) {
+                    std::cout << "Loading shader " << shader.file << std::endl;
+                    shader_modules.try_emplace(shader.file, vulkan::ShaderModule(device, shader.file));
+                }
             }
         }
 
@@ -102,10 +109,14 @@ namespace stirling {
         // Iterate through all entities to be created.
         for (auto create_info : create_info_list) {
             // Shaders
-            std::vector<VkPipelineShaderStageCreateInfo> shader_stages = {
-                vulkan::initializers::pipelineShaderStageCreateInfo(VK_SHADER_STAGE_VERTEX_BIT, shader_modules.find(create_info.material->vertex_shader_file)->second, "main"),
-                vulkan::initializers::pipelineShaderStageCreateInfo(VK_SHADER_STAGE_FRAGMENT_BIT, shader_modules.find(create_info.material->fragment_shader_file)->second, "main"),
-            };
+            std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
+            for (auto shader : create_info.material->shaders) {
+                shader_stages.emplace_back(vulkan::initializers::pipelineShaderStageCreateInfo(
+                    shader.stage,
+                    shader_modules.at(shader.file),
+                    shader.entry_point)
+                );
+            }
 
             // Pipeline
             std::cout << "Creating pipeline" << std::endl;
@@ -118,8 +129,8 @@ namespace stirling {
         
             VkDescriptorImageInfo image_info = {};
             image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            image_info.imageView   = textures.find(create_info.texture_file)->second.image_view;
-            image_info.sampler     = textures.find(create_info.texture_file)->second.sampler;
+            image_info.imageView   = textures.at(create_info.texture_file).image_view;
+            image_info.sampler     = textures.at(create_info.texture_file).sampler;
 
             std::vector<VkWriteDescriptorSet> write_descriptor_sets = {
                 vulkan::initializers::writeDescriptorSet(descriptor_set, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, &map_instance.static_uniform_buffer.m_descriptor),
@@ -136,10 +147,10 @@ namespace stirling {
             RenderInstruction render_instruction;
             render_instruction.pipeline_layout       = pipeline.getLayout();
             render_instruction.pipeline              = pipeline;
-            render_instruction.vertex_buffers        = { vertex_buffers.find(create_info.model_file)->second };
+            render_instruction.vertex_buffers        = { vertex_buffers.at(create_info.model_file) };
             render_instruction.vertex_buffer_offsets = { 0 };
-            render_instruction.index_buffer          = index_buffers.find(create_info.model_file)->second;
-            render_instruction.index_count           = index_buffers.find(create_info.model_file)->second.size();
+            render_instruction.index_buffer          = index_buffers.at(create_info.model_file);
+            render_instruction.index_count           = index_buffers.at(create_info.model_file).size();
             render_instruction.descriptor_sets       = { descriptor_set };
             render_instruction.dynamic_offsets       = { dynamic_offset };
             map_instance.render_instructions.emplace_back(render_instruction);
