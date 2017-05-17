@@ -17,9 +17,13 @@
 
 namespace stirling {
 
-    Map::Map(MaterialPool&& material_pool, std::vector<EntityCreateInfo> create_info_list) :
-        material_pool    (std::move(material_pool)),
-        create_info_list (create_info_list) {
+    Material* Map::createMaterial() {
+        materials.emplace_back(Material());
+        return &materials.back();
+    }
+
+    void Map::addEntity(EntityCreateInfo create_info) {
+        create_info_list.push_back(create_info);
     }
 
     MapInstance Map::instantiate(const vulkan::Device& device, VkRenderPass render_pass, VkExtent2D extent) const {
@@ -74,10 +78,10 @@ namespace stirling {
 
         // Preload shaders
         std::map<std::string, vulkan::ShaderModule> shader_modules;
-        for (auto& material : material_pool) {
+        for (auto& material : materials) {
             for (auto shader_file : {
-                material->fragment_shader_file,
-                material->vertex_shader_file
+                material.fragment_shader_file,
+                material.vertex_shader_file
             }) if (shader_modules.find(shader_file) == shader_modules.end()) {
                 std::cout << "Loading shader " << shader_file << std::endl;
                 shader_modules.try_emplace(shader_file, vulkan::ShaderModule(device, shader_file));

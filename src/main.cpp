@@ -13,10 +13,9 @@ public:
     }
 
     stirling::Map createMap() {
-        stirling::MaterialPool material_pool;
-        std::vector<stirling::EntityCreateInfo> entity_create_info_list;
+        stirling::Map map;
 
-        auto material = material_pool.allocate();
+        auto material = map.createMaterial();
         material->vertex_shader_file   = "shaders/vert.spv";
         material->fragment_shader_file = "shaders/frag.spv";
 
@@ -29,7 +28,7 @@ public:
                 create_info.model_file   = "models/chalet.obj";
                 create_info.texture_file = "textures/chalet.jpg";
                 create_info.material     = material;
-                entity_create_info_list.push_back(create_info);
+                map.addEntity(create_info);
             }
         }
 
@@ -40,9 +39,9 @@ public:
         create_info.model_file   = "models/agesoflove.obj";
         create_info.texture_file = "textures/agesoflove.jpg";
         create_info.material     = material;
-        //entity_create_info_list.push_back(create_info);
+        //map.addEntity(create_info);
 
-        return { std::move(material_pool), entity_create_info_list };
+        return map;
     }
 
     void run() {

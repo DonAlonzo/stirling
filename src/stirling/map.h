@@ -68,35 +68,17 @@ namespace stirling {
         std::vector<Entity>                     entities;
     };
 
-    struct MaterialPool {
-        MaterialPool() {}
-        ~MaterialPool() {
-            for (auto material : materials) delete material;
-        }
-        MaterialPool(MaterialPool&&) = default;
-        MaterialPool& operator=(MaterialPool&&) = default;
-
-        Material* allocate() {
-            materials.emplace_back(new Material());
-            return materials.back();
-        }
-
-        std::vector<Material*>::const_iterator begin() const { return materials.begin(); }
-        std::vector<Material*>::const_iterator end() const { return materials.end(); }
-    private:
-        std::vector<Material*> materials;
-    };
-
     class Map {
     public:
-        MaterialPool material_pool;
-        std::vector<EntityCreateInfo> create_info_list;
-
-        Map(MaterialPool&& material_pool, std::vector<EntityCreateInfo> create_info_list);
-
         MapInstance instantiate(const vulkan::Device& device, VkRenderPass render_pass, VkExtent2D extent) const;
 
+        Material* createMaterial();
+        void addEntity(EntityCreateInfo);
+
     private:
+        std::vector<Material> materials;
+        std::vector<EntityCreateInfo> create_info_list;
+
         VkDescriptorSetLayout initDescriptorSetLayout(VkDevice device) const;
         vulkan::DescriptorPool initDescriptorPool(VkDevice device, uint32_t max_sets) const;
     };
