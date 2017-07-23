@@ -59,7 +59,7 @@ namespace stirling {
         std::vector<uint32_t>        dynamic_offsets;
     };
 
-    struct MapInstance {
+    struct Map {
         StaticUniformBufferObject               static_uniform_buffer_object;
         DynamicUniformBufferObject              dynamic_uniform_buffer_object;
         vulkan::Buffer                          static_uniform_buffer;
@@ -75,9 +75,9 @@ namespace stirling {
         std::vector<Entity>                     entities;
     };
 
-    class Map {
+    class MapBlueprint {
     public:
-        MapInstance instantiate(const vulkan::Device& device, VkRenderPass render_pass, VkExtent2D extent) const;
+        Map instantiate(const vulkan::Device& device, VkRenderPass render_pass, VkExtent2D extent) const;
 
         Material* createMaterial();
         void addEntity(EntityCreateInfo);

@@ -51,7 +51,7 @@ namespace stirling {
 
 namespace stirling {
 
-    Window::Window(int width, int height, Map map) :
+    Window::Window(int width, int height, MapBlueprint map) :
         m_window                    (initWindow(width, height)),
         m_instance                  (getRequiredExtensions()),
         m_surface                   (initSurface()),

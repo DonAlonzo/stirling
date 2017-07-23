@@ -17,12 +17,12 @@
 
 namespace stirling {
 
-    Material* Map::createMaterial() {
+    Material* MapBlueprint::createMaterial() {
         materials.emplace_back(Material());
         return &materials.back();
     }
 
-    void Map::addEntity(EntityCreateInfo create_info) {
+    void MapBlueprint::addEntity(EntityCreateInfo create_info) {
         create_info_list.push_back(create_info);
     }
 
@@ -34,9 +34,9 @@ namespace stirling {
         shaders.emplace_back(shader_info);
     }
 
-    MapInstance Map::instantiate(const vulkan::Device& device, VkRenderPass render_pass, VkExtent2D extent) const {
+    Map MapBlueprint::instantiate(const vulkan::Device& device, VkRenderPass render_pass, VkExtent2D extent) const {
         // Map instance
-        MapInstance map_instance = {};
+        Map map_instance = {};
 
         // Static uniform buffer
         map_instance.static_uniform_buffer = device.createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, sizeof(StaticUniformBufferObject));
@@ -172,7 +172,7 @@ namespace stirling {
         return map_instance;
     }
 
-    VkDescriptorSetLayout Map::initDescriptorSetLayout(VkDevice device) const {
+    VkDescriptorSetLayout MapBlueprint::initDescriptorSetLayout(VkDevice device) const {
         std::vector<VkDescriptorSetLayoutBinding> bindings = {
             vulkan::initializers::descriptorSetLayoutBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT),
             vulkan::initializers::descriptorSetLayoutBinding(1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, VK_SHADER_STAGE_VERTEX_BIT),
@@ -191,7 +191,7 @@ namespace stirling {
         return descriptor_set_layout;
     }
 
-    vulkan::DescriptorPool Map::initDescriptorPool(VkDevice device, uint32_t max_sets) const {
+    vulkan::DescriptorPool MapBlueprint::initDescriptorPool(VkDevice device, uint32_t max_sets) const {
         std::vector<VkDescriptorPoolSize> pool_sizes{3};
 
         pool_sizes[0].type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;

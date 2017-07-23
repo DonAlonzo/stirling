@@ -20,7 +20,7 @@ namespace stirling {
         friend WindowListener;
 
     public:
-        Window(int width, int height, Map map);
+        Window(int width, int height, MapBlueprint map);
         ~Window();
         Window(Window&&) = default;
         Window(const Window&) = delete;
@@ -46,7 +46,7 @@ namespace stirling {
 
         Camera                            m_camera;
         World                             m_world;
-        MapInstance                       m_map_instance;
+        Map                       m_map_instance;
         
         vulkan::CommandPool               m_command_pool;
         std::vector<VkCommandBuffer>      m_command_buffers;
