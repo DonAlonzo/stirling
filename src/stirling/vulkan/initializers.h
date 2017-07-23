@@ -37,12 +37,12 @@ namespace stirling {
                 return write_descriptor_set;
             }
 
-            inline VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo(VkShaderStageFlagBits stage, VkShaderModule module, const char* name) {
+            inline VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo(VkShaderStageFlagBits stage, VkShaderModule module, const std::string& name) {
                 VkPipelineShaderStageCreateInfo create_info = {};
                 create_info.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
                 create_info.stage  = stage;
                 create_info.module = module;
-                create_info.pName  = name;
+                create_info.pName  = name.c_str();
                 return create_info;
             }
 

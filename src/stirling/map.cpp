@@ -11,11 +11,18 @@
 #include "physics_component.h"
 
 #include <array>
+#include <functional>
 #include <iostream>
 #include <map>
 #include <string>
 
 namespace stirling {
+
+	template<class T>
+	inline void hash_combine(std::size_t& seed, const T& v) {
+		std::hash<T> hasher;
+		seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+	}
 
     Material* MapBlueprint::createMaterial() {
         materials.emplace_back(Material());
@@ -26,7 +33,7 @@ namespace stirling {
         create_info_list.push_back(create_info);
     }
 
-    void Material::addShader(VkShaderStageFlagBits stage, const char* file, const char* entry_point) {
+    void Material::addShader(VkShaderStageFlagBits stage, const std::string& file, const std::string& entry_point) {
         ShaderInfo shader_info = {};
         shader_info.stage       = stage;
         shader_info.file        = file;
@@ -130,34 +137,67 @@ namespace stirling {
 		map.components.emplace_back(new PhysicsComponent{});
         auto physics_component = map.components.back().get();
 
-        // Iterate through all entities to be created.
-        for (auto create_info : create_info_list) {
-            // Shaders
-            std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
-            for (auto shader : create_info.material->shaders) {
-                shader_stages.emplace_back(vulkan::initializers::pipelineShaderStageCreateInfo(shader.stage, shader_modules.at(shader.file), shader.entry_point));
-            }
+		// Iterate through all entities
+		std::map<size_t, vulkan::Pipeline&> pipelines;
+		std::map<size_t, VkDescriptorSet> descriptor_sets;
+		for (auto create_info : create_info_list) {
+			// Get pipeline
+			auto& pipeline = [&]() -> vulkan::Pipeline& {
+				// Calculate hash
+				size_t hash = 0;
+				for (auto& shader : create_info.material->shaders) {
+					hash_combine(hash, shader.entry_point);
+					hash_combine(hash, shader.file);
+					hash_combine(hash, shader.stage);
+				}
 
-            // Pipeline
-            std::cout << "Creating pipeline" << std::endl;
-            map.pipelines.emplace_back(vulkan::Pipeline(device, { descriptor_set_layout }, render_pass, extent, shader_stages));
-            auto& pipeline = map.pipelines.back();
+				if (pipelines.find(hash) == pipelines.end()) {
+					// Shaders
+					std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
+					for (auto& shader : create_info.material->shaders) {
+						shader_stages.emplace_back(vulkan::initializers::pipelineShaderStageCreateInfo(shader.stage, shader_modules.at(shader.file), shader.entry_point));
+					}
 
-            // Descriptor set
-            std::cout << "Allocating descriptor set" << std::endl;
-            auto descriptor_set = descriptor_pool.allocateDescriptorSet(descriptor_set_layout);
-        
-            VkDescriptorImageInfo image_info = {};
-            image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            image_info.imageView   = textures.at(create_info.texture_file).image_view;
-            image_info.sampler     = textures.at(create_info.texture_file).sampler;
+					// Create pipeline
+					std::cout << "Creating pipeline" << std::endl;
+					map.pipelines.emplace_back(vulkan::Pipeline(device, { descriptor_set_layout }, render_pass, extent, shader_stages));
 
-            std::vector<VkWriteDescriptorSet> write_descriptor_sets = {
-                vulkan::initializers::writeDescriptorSet(descriptor_set, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, &map.static_uniform_buffer.descriptor),
-                vulkan::initializers::writeDescriptorSet(descriptor_set, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, &map.dynamic_uniform_buffer.descriptor),
-                vulkan::initializers::writeDescriptorSet(descriptor_set, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &image_info)
-            };
-            vkUpdateDescriptorSets(device, write_descriptor_sets.size(), write_descriptor_sets.data(), 0, nullptr);
+					auto& pipeline = map.pipelines.back();
+					pipelines.emplace(hash, pipeline);
+					return pipeline;
+				} else {
+					return pipelines.at(hash);
+				}
+			}();
+
+			// Get descriptor set
+			auto descriptor_set = [&]() {
+				// Calculate hash
+				size_t hash = 0;
+				hash_combine(hash, create_info.texture_file);
+
+				if (descriptor_sets.find(hash) == descriptor_sets.end()) {
+					std::cout << "Allocating descriptor set" << std::endl;
+					auto descriptor_set = descriptor_pool.allocateDescriptorSet(descriptor_set_layout);
+
+					VkDescriptorImageInfo image_info = {};
+					image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+					image_info.imageView   = textures.at(create_info.texture_file).image_view;
+					image_info.sampler     = textures.at(create_info.texture_file).sampler;
+
+					std::vector<VkWriteDescriptorSet> write_descriptor_sets = {
+						vulkan::initializers::writeDescriptorSet(descriptor_set, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, &map.static_uniform_buffer.descriptor),
+						vulkan::initializers::writeDescriptorSet(descriptor_set, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, &map.dynamic_uniform_buffer.descriptor),
+						vulkan::initializers::writeDescriptorSet(descriptor_set, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &image_info)
+					};
+					vkUpdateDescriptorSets(device, write_descriptor_sets.size(), write_descriptor_sets.data(), 0, nullptr);
+
+					descriptor_sets.emplace(hash, descriptor_set);
+					return descriptor_set;
+				} else {
+					return descriptor_sets.at(hash);
+				}
+			}();
 
             // Transform (Dynamic uniform buffer)
             uint32_t dynamic_offset = next_dynamic_index++ * static_cast<uint32_t>(dynamic_alignment);
@@ -185,7 +225,7 @@ namespace stirling {
 
             entity.addComponent(physics_component);
         }
-
+		
         return map;
     }
 

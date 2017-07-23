@@ -27,23 +27,23 @@ namespace stirling {
     };
 
     struct ShaderInfo {
-        const char*           file;
-        const char*           entry_point;
+		std::string           file;
+		std::string           entry_point;
         VkShaderStageFlagBits stage;
     };
 
     struct Material {
         std::vector<ShaderInfo> shaders;
 
-        void addShader(VkShaderStageFlagBits stage, const char* file, const char* entry_point);
+        void addShader(VkShaderStageFlagBits stage, const std::string& file, const std::string& entry_point);
     };
 
     struct EntityCreateInfo {
         glm::vec3   position;
         glm::vec3   rotation;
         glm::vec3   scale;
-        const char* model_file;
-        const char* texture_file;
+        std::string model_file;
+		std::string texture_file;
         Material*   material;
     };
 
