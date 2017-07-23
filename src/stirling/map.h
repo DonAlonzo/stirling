@@ -63,6 +63,8 @@ namespace stirling {
         DynamicUniformBufferObject              dynamic_uniform_buffer_object;
         vulkan::Buffer                          static_uniform_buffer;
         vulkan::Buffer                          dynamic_uniform_buffer;
+		vulkan::BufferMapping                   static_uniform_buffer_mapping;
+		vulkan::BufferMapping                   dynamic_uniform_buffer_mapping;
         std::vector<vulkan::ShaderModule>       shaders;
         std::vector<vulkan::Buffer>             vertex_buffers;
         std::vector<vulkan::Buffer>             index_buffers;
@@ -72,6 +74,8 @@ namespace stirling {
         std::vector<RenderInstruction>          render_instructions;
         std::vector<std::unique_ptr<Component>> components;
         std::vector<Entity>                     entities;
+
+		Map(vulkan::Buffer&& static_uniform_buffer, vulkan::Buffer&& dynamic_uniform_buffer);
     };
 
     class MapBlueprint {

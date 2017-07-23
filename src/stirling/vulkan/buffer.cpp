@@ -8,16 +8,14 @@
 namespace stirling {
     namespace vulkan {
 
-        Buffer::Buffer() {}
-
         Buffer::Buffer(const Device* device, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkDeviceSize size) :
-            m_device     (device),
-            m_size       (size),
-            m_buffer     (initBuffer(size, usage)),
-            m_memory     (allocateMemory(properties)),
-            m_descriptor (initDescriptor(size)) {
+            device     (device),
+            size       (size),
+            buffer     (initBuffer(size, usage)),
+            memory     (allocateMemory(properties)),
+            descriptor (initDescriptor(size)) {
 
-            vkBindBufferMemory(*device, m_buffer, m_memory, 0);
+            vkBindBufferMemory(*device, buffer, memory, 0);
         }
 
         Deleter<VkBuffer> Buffer::initBuffer(VkDeviceSize size, VkBufferUsageFlags usage) const {
@@ -28,15 +26,15 @@ namespace stirling {
             create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
             VkBuffer buffer;
-            if (vkCreateBuffer(*m_device, &create_info, nullptr, &buffer) != VK_SUCCESS) {
+            if (vkCreateBuffer(*device, &create_info, nullptr, &buffer) != VK_SUCCESS) {
                 throw std::runtime_error("Failed to create buffer.");
             }
-            return Deleter<VkBuffer>(buffer, *m_device, vkDestroyBuffer);
+            return Deleter<VkBuffer>(buffer, *device, vkDestroyBuffer);
         }
 
         Deleter<VkDeviceMemory> Buffer::allocateMemory(VkMemoryPropertyFlags properties) const {
             VkMemoryRequirements memory_requirements;
-            vkGetBufferMemoryRequirements(*m_device, m_buffer, &memory_requirements);
+            vkGetBufferMemoryRequirements(*device, buffer, &memory_requirements);
 
             VkMemoryAllocateInfo allocate_info = {};
             allocate_info.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -44,15 +42,15 @@ namespace stirling {
             allocate_info.memoryTypeIndex = findMemoryType(memory_requirements.memoryTypeBits, properties);
 
             VkDeviceMemory memory;
-            if (vkAllocateMemory(*m_device, &allocate_info, nullptr, &memory) != VK_SUCCESS) {
+            if (vkAllocateMemory(*device, &allocate_info, nullptr, &memory) != VK_SUCCESS) {
                 throw std::runtime_error("Failed to allocate buffer memory.");
             }
-            return Deleter<VkDeviceMemory>(memory, *m_device, vkFreeMemory);
+            return Deleter<VkDeviceMemory>(memory, *device, vkFreeMemory);
         }
 
         uint32_t Buffer::findMemoryType(uint32_t type_filter, VkMemoryPropertyFlags properties) const {
             VkPhysicalDeviceMemoryProperties memory_properties;
-            vkGetPhysicalDeviceMemoryProperties(m_device->getPhysicalDevice(), &memory_properties);
+            vkGetPhysicalDeviceMemoryProperties(device->getPhysicalDevice(), &memory_properties);
 
             for (uint32_t i = 0; i < memory_properties.memoryTypeCount; ++i) {
                 if ((type_filter & (1 << i)) && (memory_properties.memoryTypes[i].propertyFlags & properties) == properties) {
@@ -64,36 +62,36 @@ namespace stirling {
 
         VkDescriptorBufferInfo Buffer::initDescriptor(VkDeviceSize size, VkDeviceSize offset) const {
             VkDescriptorBufferInfo descriptor = {};
-            descriptor.buffer = m_buffer;
+            descriptor.buffer = buffer;
             descriptor.range  = size;
             descriptor.offset = offset;
             return descriptor;
         }
 
         Buffer::operator VkBuffer() const {
-            return m_buffer;
+            return buffer;
         }
 
-        void Buffer::map(VkDeviceSize size, VkDeviceSize offset) {
-            if (m_mapped) throw std::runtime_error("Buffer memory has already been mapped.");
-
-            if (vkMapMemory(*m_device, m_memory, offset, size, 0, &m_mapped) != VK_SUCCESS) {
-                throw std::runtime_error("Could not map buffer memory.");
-            }
+		BufferMapping Buffer::map(VkDeviceSize size, VkDeviceSize offset) const {
+			return BufferMapping(*device, memory, size, offset);
         }
 
-        void Buffer::unmap() {
-            if (!m_mapped) throw std::runtime_error("Buffer memory has not been mapped yet.");
+		BufferMapping::BufferMapping(VkDevice device, VkDeviceMemory memory, VkDeviceSize size, VkDeviceSize offset) :
+			device (device),
+			memory (memory) {
 
-            vkUnmapMemory(*m_device, m_memory);
-            m_mapped = nullptr;
-        }
+			if (vkMapMemory(device, memory, offset, size, 0, &mapped) != VK_SUCCESS) {
+				throw std::runtime_error("Could not map buffer memory.");
+			}
+		}
 
-        void Buffer::memcpy(const void* data) {
-            if (!m_mapped) throw std::runtime_error("Buffer memory has not been mapped yet.");
+		BufferMapping::~BufferMapping() {
+			vkUnmapMemory(device, memory);
+		}
 
-            std::memcpy(m_mapped, data, m_size);
-        }
+		void BufferMapping::memcpy(const void* data, size_t count) const {
+			std::memcpy(mapped, data, count);
+		}
 
     }
 }

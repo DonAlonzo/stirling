@@ -269,17 +269,17 @@ namespace stirling {
         { // Update static uniform buffer
             m_map_instance.static_uniform_buffer_object.view       = m_camera.transform();
             m_map_instance.static_uniform_buffer_object.projection = m_camera.getProjectionMatrix();
-            m_map_instance.static_uniform_buffer.memcpy(&m_map_instance.static_uniform_buffer_object);
+            m_map_instance.static_uniform_buffer_mapping.memcpy(&m_map_instance.static_uniform_buffer_object, m_map_instance.static_uniform_buffer.size);
         }
 
         { // Update dynamic uniform buffer
-            m_map_instance.dynamic_uniform_buffer.memcpy(m_map_instance.dynamic_uniform_buffer_object.model);
+            m_map_instance.dynamic_uniform_buffer_mapping.memcpy(m_map_instance.dynamic_uniform_buffer_object.model, m_map_instance.dynamic_uniform_buffer.size);
 
             // Flush dynamic uniform buffer memory
             VkMappedMemoryRange mapped_memory_range = {};
             mapped_memory_range.sType  = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-            mapped_memory_range.memory = m_map_instance.dynamic_uniform_buffer.m_memory;
-            mapped_memory_range.size   = m_map_instance.dynamic_uniform_buffer.m_size;
+            mapped_memory_range.memory = m_map_instance.dynamic_uniform_buffer.memory;
+            mapped_memory_range.size   = m_map_instance.dynamic_uniform_buffer.size;
             vkFlushMappedMemoryRanges(m_device, 1, &mapped_memory_range);
         }
 

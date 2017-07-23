@@ -9,27 +9,37 @@ namespace stirling { namespace vulkan {
 
 namespace stirling {
     namespace vulkan {
+
+		struct BufferMapping {
+			VkDevice       device;
+			VkDeviceMemory memory;
+			void*          mapped = nullptr;
+
+			BufferMapping(VkDevice device, VkDeviceMemory memory, VkDeviceSize size, VkDeviceSize offset);
+			~BufferMapping();
+			BufferMapping(BufferMapping&&) = default;
+			BufferMapping& operator=(BufferMapping&&) = default;
+
+			void memcpy(const void* data, size_t count) const;
+		};
+
         class Buffer {
             friend class Device;
 
         private:
-            const Device* m_device;
+            const Device* device;
 
         public:
-            Buffer();
+			VkDeviceSize            size;
+			Deleter<VkBuffer>       buffer;
+			Deleter<VkDeviceMemory> memory;
+			VkDescriptorBufferInfo  descriptor;
+
             Buffer(const Device* device, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkDeviceSize size);
 
             operator VkBuffer() const;
 
-            void map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
-            void unmap();
-            void memcpy(const void* data);
-
-            VkDeviceSize            m_size;
-            Deleter<VkBuffer>       m_buffer;
-            Deleter<VkDeviceMemory> m_memory;
-            VkDescriptorBufferInfo  m_descriptor;
-            void*                   m_mapped = nullptr;
+            BufferMapping map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0) const;
 
         private:
             Deleter<VkBuffer>       initBuffer(VkDeviceSize size, VkBufferUsageFlags usage) const;

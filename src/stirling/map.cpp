@@ -35,24 +35,21 @@ namespace stirling {
     }
 
     Map MapBlueprint::instantiate(const vulkan::Device& device, VkRenderPass render_pass, VkExtent2D extent) const {
-        // Map instance
-        Map map = {};
-
-        // Static uniform buffer
-        map.static_uniform_buffer = device.createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, sizeof(StaticUniformBufferObject));
-        map.static_uniform_buffer.map();
-
-        // Dynamic uniform buffer
+		// Calculate size and alignment of dynamic buffer
         uint32_t number_of_dynamic_buffer_objects = create_info_list.size();
         size_t ubo_alignment = device.getPhysicalDevice().properties.limits.minUniformBufferOffsetAlignment;
         size_t dynamic_alignment = (sizeof(glm::mat4) / ubo_alignment) * ubo_alignment + ((sizeof(glm::mat4) % ubo_alignment) > 0 ? ubo_alignment : 0);
         size_t buffer_size = number_of_dynamic_buffer_objects * dynamic_alignment;
 
-        map.dynamic_uniform_buffer_object.model = (glm::mat4*)util::memory::alignedAlloc(buffer_size, dynamic_alignment);
-        map.dynamic_uniform_buffer = device.createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, buffer_size);
-        map.dynamic_uniform_buffer.map();
+		// Map instance
+		Map map = {
+			device.createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, sizeof(StaticUniformBufferObject)),
+			device.createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, buffer_size)
+		};
 
-        uint64_t next_dynamic_index = 0;
+		// Dynamic uniform buffer object + index counter
+		map.dynamic_uniform_buffer_object.model = (glm::mat4*)util::memory::alignedAlloc(buffer_size, dynamic_alignment);
+		uint64_t next_dynamic_index = 0;
 
         // Preload textures
         std::map<std::string, vulkan::Texture&> textures;
@@ -79,36 +76,32 @@ namespace stirling {
             if (vertex_buffers.find(model.first) == vertex_buffers.end()) {
                 std::cout << "Loading vertex buffer for " << model.first << std::endl;
 
-				map.vertex_buffers.emplace_back(vulkan::Buffer(
+				map.vertex_buffers.emplace_back(vulkan::Buffer{
 					&device,
 					VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 					sizeof(vulkan::Vertex) * model.second.vertices.size()
-				));
+				});
 
 				auto& buffer = map.vertex_buffers.back();
 
-				buffer.map();
-				buffer.memcpy(model.second.vertices.data());
-				buffer.unmap();
+				buffer.map().memcpy(model.second.vertices.data(), buffer.size);
 
 				vertex_buffers.emplace(model.first, buffer);
             }
             if (index_buffers.find(model.first) == index_buffers.end()) {
                 std::cout << "Loading index buffer for " << model.first << std::endl;
 
-				map.index_buffers.emplace_back(vulkan::Buffer(
+				map.index_buffers.emplace_back(vulkan::Buffer{
 					&device,
 					VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
 					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 					sizeof(uint32_t) * model.second.indices.size()
-				));
+				});
 
 				auto& buffer = map.index_buffers.back();
 
-				buffer.map();
-				buffer.memcpy(model.second.indices.data());
-				buffer.unmap();
+				buffer.map().memcpy(model.second.indices.data(), buffer.size);
 
 				index_buffers.emplace(model.first, buffer);
 				index_counts.emplace(model.first, model.second.indices.size());
@@ -160,8 +153,8 @@ namespace stirling {
             image_info.sampler     = textures.at(create_info.texture_file).sampler;
 
             std::vector<VkWriteDescriptorSet> write_descriptor_sets = {
-                vulkan::initializers::writeDescriptorSet(descriptor_set, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, &map.static_uniform_buffer.m_descriptor),
-                vulkan::initializers::writeDescriptorSet(descriptor_set, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, &map.dynamic_uniform_buffer.m_descriptor),
+                vulkan::initializers::writeDescriptorSet(descriptor_set, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, &map.static_uniform_buffer.descriptor),
+                vulkan::initializers::writeDescriptorSet(descriptor_set, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, &map.dynamic_uniform_buffer.descriptor),
                 vulkan::initializers::writeDescriptorSet(descriptor_set, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &image_info)
             };
             vkUpdateDescriptorSets(device, write_descriptor_sets.size(), write_descriptor_sets.data(), 0, nullptr);
@@ -229,5 +222,12 @@ namespace stirling {
 
         return vulkan::DescriptorPool(device, pool_sizes, max_sets);
     }
+
+	Map::Map(vulkan::Buffer&& static_uniform_buffer, vulkan::Buffer&& dynamic_uniform_buffer) :
+		static_uniform_buffer          (std::move(static_uniform_buffer)),
+		dynamic_uniform_buffer         (std::move(dynamic_uniform_buffer)),
+		static_uniform_buffer_mapping  (this->static_uniform_buffer.map()),
+		dynamic_uniform_buffer_mapping (this->dynamic_uniform_buffer.map()) {
+	}
 
 }
