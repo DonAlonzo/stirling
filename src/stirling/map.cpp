@@ -55,11 +55,12 @@ namespace stirling {
         uint64_t next_dynamic_index = 0;
 
         // Preload textures
-        std::map<std::string, vulkan::Texture> textures;
+        std::map<std::string, vulkan::Texture&> textures;
         for (auto create_info : create_info_list) {
             if (textures.find(create_info.texture_file) == textures.end()) {
                 std::cout << "Loading texture " << create_info.texture_file << std::endl;
-                textures.try_emplace(create_info.texture_file, vulkan::Texture(device, vulkan::Image::loadFromFile(device, create_info.texture_file)));
+				map_instance.textures.emplace_back(vulkan::Texture(device, vulkan::Image::loadFromFile(device, create_info.texture_file)));
+                textures.emplace(create_info.texture_file, map_instance.textures.back());
             }
         }
 
@@ -68,19 +69,21 @@ namespace stirling {
         for (auto create_info : create_info_list) {
             if (models.find(create_info.model_file) == models.end()) {
                 std::cout << "Loading model " << create_info.model_file << std::endl;
-                models.try_emplace(create_info.model_file, vulkan::Model::loadFromFile(create_info.model_file));
+                models.emplace(create_info.model_file, vulkan::Model::loadFromFile(create_info.model_file));
             }
         }
-        std::map<std::string, vulkan::VertexBuffer> vertex_buffers;
-        std::map<std::string, vulkan::IndexBuffer> index_buffers;
+        std::map<std::string, vulkan::VertexBuffer&> vertex_buffers;
+        std::map<std::string, vulkan::IndexBuffer&> index_buffers;
         for (auto& model : models) {
             if (vertex_buffers.find(model.first) == vertex_buffers.end()) {
                 std::cout << "Loading vertex buffer for " << model.first << std::endl;
-                vertex_buffers.emplace(model.first, vulkan::VertexBuffer(&device, model.second.vertices));
+				map_instance.vertex_buffers.emplace_back(vulkan::VertexBuffer(&device, model.second.vertices));
+                vertex_buffers.emplace(model.first, map_instance.vertex_buffers.back());
             }
             if (index_buffers.find(model.first) == index_buffers.end()) {
                 std::cout << "Loading index buffer for " << model.first << std::endl;
-                index_buffers.emplace(model.first, vulkan::IndexBuffer(&device, model.second.indices));
+				map_instance.index_buffers.emplace_back(vulkan::IndexBuffer(&device, model.second.indices));
+				index_buffers.emplace(model.first, map_instance.index_buffers.back());
             }
         }
 
