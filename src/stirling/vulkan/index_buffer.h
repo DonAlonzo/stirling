@@ -11,14 +11,8 @@ namespace stirling { namespace vulkan {
 
 namespace stirling {
     namespace vulkan {
-        class IndexBuffer : public Buffer {
-        public:
+        struct IndexBuffer : public Buffer {
             IndexBuffer(const Device* device, const std::vector<uint32_t>& indices);
-
-            size_t size() const;
-
-        private:
-            size_t m_size;
         };
     }
 }

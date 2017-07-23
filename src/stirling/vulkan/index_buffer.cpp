@@ -14,9 +14,5 @@ namespace stirling {
             unmap();
         }
 
-        size_t IndexBuffer::size() const {
-            return m_size;
-        }
-
     }
 }

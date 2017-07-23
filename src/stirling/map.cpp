@@ -36,11 +36,11 @@ namespace stirling {
 
     Map MapBlueprint::instantiate(const vulkan::Device& device, VkRenderPass render_pass, VkExtent2D extent) const {
         // Map instance
-        Map map_instance = {};
+        Map map = {};
 
         // Static uniform buffer
-        map_instance.static_uniform_buffer = device.createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, sizeof(StaticUniformBufferObject));
-        map_instance.static_uniform_buffer.map();
+        map.static_uniform_buffer = device.createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, sizeof(StaticUniformBufferObject));
+        map.static_uniform_buffer.map();
 
         // Dynamic uniform buffer
         uint32_t number_of_dynamic_buffer_objects = create_info_list.size();
@@ -48,9 +48,9 @@ namespace stirling {
         size_t dynamic_alignment = (sizeof(glm::mat4) / ubo_alignment) * ubo_alignment + ((sizeof(glm::mat4) % ubo_alignment) > 0 ? ubo_alignment : 0);
         size_t buffer_size = number_of_dynamic_buffer_objects * dynamic_alignment;
 
-        map_instance.dynamic_uniform_buffer_object.model = (glm::mat4*)util::memory::alignedAlloc(buffer_size, dynamic_alignment);
-        map_instance.dynamic_uniform_buffer = device.createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, buffer_size);
-        map_instance.dynamic_uniform_buffer.map();
+        map.dynamic_uniform_buffer_object.model = (glm::mat4*)util::memory::alignedAlloc(buffer_size, dynamic_alignment);
+        map.dynamic_uniform_buffer = device.createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, buffer_size);
+        map.dynamic_uniform_buffer.map();
 
         uint64_t next_dynamic_index = 0;
 
@@ -59,8 +59,8 @@ namespace stirling {
         for (auto create_info : create_info_list) {
             if (textures.find(create_info.texture_file) == textures.end()) {
                 std::cout << "Loading texture " << create_info.texture_file << std::endl;
-				map_instance.textures.emplace_back(vulkan::Texture(device, vulkan::Image::loadFromFile(device, create_info.texture_file)));
-                textures.emplace(create_info.texture_file, map_instance.textures.back());
+				map.textures.emplace_back(vulkan::Texture(device, vulkan::Image::loadFromFile(device, create_info.texture_file)));
+                textures.emplace(create_info.texture_file, map.textures.back());
             }
         }
 
@@ -72,18 +72,46 @@ namespace stirling {
                 models.emplace(create_info.model_file, vulkan::Model::loadFromFile(create_info.model_file));
             }
         }
-        std::map<std::string, vulkan::VertexBuffer&> vertex_buffers;
-        std::map<std::string, vulkan::IndexBuffer&> index_buffers;
+        std::map<std::string, vulkan::Buffer&> vertex_buffers;
+        std::map<std::string, vulkan::Buffer&> index_buffers;
+		std::map<std::string, size_t> index_counts;
         for (auto& model : models) {
             if (vertex_buffers.find(model.first) == vertex_buffers.end()) {
                 std::cout << "Loading vertex buffer for " << model.first << std::endl;
-				map_instance.vertex_buffers.emplace_back(vulkan::VertexBuffer(&device, model.second.vertices));
-                vertex_buffers.emplace(model.first, map_instance.vertex_buffers.back());
+
+				map.vertex_buffers.emplace_back(vulkan::Buffer(
+					&device,
+					VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+					sizeof(vulkan::Vertex) * model.second.vertices.size()
+				));
+
+				auto& buffer = map.vertex_buffers.back();
+
+				buffer.map();
+				buffer.memcpy(model.second.vertices.data());
+				buffer.unmap();
+
+				vertex_buffers.emplace(model.first, buffer);
             }
             if (index_buffers.find(model.first) == index_buffers.end()) {
                 std::cout << "Loading index buffer for " << model.first << std::endl;
-				map_instance.index_buffers.emplace_back(vulkan::IndexBuffer(&device, model.second.indices));
-				index_buffers.emplace(model.first, map_instance.index_buffers.back());
+
+				map.index_buffers.emplace_back(vulkan::Buffer(
+					&device,
+					VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+					sizeof(uint32_t) * model.second.indices.size()
+				));
+
+				auto& buffer = map.index_buffers.back();
+
+				buffer.map();
+				buffer.memcpy(model.second.indices.data());
+				buffer.unmap();
+
+				index_buffers.emplace(model.first, buffer);
+				index_counts.emplace(model.first, model.second.indices.size());
             }
         }
 
@@ -102,29 +130,25 @@ namespace stirling {
         auto descriptor_set_layout = initDescriptorSetLayout(device);
 
         // Descriptor pool
-        map_instance.descriptor_pools.emplace_back(initDescriptorPool(device, create_info_list.size()));
-        auto& descriptor_pool = map_instance.descriptor_pools.back();
+        map.descriptor_pools.emplace_back(initDescriptorPool(device, create_info_list.size()));
+        auto& descriptor_pool = map.descriptor_pools.back();
 
         // Components
-        map_instance.components.emplace_back(new PhysicsComponent());
-        auto physics_component = map_instance.components.back().get();
+		map.components.emplace_back(new PhysicsComponent{});
+        auto physics_component = map.components.back().get();
 
         // Iterate through all entities to be created.
         for (auto create_info : create_info_list) {
             // Shaders
             std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
             for (auto shader : create_info.material->shaders) {
-                shader_stages.emplace_back(vulkan::initializers::pipelineShaderStageCreateInfo(
-                    shader.stage,
-                    shader_modules.at(shader.file),
-                    shader.entry_point)
-                );
+                shader_stages.emplace_back(vulkan::initializers::pipelineShaderStageCreateInfo(shader.stage, shader_modules.at(shader.file), shader.entry_point));
             }
 
             // Pipeline
             std::cout << "Creating pipeline" << std::endl;
-            map_instance.pipelines.emplace_back(vulkan::Pipeline(device, { descriptor_set_layout }, render_pass, extent, shader_stages));
-            auto& pipeline = map_instance.pipelines.back();
+            map.pipelines.emplace_back(vulkan::Pipeline(device, { descriptor_set_layout }, render_pass, extent, shader_stages));
+            auto& pipeline = map.pipelines.back();
 
             // Descriptor set
             std::cout << "Allocating descriptor set" << std::endl;
@@ -136,31 +160,31 @@ namespace stirling {
             image_info.sampler     = textures.at(create_info.texture_file).sampler;
 
             std::vector<VkWriteDescriptorSet> write_descriptor_sets = {
-                vulkan::initializers::writeDescriptorSet(descriptor_set, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, &map_instance.static_uniform_buffer.m_descriptor),
-                vulkan::initializers::writeDescriptorSet(descriptor_set, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, &map_instance.dynamic_uniform_buffer.m_descriptor),
+                vulkan::initializers::writeDescriptorSet(descriptor_set, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, &map.static_uniform_buffer.m_descriptor),
+                vulkan::initializers::writeDescriptorSet(descriptor_set, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, &map.dynamic_uniform_buffer.m_descriptor),
                 vulkan::initializers::writeDescriptorSet(descriptor_set, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &image_info)
             };
             vkUpdateDescriptorSets(device, write_descriptor_sets.size(), write_descriptor_sets.data(), 0, nullptr);
 
             // Transform (Dynamic uniform buffer)
             uint32_t dynamic_offset = next_dynamic_index++ * static_cast<uint32_t>(dynamic_alignment);
-            auto transform = (glm::mat4*)(((uint64_t)map_instance.dynamic_uniform_buffer_object.model + dynamic_offset));
+            auto transform = (glm::mat4*)(((uint64_t)map.dynamic_uniform_buffer_object.model + dynamic_offset));
 
             // Render instruction
-            RenderInstruction render_instruction;
+			RenderInstruction render_instruction = {};
             render_instruction.pipeline_layout       = pipeline.getLayout();
             render_instruction.pipeline              = pipeline;
             render_instruction.vertex_buffers        = { vertex_buffers.at(create_info.model_file) };
             render_instruction.vertex_buffer_offsets = { 0 };
             render_instruction.index_buffer          = index_buffers.at(create_info.model_file);
-            render_instruction.index_count           = index_buffers.at(create_info.model_file).size();
+			render_instruction.index_count           = index_counts.at(create_info.model_file);
             render_instruction.descriptor_sets       = { descriptor_set };
             render_instruction.dynamic_offsets       = { dynamic_offset };
-            map_instance.render_instructions.emplace_back(render_instruction);
+            map.render_instructions.emplace_back(render_instruction);
 
             // Compose entity
-            map_instance.entities.emplace_back(Entity(vulkan::Transform(transform)));
-            auto& entity = map_instance.entities.back();
+            map.entities.emplace_back(transform);
+            auto& entity = map.entities.back();
 
             entity.transform().moveTo(create_info.position);
             entity.transform().setRotation(create_info.rotation);
@@ -169,7 +193,7 @@ namespace stirling {
             entity.addComponent(physics_component);
         }
 
-        return map_instance;
+        return map;
     }
 
     VkDescriptorSetLayout MapBlueprint::initDescriptorSetLayout(VkDevice device) const {

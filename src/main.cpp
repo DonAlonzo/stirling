@@ -12,8 +12,8 @@ public:
         m_window (1680, 1050, createMap()) {
     }
 
-    stirling::Map createMap() {
-        stirling::Map map;
+    stirling::MapBlueprint createMap() {
+        stirling::MapBlueprint map;
 
         auto material = map.createMaterial();
         material->addShader(VK_SHADER_STAGE_VERTEX_BIT, "shaders/vert.spv", "main");
@@ -36,8 +36,8 @@ public:
         create_info.position     = glm::vec3(-2.f, -1.f, 0.f);
         create_info.rotation     = glm::vec3(0.f, 0.f, 0.f);
         create_info.scale        = glm::vec3(0.1f, 0.1f, 0.1f);
-        create_info.model_file   = "models/agesoflove.obj";
-        create_info.texture_file = "textures/agesoflove.jpg";
+        create_info.model_file   = "models/gladiators.obj";
+        create_info.texture_file = "textures/gladiators.jpg";
         create_info.material     = material;
         //map.addEntity(create_info);
 

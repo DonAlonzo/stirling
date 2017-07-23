@@ -14,14 +14,9 @@ namespace stirling {
 
 namespace stirling {
     namespace vulkan {
-        class VertexBuffer : public Buffer {
-        public:
+        struct VertexBuffer : public Buffer {
             VertexBuffer(const Device* device, const std::vector<Vertex>& vertices);
 
-            int size() const;
-
-        private:
-            int m_size;
         };
     }
 }

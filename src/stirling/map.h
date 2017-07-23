@@ -1,12 +1,11 @@
 #pragma once
 
 namespace stirling { namespace vulkan { class Device; } }
+#include "vulkan/buffer.h"
 #include "vulkan/descriptor_pool.h"
-#include "vulkan/index_buffer.h"
 #include "vulkan/pipeline.h"
 #include "vulkan/shader_module.h"
 #include "vulkan/texture.h"
-#include "vulkan/vertex_buffer.h"
 
 #include "entity.h"
 
@@ -65,8 +64,8 @@ namespace stirling {
         vulkan::Buffer                          static_uniform_buffer;
         vulkan::Buffer                          dynamic_uniform_buffer;
         std::vector<vulkan::ShaderModule>       shaders;
-        std::vector<vulkan::VertexBuffer>       vertex_buffers;
-        std::vector<vulkan::IndexBuffer>        index_buffers;
+        std::vector<vulkan::Buffer>             vertex_buffers;
+        std::vector<vulkan::Buffer>             index_buffers;
         std::vector<vulkan::Texture>            textures;
         std::vector<vulkan::DescriptorPool>     descriptor_pools;
         std::vector<vulkan::Pipeline>           pipelines;

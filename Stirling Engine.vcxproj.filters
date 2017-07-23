@@ -60,13 +60,7 @@
     <ClCompile Include="src\stirling\vulkan\semaphore.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="src\stirling\vulkan\vertex_buffer.cpp">
-      <Filter>Source Files\vulkan</Filter>
-    </ClCompile>
     <ClCompile Include="src\stirling\vulkan\buffer.cpp">
-      <Filter>Source Files\vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\stirling\vulkan\index_buffer.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\stirling\vulkan\descriptor_pool.cpp">
@@ -149,13 +143,7 @@
     <ClInclude Include="src\stirling\stirling.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\stirling\vulkan\vertex_buffer.h">
-      <Filter>Header Files\vulkan</Filter>
-    </ClInclude>
     <ClInclude Include="src\stirling\vulkan\buffer.h">
-      <Filter>Header Files\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\stirling\vulkan\index_buffer.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\stirling\vulkan\vertex.h">
