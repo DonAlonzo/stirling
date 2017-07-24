@@ -51,7 +51,9 @@ namespace stirling {
 
 		// Map instance
 		Map map(
+			// Static uniform buffer
 			device.createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, sizeof(StaticUniformBufferObject)),
+			// Dynamic uniform buffer
 			device.createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, buffer_size)
 		);
 
@@ -132,22 +134,19 @@ namespace stirling {
 
 		// Define hash function for descriptor sets
 		auto descriptor_set_hash_function = [](const EntityCreateInfo& create_info) {
-			// Calculate hash
 			size_t hash = 0;
 			hash_combine(hash, create_info.texture_file);
 			return hash;
 		};
 
 		// Calculate the number of unique descriptor sets we are going to create
-		size_t number_of_unique_descriptor_sets = 0;
-		std::set<size_t> descriptor_set_hashes;
-		for (auto& create_info : create_info_list) {
-			auto hash = descriptor_set_hash_function(create_info);
-			if (descriptor_set_hashes.find(hash) == descriptor_set_hashes.end()) {
-				descriptor_set_hashes.emplace(hash);
-				++number_of_unique_descriptor_sets;
+		auto number_of_unique_descriptor_sets = [&]() {
+			std::set<size_t> descriptor_set_hashes;
+			for (auto& create_info : create_info_list) {
+				descriptor_set_hashes.emplace(descriptor_set_hash_function(create_info));
 			}
-		}
+			return descriptor_set_hashes.size();
+		}();
 
 		// Create descriptor pool
 		std::cout << "Creating descriptor pool" << std::endl;
@@ -160,7 +159,6 @@ namespace stirling {
 
 		// Define hash function for pipelines
 		auto pipeline_hash_function = [](const EntityCreateInfo& create_info) {
-			// Calculate hash
 			size_t hash = 0;
 			for (auto& shader : create_info.material->shaders) {
 				hash_combine(hash, shader.entry_point);
@@ -171,15 +169,13 @@ namespace stirling {
 		};
 
 		// Calculate the number of unique pipelines we are going to create
-		size_t number_of_unique_pipelines = 0;
-		std::set<size_t> pipeline_hashes;
-		for (auto& create_info : create_info_list) {
-			auto hash = pipeline_hash_function(create_info);
-			if (pipeline_hashes.find(hash) == pipeline_hashes.end()) {
-				pipeline_hashes.emplace(hash);
-				++number_of_unique_pipelines;
+		auto number_of_unique_pipelines = [&]() {
+			std::set<size_t> pipeline_hashes;
+			for (auto& create_info : create_info_list) {
+				pipeline_hashes.emplace(pipeline_hash_function(create_info));
 			}
-		}
+			return pipeline_hashes.size();
+		}();
 
 		// Iterate through all entities
 		std::map<size_t, vulkan::Pipeline&> pipelines;
