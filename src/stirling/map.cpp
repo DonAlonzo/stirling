@@ -150,12 +150,36 @@ namespace stirling {
 		}
 
 		// Create descriptor pool
+		std::cout << "Creating descriptor pool" << std::endl;
 		map.descriptor_pools.emplace_back(initDescriptorPool(device, number_of_unique_descriptor_sets));
 		auto& descriptor_pool = map.descriptor_pools.back();
 
         // Components
 		map.components.emplace_back(new PhysicsComponent{});
         auto physics_component = map.components.back().get();
+
+		// Define hash function for pipelines
+		auto pipeline_hash_function = [](const EntityCreateInfo& create_info) {
+			// Calculate hash
+			size_t hash = 0;
+			for (auto& shader : create_info.material->shaders) {
+				hash_combine(hash, shader.entry_point);
+				hash_combine(hash, shader.file);
+				hash_combine(hash, shader.stage);
+			}
+			return hash;
+		};
+
+		// Calculate the number of unique pipelines we are going to create
+		size_t number_of_unique_pipelines = 0;
+		std::set<size_t> pipeline_hashes;
+		for (auto& create_info : create_info_list) {
+			auto hash = pipeline_hash_function(create_info);
+			if (pipeline_hashes.find(hash) == pipeline_hashes.end()) {
+				pipeline_hashes.emplace(hash);
+				++number_of_unique_pipelines;
+			}
+		}
 
 		// Iterate through all entities
 		std::map<size_t, vulkan::Pipeline&> pipelines;
@@ -164,14 +188,11 @@ namespace stirling {
 			// Get pipeline
 			auto& pipeline = [&]() -> vulkan::Pipeline& {
 				// Calculate hash
-				size_t hash = 0;
-				for (auto& shader : create_info.material->shaders) {
-					hash_combine(hash, shader.entry_point);
-					hash_combine(hash, shader.file);
-					hash_combine(hash, shader.stage);
-				}
+				size_t hash = pipeline_hash_function(create_info);
 
 				if (pipelines.find(hash) == pipelines.end()) {
+					std::cout << "Creating pipeline (" << std::to_string(pipelines.size() + 1) << "/" << std::to_string(number_of_unique_pipelines) << ")" << std::endl;
+
 					// Shaders
 					std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
 					for (auto& shader : create_info.material->shaders) {
@@ -183,7 +204,6 @@ namespace stirling {
 					}
 
 					// Create pipeline
-					std::cout << "Creating pipeline" << std::endl;
 					map.pipelines.emplace_back(vulkan::Pipeline{device, { descriptor_set_layout }, render_pass, extent, shader_stages});
 
 					auto& pipeline = map.pipelines.back();
@@ -201,7 +221,7 @@ namespace stirling {
 				size_t hash = descriptor_set_hash_function(create_info);
 
 				if (descriptor_sets.find(hash) == descriptor_sets.end()) {
-					std::cout << "Allocating descriptor set (" << create_info.texture_file << ")\n";
+					std::cout << "Allocating descriptor set (" << std::to_string(descriptor_sets.size() + 1) << "/" << std::to_string(number_of_unique_descriptor_sets) << ")" << std::endl;
 					auto descriptor_set = descriptor_sets[hash] = descriptor_pool.allocateDescriptorSet(descriptor_set_layout);
 
 					VkDescriptorImageInfo image_info = {};
@@ -248,6 +268,8 @@ namespace stirling {
 
             entity.addComponent(physics_component);
         }
+
+		std::cout << "Map instantiation complete" << std::endl;
 		
         return map;
     }

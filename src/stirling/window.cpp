@@ -147,6 +147,8 @@ namespace stirling {
     std::vector<VkCommandBuffer> Window::initCommandBuffers() const {
         auto command_buffers = m_command_pool.allocateCommandBuffers(m_framebuffers.size());
         for (int i = 0; i < command_buffers.size(); ++i) {
+			std::cout << "Creating command buffer (" << std::to_string(i + 1) << "/" << std::to_string(command_buffers.size()) << ")" << std::endl;
+
             VkCommandBufferBeginInfo begin_info = {};
             begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
             begin_info.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
