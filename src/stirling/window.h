@@ -46,7 +46,7 @@ namespace stirling {
 
         Camera                            m_camera;
         World                             m_world;
-        Map                       m_map_instance;
+        Map                       m_map;
         
         vulkan::CommandPool               m_command_pool;
         std::vector<VkCommandBuffer>      m_command_buffers;

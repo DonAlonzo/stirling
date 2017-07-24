@@ -51,7 +51,7 @@ namespace stirling {
 
 namespace stirling {
 
-    Window::Window(int width, int height, MapBlueprint map) :
+    Window::Window(int width, int height, MapBlueprint map_blueprint) :
         m_window                    (initWindow(width, height)),
         m_instance                  (getRequiredExtensions()),
         m_surface                   (initSurface()),
@@ -64,12 +64,12 @@ namespace stirling {
         m_image_available_semaphore (m_device.createSemaphore()),
         m_render_finished_semaphore (m_device.createSemaphore()),
         m_camera                    (glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.01f, 100.0f),
-        m_map_instance              (map.instantiate(m_device, m_render_pass, m_swapchain.getExtent())),
+        m_map                       (map_blueprint.instantiate(m_device, m_render_pass, m_swapchain.getExtent())),
         m_command_pool              (m_device.getGraphicsQueue().createCommandPool()),
         m_command_buffers           (initCommandBuffers()) {
         
         // Add map entities to world
-        for (auto& entity : m_map_instance.entities) {
+        for (auto& entity : m_map.entities) {
             m_world.addEntity(&entity);
         }
 
@@ -166,7 +166,7 @@ namespace stirling {
             render_pass_info.pClearValues      = clear_values.data();
 
             vkCmdBeginRenderPass(command_buffers[i], &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
-            for (auto& render_instruction : m_map_instance.render_instructions) {
+            for (auto& render_instruction : m_map.render_instructions) {
                 vkCmdBindPipeline(
                     command_buffers[i],
                     VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -267,19 +267,19 @@ namespace stirling {
 
     void Window::render() {
         { // Update static uniform buffer
-            m_map_instance.static_uniform_buffer_object.view       = m_camera.transform();
-            m_map_instance.static_uniform_buffer_object.projection = m_camera.getProjectionMatrix();
-            m_map_instance.static_uniform_buffer_mapping.memcpy(&m_map_instance.static_uniform_buffer_object, m_map_instance.static_uniform_buffer.size);
+            m_map.static_uniform_buffer_object.view       = m_camera.transform();
+            m_map.static_uniform_buffer_object.projection = m_camera.getProjectionMatrix();
+            m_map.static_uniform_buffer_mapping.memcpy(&m_map.static_uniform_buffer_object, m_map.static_uniform_buffer.size);
         }
 
         { // Update dynamic uniform buffer
-            m_map_instance.dynamic_uniform_buffer_mapping.memcpy(m_map_instance.dynamic_uniform_buffer_object.model, m_map_instance.dynamic_uniform_buffer.size);
+            m_map.dynamic_uniform_buffer_mapping.memcpy(m_map.dynamic_uniform_buffer_object.model, m_map.dynamic_uniform_buffer.size);
 
             // Flush dynamic uniform buffer memory
             VkMappedMemoryRange mapped_memory_range = {};
             mapped_memory_range.sType  = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-            mapped_memory_range.memory = m_map_instance.dynamic_uniform_buffer.memory;
-            mapped_memory_range.size   = m_map_instance.dynamic_uniform_buffer.size;
+            mapped_memory_range.memory = m_map.dynamic_uniform_buffer.memory;
+            mapped_memory_range.size   = m_map.dynamic_uniform_buffer.size;
             vkFlushMappedMemoryRanges(m_device, 1, &mapped_memory_range);
         }
 

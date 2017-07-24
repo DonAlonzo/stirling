@@ -20,7 +20,7 @@ public:
         material->addShader(VK_SHADER_STAGE_FRAGMENT_BIT, "shaders/frag.spv", "main");
 
         for (int x = -1; x <= 1; ++x) {
-            for (int y = -1; y <= 1; ++y) {
+			for (int y = 0; y <= 0; ++y) {
                 stirling::EntityCreateInfo create_info;
                 create_info.position     = glm::vec3(x * 2.f, y * 2.f, 0.f);
                 create_info.rotation     = glm::vec3(0.f, 0.f, 0.f);

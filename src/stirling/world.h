@@ -15,9 +15,9 @@ namespace stirling {
         void update(float delta_seconds);
 
     private:
-        static const int MAX_NUMBER_OF_ENTITIES = 128;
+        static const size_t MAX_NUMBER_OF_ENTITIES = 65536;
 
         Entity* m_entities[MAX_NUMBER_OF_ENTITIES];
-        int     m_number_of_entities;
+		size_t  m_number_of_entities;
     };
 }

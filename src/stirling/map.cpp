@@ -14,6 +14,7 @@
 #include <functional>
 #include <iostream>
 #include <map>
+#include <set>
 #include <string>
 
 namespace stirling {
@@ -49,10 +50,10 @@ namespace stirling {
         size_t buffer_size = number_of_dynamic_buffer_objects * dynamic_alignment;
 
 		// Map instance
-		Map map = {
+		Map map(
 			device.createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, sizeof(StaticUniformBufferObject)),
 			device.createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, buffer_size)
-		};
+		);
 
 		// Dynamic uniform buffer object + index counter
 		map.dynamic_uniform_buffer_object.model = (glm::mat4*)util::memory::alignedAlloc(buffer_size, dynamic_alignment);
@@ -129,9 +130,28 @@ namespace stirling {
         // Descriptor set layout
         auto descriptor_set_layout = initDescriptorSetLayout(device);
 
-        // Descriptor pool
-        map.descriptor_pools.emplace_back(initDescriptorPool(device, create_info_list.size()));
-        auto& descriptor_pool = map.descriptor_pools.back();
+		// Define hash function for descriptor sets
+		auto descriptor_set_hash_function = [](const EntityCreateInfo& create_info) {
+			// Calculate hash
+			size_t hash = 0;
+			hash_combine(hash, create_info.texture_file);
+			return hash;
+		};
+
+		// Calculate the number of unique descriptor sets we are going to create
+		size_t number_of_unique_descriptor_sets = 0;
+		std::set<size_t> descriptor_set_hashes;
+		for (auto& create_info : create_info_list) {
+			auto hash = descriptor_set_hash_function(create_info);
+			if (descriptor_set_hashes.find(hash) == descriptor_set_hashes.end()) {
+				descriptor_set_hashes.emplace(hash);
+				++number_of_unique_descriptor_sets;
+			}
+		}
+
+		// Create descriptor pool
+		map.descriptor_pools.emplace_back(initDescriptorPool(device, number_of_unique_descriptor_sets));
+		auto& descriptor_pool = map.descriptor_pools.back();
 
         // Components
 		map.components.emplace_back(new PhysicsComponent{});
@@ -140,7 +160,7 @@ namespace stirling {
 		// Iterate through all entities
 		std::map<size_t, vulkan::Pipeline&> pipelines;
 		std::map<size_t, VkDescriptorSet> descriptor_sets;
-		for (auto create_info : create_info_list) {
+		for (auto& create_info : create_info_list) {
 			// Get pipeline
 			auto& pipeline = [&]() -> vulkan::Pipeline& {
 				// Calculate hash
@@ -155,15 +175,20 @@ namespace stirling {
 					// Shaders
 					std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
 					for (auto& shader : create_info.material->shaders) {
-						shader_stages.emplace_back(vulkan::initializers::pipelineShaderStageCreateInfo(shader.stage, shader_modules.at(shader.file), shader.entry_point));
+						shader_stages.emplace_back(vulkan::initializers::pipelineShaderStageCreateInfo(
+							shader.stage,
+							shader_modules.at(shader.file),
+							shader.entry_point)
+						);
 					}
 
 					// Create pipeline
 					std::cout << "Creating pipeline" << std::endl;
-					map.pipelines.emplace_back(vulkan::Pipeline(device, { descriptor_set_layout }, render_pass, extent, shader_stages));
+					map.pipelines.emplace_back(vulkan::Pipeline{device, { descriptor_set_layout }, render_pass, extent, shader_stages});
 
 					auto& pipeline = map.pipelines.back();
 					pipelines.emplace(hash, pipeline);
+
 					return pipeline;
 				} else {
 					return pipelines.at(hash);
@@ -173,12 +198,11 @@ namespace stirling {
 			// Get descriptor set
 			auto descriptor_set = [&]() {
 				// Calculate hash
-				size_t hash = 0;
-				hash_combine(hash, create_info.texture_file);
+				size_t hash = descriptor_set_hash_function(create_info);
 
 				if (descriptor_sets.find(hash) == descriptor_sets.end()) {
-					std::cout << "Allocating descriptor set" << std::endl;
-					auto descriptor_set = descriptor_pool.allocateDescriptorSet(descriptor_set_layout);
+					std::cout << "Allocating descriptor set (" << create_info.texture_file << ")\n";
+					auto descriptor_set = descriptor_sets[hash] = descriptor_pool.allocateDescriptorSet(descriptor_set_layout);
 
 					VkDescriptorImageInfo image_info = {};
 					image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -192,7 +216,6 @@ namespace stirling {
 					};
 					vkUpdateDescriptorSets(device, write_descriptor_sets.size(), write_descriptor_sets.data(), 0, nullptr);
 
-					descriptor_sets.emplace(hash, descriptor_set);
 					return descriptor_set;
 				} else {
 					return descriptor_sets.at(hash);
@@ -216,7 +239,7 @@ namespace stirling {
             map.render_instructions.emplace_back(render_instruction);
 
             // Compose entity
-            map.entities.emplace_back(transform);
+            map.entities.emplace_back(Entity{transform});
             auto& entity = map.entities.back();
 
             entity.transform().moveTo(create_info.position);
