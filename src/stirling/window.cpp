@@ -86,6 +86,10 @@ namespace stirling {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         
         auto window = glfwCreateWindow(width, height, "Stirling Engine", nullptr/*glfwGetPrimaryMonitor()*/, nullptr);
+		glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_FALSE);
+		glfwSetWindowAttrib(window, GLFW_RESIZABLE, GLFW_FALSE);
+		glfwSetWindowPos(window, 0, 0);
+
         glfwSetWindowUserPointer(window, this);
         glfwSetWindowSizeCallback(window, WindowListener::onResized);
         glfwSetKeyCallback(window, WindowListener::onKeyInput);
