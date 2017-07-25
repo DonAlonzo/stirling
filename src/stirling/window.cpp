@@ -268,6 +268,9 @@ namespace stirling {
     }
 
     void Window::render() {
+		// Calculate FPS
+		glfwSetWindowTitle(m_window, ("Stirling Engine - FPS: " + std::to_string(calculateFPS())).c_str());
+
         { // Update static uniform buffer
             m_map.static_uniform_buffer_object.view       = m_camera.transform();
             m_map.static_uniform_buffer_object.projection = m_camera.getProjectionMatrix();
@@ -347,6 +350,25 @@ namespace stirling {
             throw std::runtime_error("Failed to present swapchain image.");
         }
     }
+
+	size_t Window::calculateFPS() const {
+		static constexpr std::chrono::milliseconds period(250);
+		static std::chrono::time_point<std::chrono::steady_clock> last_tick;
+		static size_t frames = 0;
+		static size_t fps;
+
+		++frames;
+
+		const auto now = std::chrono::high_resolution_clock::now();
+		const auto difference = now - last_tick;
+		if (difference > period) {
+			fps = 1e6 * frames / std::chrono::duration_cast<std::chrono::microseconds>(difference).count();
+			frames = 0;
+			last_tick = now;
+		}
+
+		return fps;
+	}
 
     void Window::onResized(int width, int height) {
         if (width == 0 || height == 0) return;

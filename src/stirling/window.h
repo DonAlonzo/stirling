@@ -64,6 +64,8 @@ namespace stirling {
         std::vector<const char*>      getRequiredExtensions() const;
         VkExtent2D                    getSize() const;
 
+		size_t                        calculateFPS() const;
+
         void                          onResized(int width, int height);
         void                          onKeyInput(int key, int scancode, int action, int mods);
         void                          onMouseMovementInput(double x, double y);
