@@ -13,9 +13,9 @@ public:
     }
 
     stirling::MapBlueprint createMapBlueprint() {
-        stirling::MapBlueprint map;
+        stirling::MapBlueprint map_blueprint;
 
-        auto material = map.createMaterial();
+        auto material = map_blueprint.createMaterial();
         material->addShader(VK_SHADER_STAGE_VERTEX_BIT, "shaders/vert.spv", "main");
         material->addShader(VK_SHADER_STAGE_FRAGMENT_BIT, "shaders/frag.spv", "main");
 
@@ -28,7 +28,7 @@ public:
                 create_info.model_file   = "models/chalet.obj";
                 create_info.texture_file = "textures/chalet.jpg";
                 create_info.material     = material;
-                map.addEntity(create_info);
+                map_blueprint.addEntity(create_info);
             }
         }
 
@@ -39,9 +39,9 @@ public:
         create_info.model_file   = "models/gladiators.obj";
         create_info.texture_file = "textures/gladiators.jpg";
         create_info.material     = material;
-        map.addEntity(create_info);
+        map_blueprint.addEntity(create_info);
 
-        return map;
+        return map_blueprint;
     }
 
     void run() {

@@ -26,7 +26,7 @@ namespace stirling {
 	}
 
     Material* MapBlueprint::createMaterial() {
-        materials.emplace_back(Material());
+		materials.emplace_back(Material{});
         return &materials.back();
     }
 
@@ -62,7 +62,7 @@ namespace stirling {
 		uint64_t next_dynamic_index = 0;
 
         // Preload textures
-        std::unordered_map<std::string, const vulkan::Texture&> textures;
+		std::unordered_map<std::string, std::pair<VkImageView, VkSampler>> textures;
         for (auto create_info : create_info_list) {
             if (textures.find(create_info.texture_file) == textures.end()) {
                 std::cout << "Loading texture " << create_info.texture_file << std::endl;
@@ -70,7 +70,7 @@ namespace stirling {
 				map.images.emplace_back(vulkan::Image::loadFromFile(device, create_info.texture_file));
 				map.textures.emplace_back(vulkan::Texture(device, map.images.back()));
 
-                textures.emplace(create_info.texture_file, map.textures.back());
+				textures.emplace(create_info.texture_file, std::make_pair((VkImageView)map.textures.back().image_view, (VkSampler)map.textures.back().sampler));
             }
         }
 
@@ -181,16 +181,16 @@ namespace stirling {
 		}();
 
 		// Iterate through all entities
-		std::unordered_map<size_t, vulkan::Pipeline&> pipelines;
-		std::unordered_map<size_t, VkDescriptorSet> descriptor_sets;
+		std::unordered_map<size_t, vulkan::Pipeline&> hashed_pipelines;
+		std::unordered_map<size_t, VkDescriptorSet> hashed_descriptor_sets;
 		for (auto& create_info : create_info_list) {
 			// Get pipeline
 			auto& pipeline = [&]() -> vulkan::Pipeline& {
 				// Calculate hash
 				size_t hash = pipeline_hash_function(create_info);
 
-				if (pipelines.find(hash) == pipelines.end()) {
-					std::cout << "Creating pipeline (" << std::to_string(pipelines.size() + 1) << "/" << std::to_string(number_of_unique_pipelines) << ")" << std::endl;
+				if (hashed_pipelines.find(hash) == hashed_pipelines.end()) {
+					std::cout << "Creating pipeline (" << std::to_string(hashed_pipelines.size() + 1) << "/" << std::to_string(number_of_unique_pipelines) << ")" << std::endl;
 
 					// Shaders
 					std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
@@ -206,11 +206,11 @@ namespace stirling {
 					map.pipelines.emplace_back(vulkan::Pipeline{device, { descriptor_set_layout }, render_pass, extent, shader_stages});
 
 					auto& pipeline = map.pipelines.back();
-					pipelines.emplace(hash, pipeline);
+					hashed_pipelines.emplace(hash, pipeline);
 
 					return pipeline;
 				} else {
-					return pipelines.at(hash);
+					return hashed_pipelines.at(hash);
 				}
 			}();
 
@@ -219,26 +219,26 @@ namespace stirling {
 				// Calculate hash
 				size_t hash = descriptor_set_hash_function(create_info);
 
-				if (descriptor_sets.find(hash) == descriptor_sets.end()) {
-					std::cout << "Allocating descriptor set (" << std::to_string(descriptor_sets.size() + 1) << "/" << std::to_string(number_of_unique_descriptor_sets) << ")" << std::endl;
-					auto descriptor_set = descriptor_sets[hash] = descriptor_pool.allocateDescriptorSet(descriptor_set_layout);
+				if (hashed_descriptor_sets.find(hash) == hashed_descriptor_sets.end()) {
+					std::cout << "Allocating descriptor set (" << std::to_string(hashed_descriptor_sets.size() + 1) << "/" << std::to_string(number_of_unique_descriptor_sets) << ")" << std::endl;
+					
+					auto descriptor_set = hashed_descriptor_sets[hash] = descriptor_pool.allocateDescriptorSet(descriptor_set_layout);
 
 					VkDescriptorImageInfo image_info = {};
 					image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-					image_info.imageView   = textures.at(create_info.texture_file).image_view;
-					image_info.sampler     = textures.at(create_info.texture_file).sampler;
-
+					image_info.imageView   = textures.at(create_info.texture_file).first;
+					image_info.sampler     = textures.at(create_info.texture_file).second;
+					
 					std::vector<VkWriteDescriptorSet> write_descriptor_sets = {
 						vulkan::initializers::writeDescriptorSet(descriptor_set, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, &map.static_uniform_buffer.descriptor),
 						vulkan::initializers::writeDescriptorSet(descriptor_set, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, &map.dynamic_uniform_buffer.descriptor),
 						vulkan::initializers::writeDescriptorSet(descriptor_set, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &image_info)
 					};
 					vkUpdateDescriptorSets(device, write_descriptor_sets.size(), write_descriptor_sets.data(), 0, nullptr);
-					vkUpdateDescriptorSets(device, write_descriptor_sets.size(), write_descriptor_sets.data(), 0, nullptr);
 					
 					return descriptor_set;
 				} else {
-					return descriptor_sets.at(hash);
+					return hashed_descriptor_sets.at(hash);
 				}
 			}();
 
