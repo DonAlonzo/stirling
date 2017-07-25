@@ -7,8 +7,8 @@ namespace stirling {
     namespace vulkan {
 
         Pipeline::Pipeline(VkDevice device, std::vector<VkDescriptorSetLayout> descriptor_set_layouts, VkRenderPass render_pass, VkExtent2D extent, std::vector<VkPipelineShaderStageCreateInfo> shader_stages) :
-            m_pipeline_layout (initPipelineLayout(device, descriptor_set_layouts)),
-            m_pipeline        (initPipeline(device, render_pass, extent, shader_stages)) {
+            layout   (initPipelineLayout(device, descriptor_set_layouts)),
+            pipeline (initPipeline(device, render_pass, extent, shader_stages)) {
         }
 
         Deleter<VkPipelineLayout> Pipeline::initPipelineLayout(VkDevice device, std::vector<VkDescriptorSetLayout> descriptor_set_layouts) const {
@@ -124,7 +124,7 @@ namespace stirling {
             create_info.pDepthStencilState  = &depth_stencil;
             create_info.pColorBlendState    = &color_blending;
             create_info.pDynamicState       = nullptr;
-            create_info.layout              = m_pipeline_layout;
+            create_info.layout              = layout;
             create_info.renderPass          = render_pass;
             create_info.subpass             = 0;
             create_info.basePipelineHandle  = VK_NULL_HANDLE;
@@ -137,12 +137,8 @@ namespace stirling {
             return Deleter<VkPipeline>(pipeline, device, vkDestroyPipeline);
         }
 
-        Pipeline::operator const VkPipeline&() const {
-            return m_pipeline;
-        }
-
-        const VkPipelineLayout& Pipeline::getLayout() const {
-            return m_pipeline_layout;
+        Pipeline::operator VkPipeline() const {
+            return pipeline;
         }
 
     }

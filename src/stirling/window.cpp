@@ -233,19 +233,23 @@ namespace stirling {
 
     void Window::recreateSwapchain() {
         throw std::runtime_error("Window::recreateSwapchain hasn't been implemented yet.");
-        /*vkDeviceWaitIdle(m_device);
+        vkDeviceWaitIdle(m_device);
 
         m_swapchain    = vulkan::Swapchain(m_device, m_surface, getSize(), m_swapchain);
         m_depth_image  = vulkan::DepthImage(m_device, m_swapchain.getExtent());
         m_render_pass  = vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.image_format);
         m_framebuffers = m_swapchain.createFramebuffers(m_render_pass, m_depth_image.image_view);
 
+		/*
+		pipeline.recreate(m_render_pass, m_swapchain.getExtent());
+
         m_pipeline = vulkan::Pipeline(m_device, { m_descriptor_set_layout }, m_render_pass, m_swapchain.getExtent(), "shaders/vert.spv", "shaders/frag.spv");
+		*/
 
         vkFreeCommandBuffers(m_device, m_command_pool, m_command_buffers.size(), m_command_buffers.data());
         m_command_buffers = initCommandBuffers();
 
-        m_camera->setAspectRatio(m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height);*/
+        m_camera.setAspectRatio(m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height);
     }
 
     VkExtent2D Window::getSize() const {

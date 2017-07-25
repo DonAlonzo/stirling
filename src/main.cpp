@@ -32,14 +32,18 @@ public:
             }
         }
 
-        stirling::EntityCreateInfo create_info = {};
-        create_info.position     = glm::vec3(-2.f, -1.f, 0.f);
-        create_info.rotation     = glm::vec3(0.f, 0.f, 0.f);
-        create_info.scale        = glm::vec3(0.1f, 0.1f, 0.1f);
-        create_info.model_file   = "models/gladiators.obj";
-        create_info.texture_file = "textures/gladiators.jpg";
-        create_info.material     = material;
-        map_blueprint.addEntity(create_info);
+		for (int x = -1; x <= 1; ++x) {
+			for (int y = 0; y <= 0; ++y) {
+				stirling::EntityCreateInfo create_info = {};
+				create_info.position     = glm::vec3(x * -20.f, y * -10.f, 0.f);
+				create_info.rotation     = glm::vec3(0.f, 0.f, glm::radians(180.f));
+				create_info.scale        = glm::vec3(0.1f, 0.1f, 0.1f);
+				create_info.model_file   = "models/gladiators.obj";
+				create_info.texture_file = "textures/gladiators.jpg";
+				create_info.material     = material;
+				map_blueprint.addEntity(create_info);
+			}
+		}
 
         return map_blueprint;
     }

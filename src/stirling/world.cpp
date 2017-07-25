@@ -12,9 +12,9 @@ namespace stirling {
     }
 
     void World::update(float delta_seconds) {
-        for (int i = 0; i < m_number_of_entities; ++i) {
-            m_entities[i]->update(delta_seconds);
-        }
+		for (int i = 0; i < m_number_of_entities; ++i) {
+			m_entities[i]->update(delta_seconds);
+		}
     }
 
 }

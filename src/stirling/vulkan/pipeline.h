@@ -15,18 +15,15 @@ namespace stirling {
 
 namespace stirling {
     namespace vulkan {
-        class Pipeline {
-        public:
+        struct Pipeline {
+			Deleter<VkPipelineLayout> layout;
+			Deleter<VkPipeline>       pipeline;
+
             Pipeline(VkDevice device, std::vector<VkDescriptorSetLayout> descriptor_set_layouts, VkRenderPass render_pass, VkExtent2D extent, std::vector<VkPipelineShaderStageCreateInfo> shader_stages);
 
-            operator const VkPipeline&() const;
-
-            const VkPipelineLayout& getLayout() const;
+            operator VkPipeline() const;
 
         private:
-            Deleter<VkPipelineLayout> m_pipeline_layout;
-            Deleter<VkPipeline>       m_pipeline;
-            
             Deleter<VkPipelineLayout> initPipelineLayout(VkDevice device, std::vector<VkDescriptorSetLayout> descriptor_set_layouts) const;
             Deleter<VkPipeline>       initPipeline(VkDevice device, VkRenderPass render_pass, VkExtent2D extent, std::vector<VkPipelineShaderStageCreateInfo> shader_stages) const;
         };

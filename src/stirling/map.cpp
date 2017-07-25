@@ -248,7 +248,7 @@ namespace stirling {
 
             // Render instruction
 			RenderInstruction render_instruction = {};
-            render_instruction.pipeline_layout       = pipeline.getLayout();
+            render_instruction.pipeline_layout       = pipeline.layout;
             render_instruction.pipeline              = pipeline;
             render_instruction.vertex_buffers        = { vertex_buffers.at(create_info.model_file) };
             render_instruction.vertex_buffer_offsets = { 0 };
