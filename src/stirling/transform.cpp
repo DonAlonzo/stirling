@@ -49,8 +49,8 @@ namespace stirling {
             update();
         }
 
-        void Transform::lookAt(const glm::vec3& target, const glm::vec3& up) {
-            m_rotation = glm::lookAt(target, m_position, up);
+        void Transform::lookAt(const glm::vec3& target, const glm::vec3& center, const glm::vec3& up) {
+            m_rotation = glm::lookAt(target, center, up);
             update();
         }
 

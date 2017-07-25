@@ -76,8 +76,8 @@ namespace stirling {
         addControls();
 
         // Add camera
-        m_camera.transform().moveTo(glm::vec3(2.f, -2.f, -2.f));
-        m_camera.transform().lookAt(glm::vec3(0.f, 0.f, 0.f));
+        m_camera.moveTo(glm::vec3(2.f, -2.f, -2.f));
+        m_camera.lookAt(glm::vec3(0.f, 0.f, 0.f));
         m_world.addEntity(&m_camera);
     }
 
