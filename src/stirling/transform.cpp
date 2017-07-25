@@ -9,17 +9,25 @@
 namespace stirling {
     namespace vulkan {
 
-        Transform::Transform() {
-            m_transform = new glm::mat4();
-        }
+        Transform::Transform() :
+			m_transform (new glm::mat4()) {
+		}
 
-        Transform::Transform(glm::mat4* transform) {
-            m_transform = transform;
-        }
+        Transform::Transform(glm::mat4* transform) :
+			m_transform (transform) {
+		}
+
+		Transform::Transform(const glm::mat4& transform) :
+			m_transform (new glm::mat4(transform)) {
+		}
 
         Transform::operator const glm::mat4&() {
             return transform();
         }
+
+		Transform Transform::operator*(const Transform& rhs) const {
+			return transform() * rhs.transform();
+		}
 
         void Transform::translate(const glm::vec3& translation) {
             m_position += translation;
@@ -87,12 +95,12 @@ namespace stirling {
             return m_scale;
         }
 
-        const glm::mat4& Transform::transform() {
+        const glm::mat4& Transform::transform() const {
             return *m_transform;
         }
 
         void Transform::update() {
-            *m_transform = glm::translate(glm::toMat4(m_rotation) * glm::scale(glm::mat4(), m_scale), m_position);
+            *m_transform = glm::translate(glm::mat4(), m_position) * glm::toMat4(m_rotation) * glm::scale(glm::mat4(), m_scale);
         }
 
     }

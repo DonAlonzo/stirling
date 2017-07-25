@@ -185,7 +185,7 @@ namespace stirling {
 		std::unordered_map<size_t, VkDescriptorSet> hashed_descriptor_sets;
 		for (auto& create_info : create_info_list) {
 			// Get pipeline
-			auto& pipeline = [&]() -> vulkan::Pipeline& {
+			const auto& pipeline = [&]() -> const vulkan::Pipeline& {
 				// Calculate hash
 				size_t hash = pipeline_hash_function(create_info);
 

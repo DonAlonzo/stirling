@@ -388,8 +388,8 @@ namespace stirling {
     void Window::onMouseMovementInput(double x, double y) {
         double delta_x = last_x - x;
         double delta_y = last_y - y;
-        m_camera.transform().rotate(delta_y * 0.001f, m_camera.transform().right());
-        m_camera.transform().rotate(-delta_x * 0.001f, glm::vec3(0.0f, 0.0f, 1.0f));
+        m_camera.rotate(delta_y * 0.001f, m_camera.transform().right());
+        m_camera.rotate(-delta_x * 0.001f, glm::vec3(0.0f, 0.0f, 1.0f));
         last_x = x;
         last_y = y;
     }

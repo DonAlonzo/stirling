@@ -19,7 +19,7 @@ namespace stirling {
         virtual void update(float delta_seconds);
 
     protected:
-        static const int MAX_NUMBER_OF_COMPONENTS = 8;
+        static constexpr int MAX_NUMBER_OF_COMPONENTS = 8;
 
         vulkan::Transform m_transform;
         Component*        m_components[MAX_NUMBER_OF_COMPONENTS];

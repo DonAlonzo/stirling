@@ -47,21 +47,25 @@ namespace stirling {
         return m_projection_matrix;
     }
 
+	void Camera::rotate(float angle, const glm::vec3& axis) {
+		m_pivot_1.rotate(angle, axis);
+	}
+
     void Camera::update(float delta_seconds) {
         float meters_per_second = 1.5f;
 
         glm::vec3 direction;
         if (InputHandler::getInstance()[Action::MOVE_FORWARD]) {
-            direction += m_transform.forward();
+            direction += m_pivot_1.forward();
         }
         if (InputHandler::getInstance()[Action::MOVE_BACKWARD]) {
-            direction += m_transform.backward();
+            direction += m_pivot_1.backward();
         }
         if (InputHandler::getInstance()[Action::STRAFE_LEFT]) {
-            direction += m_transform.left();
+            direction += m_pivot_1.left();
         }
         if (InputHandler::getInstance()[Action::STRAFE_RIGHT]) {
-            direction += m_transform.right();
+            direction += m_pivot_1.right();
         }
         if (InputHandler::getInstance()[Action::JUMP]) {
             direction += glm::vec3(0.0f, 0.0f, -1.0f);
@@ -71,8 +75,10 @@ namespace stirling {
         }
         
         if (glm::length(direction) > 0.0f) {
-            m_transform.translate(glm::normalize(direction) * meters_per_second * delta_seconds);
+			m_pivot_2.translate(glm::normalize(direction) * meters_per_second * delta_seconds);
         }
+
+		m_transform = m_pivot_1 * m_pivot_2;
     }
 
 }

@@ -8,9 +8,11 @@ namespace stirling {
         class Transform {
         public:
             Transform();
+			Transform(const glm::mat4& transform);
             Transform(glm::mat4* transform);
 
             operator const glm::mat4&();
+			Transform operator*(const Transform&) const;
 
             void translate(const glm::vec3& translation);
             void moveTo(const glm::vec3& position);
@@ -29,7 +31,7 @@ namespace stirling {
             const glm::vec3& position() const;
             const glm::quat& rotation() const;
             const glm::vec3& scale() const;
-            const glm::mat4& transform();
+            const glm::mat4& transform() const;
 
         private:
             glm::vec3 m_position;

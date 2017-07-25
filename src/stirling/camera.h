@@ -18,14 +18,18 @@ namespace stirling {
 
         const glm::mat4& getProjectionMatrix() const;
 
+		void rotate(float angle, const glm::vec3& axis);
+
         void update(float delta_seconds) override;
 
     private:
-        glm::mat4 m_projection_matrix;
-        float     m_aspect_ratio;
-        float     m_field_of_view;
-        float     m_near_plane;
-        float     m_far_plane;
+		vulkan::Transform m_pivot_1;
+		vulkan::Transform m_pivot_2;
+        glm::mat4         m_projection_matrix;
+        float             m_aspect_ratio;
+        float             m_field_of_view;
+        float             m_near_plane;
+        float             m_far_plane;
 
         void updateProjectionMatrix();
     };
