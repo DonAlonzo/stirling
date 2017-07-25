@@ -68,6 +68,7 @@ namespace stirling {
         std::vector<vulkan::ShaderModule>       shaders;
         std::vector<vulkan::Buffer>             vertex_buffers;
         std::vector<vulkan::Buffer>             index_buffers;
+		std::vector<vulkan::Image>              images;
         std::vector<vulkan::Texture>            textures;
         std::vector<vulkan::DescriptorPool>     descriptor_pools;
         std::vector<vulkan::Pipeline>           pipelines;

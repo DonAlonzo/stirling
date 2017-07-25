@@ -8,8 +8,7 @@
 
 namespace stirling {
     namespace vulkan {
-        class Texture {
-        public:
+        struct Texture {
             Deleter<VkImageView> image_view;
             Deleter<VkSampler>   sampler;
 

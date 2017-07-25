@@ -13,9 +13,9 @@
 #include <array>
 #include <functional>
 #include <iostream>
-#include <map>
 #include <set>
 #include <string>
+#include <unordered_map>
 
 namespace stirling {
 
@@ -62,26 +62,29 @@ namespace stirling {
 		uint64_t next_dynamic_index = 0;
 
         // Preload textures
-        std::map<std::string, vulkan::Texture&> textures;
+        std::unordered_map<std::string, const vulkan::Texture&> textures;
         for (auto create_info : create_info_list) {
             if (textures.find(create_info.texture_file) == textures.end()) {
                 std::cout << "Loading texture " << create_info.texture_file << std::endl;
-				map.textures.emplace_back(vulkan::Texture(device, vulkan::Image::loadFromFile(device, create_info.texture_file)));
+				
+				map.images.emplace_back(vulkan::Image::loadFromFile(device, create_info.texture_file));
+				map.textures.emplace_back(vulkan::Texture(device, map.images.back()));
+
                 textures.emplace(create_info.texture_file, map.textures.back());
             }
         }
 
         // Preload models
-        std::map<std::string, vulkan::Model> models;
+        std::unordered_map<std::string, vulkan::Model> models;
         for (auto create_info : create_info_list) {
             if (models.find(create_info.model_file) == models.end()) {
                 std::cout << "Loading model " << create_info.model_file << std::endl;
                 models.emplace(create_info.model_file, vulkan::Model::loadFromFile(create_info.model_file));
             }
         }
-        std::map<std::string, vulkan::Buffer&> vertex_buffers;
-        std::map<std::string, vulkan::Buffer&> index_buffers;
-		std::map<std::string, size_t> index_counts;
+        std::unordered_map<std::string, VkBuffer> vertex_buffers;
+        std::unordered_map<std::string, VkBuffer> index_buffers;
+		std::unordered_map<std::string, size_t> index_counts;
         for (auto& model : models) {
             if (vertex_buffers.find(model.first) == vertex_buffers.end()) {
                 std::cout << "Loading vertex buffer for " << model.first << std::endl;
@@ -119,12 +122,12 @@ namespace stirling {
         }
 
         // Preload shaders
-        std::map<std::string, vulkan::ShaderModule> shader_modules;
+        std::unordered_map<std::string, vulkan::ShaderModule> shader_modules;
         for (auto& material : materials) {
             for (auto shader : material.shaders) {
                 if (shader_modules.find(shader.file) == shader_modules.end()) {
                     std::cout << "Loading shader " << shader.file << std::endl;
-                    shader_modules.try_emplace(shader.file, vulkan::ShaderModule(device, shader.file));
+                    shader_modules.emplace(shader.file, vulkan::ShaderModule(device, shader.file));
                 }
             }
         }
@@ -151,7 +154,7 @@ namespace stirling {
 		// Create descriptor pool
 		std::cout << "Creating descriptor pool" << std::endl;
 		map.descriptor_pools.emplace_back(initDescriptorPool(device, number_of_unique_descriptor_sets));
-		auto& descriptor_pool = map.descriptor_pools.back();
+		const auto& descriptor_pool = map.descriptor_pools.back();
 
         // Components
 		map.components.emplace_back(new PhysicsComponent{});
@@ -160,7 +163,7 @@ namespace stirling {
 		// Define hash function for pipelines
 		auto pipeline_hash_function = [](const EntityCreateInfo& create_info) {
 			size_t hash = 0;
-			for (auto& shader : create_info.material->shaders) {
+			for (const auto& shader : create_info.material->shaders) {
 				hash_combine(hash, shader.entry_point);
 				hash_combine(hash, shader.file);
 				hash_combine(hash, shader.stage);
@@ -171,15 +174,15 @@ namespace stirling {
 		// Calculate the number of unique pipelines we are going to create
 		auto number_of_unique_pipelines = [&]() {
 			std::set<size_t> pipeline_hashes;
-			for (auto& create_info : create_info_list) {
+			for (const auto& create_info : create_info_list) {
 				pipeline_hashes.emplace(pipeline_hash_function(create_info));
 			}
 			return pipeline_hashes.size();
 		}();
 
 		// Iterate through all entities
-		std::map<size_t, vulkan::Pipeline&> pipelines;
-		std::map<size_t, VkDescriptorSet> descriptor_sets;
+		std::unordered_map<size_t, vulkan::Pipeline&> pipelines;
+		std::unordered_map<size_t, VkDescriptorSet> descriptor_sets;
 		for (auto& create_info : create_info_list) {
 			// Get pipeline
 			auto& pipeline = [&]() -> vulkan::Pipeline& {
@@ -231,7 +234,8 @@ namespace stirling {
 						vulkan::initializers::writeDescriptorSet(descriptor_set, 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &image_info)
 					};
 					vkUpdateDescriptorSets(device, write_descriptor_sets.size(), write_descriptor_sets.data(), 0, nullptr);
-
+					vkUpdateDescriptorSets(device, write_descriptor_sets.size(), write_descriptor_sets.data(), 0, nullptr);
+					
 					return descriptor_set;
 				} else {
 					return descriptor_sets.at(hash);

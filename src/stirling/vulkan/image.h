@@ -11,20 +11,17 @@ namespace stirling { namespace vulkan {
 
 namespace stirling {
     namespace vulkan {
-        class Image {
-        public:
-            Image(const Device& device, const VkImageCreateInfo& create_info, const VkMemoryPropertyFlags& properties);
+        struct Image {
+			Deleter<VkImage>        image;
+			Deleter<VkDeviceMemory> memory;
 
-            static Image loadFromFile(const Device& device, const std::string& file_name);
+            Image(const Device& device, const VkImageCreateInfo& create_info, const VkMemoryPropertyFlags& properties);
 
             operator VkImage() const;
 
-            VkDeviceMemory getMemory() const;
+			static Image loadFromFile(const Device& device, const std::string& file_name);
 
         private:
-            Deleter<VkImage>        m_image;
-            Deleter<VkDeviceMemory> m_memory;
-
             Deleter<VkImage>        initImage(const Device& device, const VkImageCreateInfo& create_info) const;
             Deleter<VkDeviceMemory> allocateMemory(const Device& device, const VkMemoryPropertyFlags& properties) const;
             uint32_t                findMemoryType(const Device& device, uint32_t typeFilter, VkMemoryPropertyFlags properties) const;

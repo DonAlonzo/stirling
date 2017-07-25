@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <iostream>
 
 namespace stirling {
     namespace vulkan {
@@ -57,7 +58,10 @@ namespace stirling {
             }
 
             ~Deleter() {
-                if (m_object != VK_NULL_HANDLE) m_delete_function();
+				if (m_object != VK_NULL_HANDLE) {
+					std::cout << "Releasing " << typeid(T).name() << std::endl;
+					m_delete_function();
+				}
             }
 
             operator const T&() const {

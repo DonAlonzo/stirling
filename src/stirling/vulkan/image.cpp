@@ -12,11 +12,9 @@ namespace stirling {
         Image Image::loadFromFile(const Device& device, const std::string& file_name) {
             int width, height, channels;
             auto pixels = stbi_load(file_name.c_str(), &width, &height, &channels, STBI_rgb_alpha);
-            VkDeviceSize image_size = width * height * 4;
+            if (!pixels) throw std::runtime_error("Failed to load texture image.");
 
-            if (!pixels) {
-                throw std::runtime_error("Failed to load texture image.");
-            }
+			VkDeviceSize image_size = width * height * 4;
 
             VkImageCreateInfo create_info = {};
             create_info.sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -45,19 +43,19 @@ namespace stirling {
             vkGetImageSubresourceLayout(device, image, &subresource, &image_layout);
 
             void* data;
-            vkMapMemory(device, image.getMemory(), 0, image_size, 0, &data);
+            vkMapMemory(device, image.memory, 0, image_size, 0, &data);
 
             if (image_layout.rowPitch == width * 4) {
                 memcpy(data, pixels, (size_t)image_size);
             } else {
-                uint8_t* dataBytes = reinterpret_cast<uint8_t*>(data);
+                auto data_bytes = reinterpret_cast<uint8_t*>(data);
 
                 for (int y = 0; y < height; y++) {
-                    memcpy(&dataBytes[y * image_layout.rowPitch], &pixels[y * width * 4], width * 4);
+                    memcpy(&data_bytes[y * image_layout.rowPitch], &pixels[y * width * 4], width * 4);
                 }
             }
 
-            vkUnmapMemory(device, image.getMemory());
+            vkUnmapMemory(device, image.memory);
 
             stbi_image_free(pixels);
 
@@ -65,10 +63,10 @@ namespace stirling {
         }
 
         Image::Image(const Device& device, const VkImageCreateInfo& create_info, const VkMemoryPropertyFlags& properties) :
-            m_image  (initImage(device, create_info)),
-            m_memory (allocateMemory(device, properties)) {
+            image  (initImage(device, create_info)),
+            memory (allocateMemory(device, properties)) {
 
-            vkBindImageMemory(device, m_image, m_memory, 0);
+            vkBindImageMemory(device, image, memory, 0);
         }
 
         Deleter<VkImage> Image::initImage(const Device& device, const VkImageCreateInfo& create_info) const {
@@ -81,7 +79,7 @@ namespace stirling {
 
         Deleter<VkDeviceMemory> Image::allocateMemory(const Device& device, const VkMemoryPropertyFlags& properties) const {
             VkMemoryRequirements memory_requirements;
-            vkGetImageMemoryRequirements(device, m_image, &memory_requirements);
+            vkGetImageMemoryRequirements(device, image, &memory_requirements);
 
             VkMemoryAllocateInfo allocate_info = {};
             allocate_info.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -108,11 +106,7 @@ namespace stirling {
         }
 
         Image::operator VkImage() const {
-            return m_image;
-        }
-
-        VkDeviceMemory Image::getMemory() const {
-            return m_memory;
+            return image;
         }
 
     }

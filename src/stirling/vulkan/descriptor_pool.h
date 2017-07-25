@@ -15,7 +15,6 @@ namespace stirling {
             operator VkDescriptorPool() const;
 
             VkDescriptorSet              allocateDescriptorSet(const VkDescriptorSetLayout& set_layout) const;
-            std::vector<VkDescriptorSet> allocateDescriptorSets(const std::vector<VkDescriptorSetLayout>& set_layouts) const;
 
         private:
             VkDevice                  m_device;

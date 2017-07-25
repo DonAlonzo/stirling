@@ -9,10 +9,10 @@
 class StirlingDemo {
 public:
     StirlingDemo() :
-        m_window (1680, 1050, createMap()) {
+        m_window (1680, 1050, createMapBlueprint()) {
     }
 
-    stirling::MapBlueprint createMap() {
+    stirling::MapBlueprint createMapBlueprint() {
         stirling::MapBlueprint map;
 
         auto material = map.createMaterial();
@@ -21,7 +21,7 @@ public:
 
         for (int x = -1; x <= 1; ++x) {
 			for (int y = 0; y <= 0; ++y) {
-                stirling::EntityCreateInfo create_info;
+				stirling::EntityCreateInfo create_info = {};
                 create_info.position     = glm::vec3(x * 2.f, y * 2.f, 0.f);
                 create_info.rotation     = glm::vec3(0.f, 0.f, 0.f);
                 create_info.scale        = glm::vec3(1.f, 1.f, 1.f);
@@ -39,7 +39,7 @@ public:
         create_info.model_file   = "models/gladiators.obj";
         create_info.texture_file = "textures/gladiators.jpg";
         create_info.material     = material;
-        //map.addEntity(create_info);
+        map.addEntity(create_info);
 
         return map;
     }
@@ -57,7 +57,7 @@ private:
 
 int main() {
     try {
-        StirlingDemo().run();
+		StirlingDemo{}.run();
         return 0;
     } catch (const std::runtime_error& e) {
         std::cerr << e.what() << std::endl;
