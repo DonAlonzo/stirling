@@ -48,33 +48,34 @@ namespace stirling {
     }
 
 	void Camera::rotate(float angle, const glm::vec3& axis) {
-		m_pivot_1.rotate(angle, axis);
+		m_rotation *= glm::angleAxis(angle, axis);
+		//glm::eulerAngles()
 	}
 
 	void Camera::moveTo(const glm::vec3& position) {
-		m_pivot_2.moveTo(position);
+		m_position = position;
 	}
 
 	void Camera::lookAt(const glm::vec3& target, const glm::vec3& up) {
-		m_pivot_1.lookAt(target, m_pivot_2.position(), up);
+		m_rotation = glm::lookAt(target, m_position, up);
 	}
 
     void Camera::update(float delta_seconds) {
         float meters_per_second = 1.5f;
 
         glm::vec3 direction;
-        if (InputHandler::getInstance()[Action::MOVE_FORWARD])  direction += m_pivot_1.forward();
-        if (InputHandler::getInstance()[Action::MOVE_BACKWARD]) direction += m_pivot_1.backward();
-        if (InputHandler::getInstance()[Action::STRAFE_LEFT])   direction += m_pivot_1.left();
-        if (InputHandler::getInstance()[Action::STRAFE_RIGHT])  direction += m_pivot_1.right();
+        if (InputHandler::getInstance()[Action::MOVE_FORWARD])  direction += m_transform.forward();
+        if (InputHandler::getInstance()[Action::MOVE_BACKWARD]) direction += m_transform.backward();
+        if (InputHandler::getInstance()[Action::STRAFE_LEFT])   direction += m_transform.left();
+        if (InputHandler::getInstance()[Action::STRAFE_RIGHT])  direction += m_transform.right();
         if (InputHandler::getInstance()[Action::JUMP])          direction += glm::vec3(0.0f, 0.0f, -1.0f);
         if (InputHandler::getInstance()[Action::CROUCH])        direction += glm::vec3(0.0f, 0.0f, 1.0f);
         
         if (glm::length(direction) > 0.0f) {
-			m_pivot_2.translate(glm::normalize(direction) * meters_per_second * delta_seconds);
+			m_position += glm::normalize(direction) * meters_per_second * delta_seconds;
         }
 
-		m_transform = m_pivot_1 * m_pivot_2;
+		m_transform = glm::translate(glm::toMat4(m_rotation), m_position);
     }
 
 }
