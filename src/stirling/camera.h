@@ -5,8 +5,7 @@
 #include "entity.h"
 
 namespace stirling {
-    class Camera : public Entity {
-    public:
+    struct Camera : public Entity {
         Camera(float field_of_view, float aspect_ratio, float near_plane, float far_plane);
 
         void setAspectRatio(float aspect_ratio);

@@ -49,7 +49,6 @@ namespace stirling {
 
 	void Camera::rotate(float angle, const glm::vec3& axis) {
 		m_rotation *= glm::angleAxis(angle, axis);
-		//glm::eulerAngles()
 	}
 
 	void Camera::moveTo(const glm::vec3& position) {

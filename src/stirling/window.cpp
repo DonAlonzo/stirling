@@ -239,9 +239,9 @@ namespace stirling {
         throw std::runtime_error("Window::recreateSwapchain hasn't been implemented yet.");
         vkDeviceWaitIdle(m_device);
 
-        m_swapchain    = vulkan::Swapchain(m_device, m_surface, getSize(), m_swapchain);
-        m_depth_image  = vulkan::DepthImage(m_device, m_swapchain.getExtent());
-        m_render_pass  = vulkan::RenderPass(m_device, m_swapchain.getImageFormat(), m_depth_image.image_format);
+        m_swapchain    = vulkan::Swapchain{m_device, m_surface, getSize(), m_swapchain};
+        m_depth_image  = vulkan::DepthImage{m_device, m_swapchain.getExtent()};
+        m_render_pass  = vulkan::RenderPass{m_device, m_swapchain.getImageFormat(), m_depth_image.image_format};
         m_framebuffers = m_swapchain.createFramebuffers(m_render_pass, m_depth_image.image_view);
 
 		/*
@@ -360,7 +360,7 @@ namespace stirling {
     }
 
 	size_t Window::calculateFPS() const {
-		static constexpr std::chrono::milliseconds period(250);
+		static constexpr std::chrono::milliseconds period(200);
 		static std::chrono::time_point<std::chrono::steady_clock> last_tick;
 		static size_t frames = 0;
 		static size_t fps;

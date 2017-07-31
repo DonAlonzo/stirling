@@ -13,6 +13,7 @@ namespace stirling { namespace vulkan { class Device; } }
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace stirling {
@@ -92,6 +93,8 @@ namespace stirling {
 
         VkDescriptorSetLayout initDescriptorSetLayout(VkDevice device) const;
         vulkan::DescriptorPool initDescriptorPool(VkDevice device, uint32_t max_sets) const;
+
+		std::unordered_map<std::string, vulkan::ShaderModule> preloadShaders(VkDevice device) const;
     };
 
 }

@@ -15,14 +15,14 @@ namespace stirling {
     namespace vulkan {
         class ShaderModule {
         public:
-            ShaderModule(const Device& device, const std::string& file_name);
+            ShaderModule(VkDevice device, const std::string& file_name);
 
             operator const VkShaderModule&() const;
 
         private:
             Deleter<VkShaderModule> m_shader_module;
 
-            Deleter<VkShaderModule> createShaderModule(const Device& device, const std::vector<char>& code) const;
+            Deleter<VkShaderModule> createShaderModule(VkDevice device, const std::vector<char>& code) const;
         };
     }
 }

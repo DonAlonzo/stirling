@@ -15,7 +15,6 @@
 #include <iostream>
 #include <set>
 #include <string>
-#include <unordered_map>
 
 namespace stirling {
 
@@ -122,15 +121,7 @@ namespace stirling {
         }
 
         // Preload shaders
-        std::unordered_map<std::string, vulkan::ShaderModule> shader_modules;
-        for (auto& material : materials) {
-            for (auto shader : material.shaders) {
-                if (shader_modules.find(shader.file) == shader_modules.end()) {
-                    std::cout << "Loading shader " << shader.file << std::endl;
-                    shader_modules.emplace(shader.file, vulkan::ShaderModule(device, shader.file));
-                }
-            }
-        }
+		auto shader_modules = preloadShaders(device);
 
         // Descriptor set layout
         auto descriptor_set_layout = initDescriptorSetLayout(device);
@@ -273,6 +264,19 @@ namespace stirling {
 		
         return map;
     }
+
+	std::unordered_map<std::string, vulkan::ShaderModule> MapBlueprint::preloadShaders(VkDevice device) const {
+		std::unordered_map<std::string, vulkan::ShaderModule> shader_modules;
+		for (auto& material : materials) {
+			for (auto shader : material.shaders) {
+				if (shader_modules.find(shader.file) == shader_modules.end()) {
+					std::cout << "Loading shader " << shader.file << std::endl;
+					shader_modules.emplace(shader.file, vulkan::ShaderModule(device, shader.file));
+				}
+			}
+		}
+		return shader_modules;
+	}
 
     VkDescriptorSetLayout MapBlueprint::initDescriptorSetLayout(VkDevice device) const {
         std::vector<VkDescriptorSetLayoutBinding> bindings = {

@@ -5,11 +5,11 @@
 
 namespace stirling {
     namespace vulkan {
-        ShaderModule::ShaderModule(const Device& device, const std::string& file_name) :
+        ShaderModule::ShaderModule(VkDevice device, const std::string& file_name) :
             m_shader_module (createShaderModule(device, util::io::readFile(file_name))) {
         }
 
-        Deleter<VkShaderModule> ShaderModule::createShaderModule(const Device& device, const std::vector<char>& code) const {
+        Deleter<VkShaderModule> ShaderModule::createShaderModule(VkDevice device, const std::vector<char>& code) const {
             VkShaderModuleCreateInfo create_info = {};
             create_info.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
             create_info.codeSize = code.size();
