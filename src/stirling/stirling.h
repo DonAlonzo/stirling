@@ -10,7 +10,6 @@
 #include "vulkan/descriptor_pool.h"
 #include "vulkan/device.h"
 #include "vulkan/image.h"
-#include "vulkan/index_buffer.h"
 #include "vulkan/instance.h"
 #include "vulkan/model.h"
 #include "vulkan/pipeline.h"
@@ -20,7 +19,6 @@
 #include "vulkan/swapchain.h"
 #include "vulkan/texture.h"
 #include "vulkan/vertex.h"
-#include "vulkan/vertex_buffer.h"
 
 // stirling
 #include "camera.h"

@@ -89,7 +89,7 @@ namespace stirling {
                 std::cout << "Loading vertex buffer for " << model.first << std::endl;
 
 				map.vertex_buffers.emplace_back(vulkan::Buffer{
-					&device,
+					device,
 					VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 					sizeof(vulkan::Vertex) * model.second.vertices.size()
@@ -97,7 +97,7 @@ namespace stirling {
 
 				auto& buffer = map.vertex_buffers.back();
 
-				buffer.map().memcpy(model.second.vertices.data(), buffer.size);
+				buffer.map().memcpy(model.second.vertices.data(), buffer.memory.size);
 
 				vertex_buffers.emplace(model.first, buffer);
             }
@@ -105,7 +105,7 @@ namespace stirling {
                 std::cout << "Loading index buffer for " << model.first << std::endl;
 
 				map.index_buffers.emplace_back(vulkan::Buffer{
-					&device,
+					device,
 					VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
 					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 					sizeof(uint32_t) * model.second.indices.size()
@@ -113,7 +113,7 @@ namespace stirling {
 
 				auto& buffer = map.index_buffers.back();
 
-				buffer.map().memcpy(model.second.indices.data(), buffer.size);
+				buffer.map().memcpy(model.second.indices.data(), buffer.memory.size);
 
 				index_buffers.emplace(model.first, buffer);
 				index_counts.emplace(model.first, model.second.indices.size());

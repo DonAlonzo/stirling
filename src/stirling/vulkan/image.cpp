@@ -65,7 +65,6 @@ namespace stirling {
         Image::Image(const Device& device, const VkImageCreateInfo& create_info, const VkMemoryPropertyFlags& properties) :
             image  (initImage(device, create_info)),
             memory (allocateMemory(device, properties)) {
-
             vkBindImageMemory(device, image, memory, 0);
         }
 

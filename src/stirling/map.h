@@ -64,8 +64,8 @@ namespace stirling {
         DynamicUniformBufferObject              dynamic_uniform_buffer_object;
         vulkan::Buffer                          static_uniform_buffer;
         vulkan::Buffer                          dynamic_uniform_buffer;
-		vulkan::BufferMapping                   static_uniform_buffer_mapping;
-		vulkan::BufferMapping                   dynamic_uniform_buffer_mapping;
+		vulkan::MemoryMapping                   static_uniform_buffer_mapping;
+		vulkan::MemoryMapping                   dynamic_uniform_buffer_mapping;
         std::vector<vulkan::ShaderModule>       shaders;
         std::vector<vulkan::Buffer>             vertex_buffers;
         std::vector<vulkan::Buffer>             index_buffers;

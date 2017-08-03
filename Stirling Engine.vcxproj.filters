@@ -108,6 +108,9 @@
     <ClCompile Include="src\stirling\world.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\stirling\vulkan\memory.cpp">
+      <Filter>Source Files\vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\stirling\vulkan\instance.h">
@@ -211,6 +214,9 @@
     </ClInclude>
     <ClInclude Include="src\stirling\world.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stirling\vulkan\memory.h">
+      <Filter>Header Files\vulkan</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
