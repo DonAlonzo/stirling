@@ -64,7 +64,7 @@ namespace stirling {
 				}
             }
 
-            operator const T&() const {
+            operator T() const {
                 return m_object;
             }
 
