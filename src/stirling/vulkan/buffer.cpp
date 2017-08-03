@@ -9,14 +9,14 @@ namespace stirling {
     namespace vulkan {
 
         Buffer::Buffer(const Device& device, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkDeviceSize size) :
-            buffer     (init(device, size, usage)),
+            Deleter<VkBuffer>(init(device, size, usage), device, vkDestroyBuffer),
             memory     (initMemory(device, properties)),
             descriptor (initDescriptor(size)) {
 
-            vkBindBufferMemory(device, buffer, memory, 0);
+            vkBindBufferMemory(device, *this, memory, 0);
         }
 
-        Deleter<VkBuffer> Buffer::init(VkDevice device, VkDeviceSize size, VkBufferUsageFlags usage) const {
+        VkBuffer Buffer::init(VkDevice device, VkDeviceSize size, VkBufferUsageFlags usage) const {
             VkBufferCreateInfo create_info = {};
             create_info.sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
             create_info.size        = size;
@@ -27,29 +27,21 @@ namespace stirling {
             if (vkCreateBuffer(device, &create_info, nullptr, &buffer) != VK_SUCCESS) {
                 throw std::runtime_error("Failed to create buffer.");
             }
-            return Deleter<VkBuffer>(buffer, device, vkDestroyBuffer);
+            return buffer;
         }
 
         Memory Buffer::initMemory(const Device& device, VkMemoryPropertyFlags properties) const {
             VkMemoryRequirements memory_requirements;
-            vkGetBufferMemoryRequirements(device, buffer, &memory_requirements);
+            vkGetBufferMemoryRequirements(device, *this, &memory_requirements);
             return {device, memory_requirements, properties};
         }
 
-        VkDescriptorBufferInfo Buffer::initDescriptor(VkDeviceSize size, VkDeviceSize offset) const {
+        VkDescriptorBufferInfo Buffer::initDescriptor(VkDeviceSize size) const {
             VkDescriptorBufferInfo descriptor = {};
-            descriptor.buffer = buffer;
+            descriptor.buffer = *this;
             descriptor.range  = size;
-            descriptor.offset = offset;
+            descriptor.offset = 0;
             return descriptor;
-        }
-
-        Buffer::operator VkBuffer() const {
-            return buffer;
-        }
-        
-		MemoryMapping Buffer::map(VkDeviceSize size, VkDeviceSize offset) const {
-			return memory.map(size, offset);
         }
 
     }

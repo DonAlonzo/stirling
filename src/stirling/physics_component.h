@@ -3,10 +3,11 @@
 #include "component.h"
 
 namespace stirling {
-    class PhysicsComponent : public Component {
-    public:
+
+    struct PhysicsComponent : Component {
         PhysicsComponent();
 
         void update(Entity* entity, float delta_seconds) override;
     };
+
 }

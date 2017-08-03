@@ -147,7 +147,7 @@ namespace stirling {
             if (queue_flags & VK_QUEUE_TRANSFER_BIT) {
                 for (uint32_t i = 0; i < static_cast<uint32_t>(queue_family_properties.size()); ++i) {
                     if ((queue_family_properties[i].queueFlags & queue_flags) &&
-                        (queue_family_properties[i].queueFlags & (VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT) == 0)) {
+                       ((queue_family_properties[i].queueFlags & (VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT)) == 0)) {
                         return i;
                     }
                 }

@@ -2,7 +2,7 @@
 
 #include "transform.h"
 
-namespace stirling { class Component; }
+namespace stirling { struct Component; }
 
 #include <vector>
 

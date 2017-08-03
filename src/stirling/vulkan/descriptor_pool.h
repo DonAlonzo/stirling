@@ -8,19 +8,15 @@
 
 namespace stirling {
     namespace vulkan {
-        class DescriptorPool {
-        public:
+        struct DescriptorPool : Deleter<VkDescriptorPool> {
             DescriptorPool(VkDevice device, const std::vector<VkDescriptorPoolSize>& pool_sizes, uint32_t max_sets);
 
-            operator VkDescriptorPool() const;
-
-            VkDescriptorSet              allocateDescriptorSet(const VkDescriptorSetLayout& set_layout) const;
+            VkDescriptorSet allocateDescriptorSet(const VkDescriptorSetLayout& set_layout) const;
 
         private:
-            VkDevice                  m_device;
-            Deleter<VkDescriptorPool> m_descriptor_pool;
+            VkDevice device;
 
-            Deleter<VkDescriptorPool> initDescriptorPool(const std::vector<VkDescriptorPoolSize>& pool_sizes, uint32_t max_sets) const;
+            VkDescriptorPool init(VkDevice device, const std::vector<VkDescriptorPoolSize>& pool_sizes, uint32_t max_sets) const;
         };
     }
 }

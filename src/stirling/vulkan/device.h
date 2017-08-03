@@ -6,7 +6,7 @@
 // Stirling
 namespace stirling {
     namespace vulkan {
-        class Buffer;
+        struct Buffer;
         class PhysicalDevice;
         class Semaphore;
         struct QueueFamilyIndices;

@@ -3,8 +3,7 @@
 #include "entity.h"
 
 namespace stirling {
-    class Component {
-    public:
+    struct Component {
         virtual void update(Entity* entity, float delta_seconds) = 0;
     };
 }

@@ -22,21 +22,18 @@ namespace stirling {
 			void memcpy(const void* data, size_t count) const;
 		};
 
-        struct Memory {
-            VkDeviceSize            size;
+        struct Memory : Deleter<VkDeviceMemory> {
+            VkDeviceSize size;
 
             Memory(const Device& device, VkMemoryRequirements memory_requirements, VkMemoryPropertyFlags properties);
 
-            operator VkDeviceMemory() const;
-            
             MemoryMapping map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0) const;
 
         private:
-			VkDevice                device;
-			Deleter<VkDeviceMemory> memory;
+			VkDevice device;
             
-            Deleter<VkDeviceMemory> allocate(const Device& device, VkMemoryRequirements memory_requirements, VkMemoryPropertyFlags properties) const;
-            uint32_t                findMemoryType(VkPhysicalDevice physical_device, uint32_t type_filter, VkMemoryPropertyFlags properties) const;
+            VkDeviceMemory allocate(const Device& device, VkMemoryRequirements memory_requirements, VkMemoryPropertyFlags properties) const;
+            uint32_t       findMemoryType(VkPhysicalDevice physical_device, uint32_t type_filter, VkMemoryPropertyFlags properties) const;
         };
 
     }

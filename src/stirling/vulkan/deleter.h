@@ -8,9 +8,9 @@
 
 namespace stirling {
     namespace vulkan {
+
         template <typename T>
-        class Deleter {
-        public:
+        struct Deleter {
             Deleter() :
                 m_object          (VK_NULL_HANDLE), 
                 m_delete_function ([]() {}) {
@@ -72,5 +72,6 @@ namespace stirling {
             T m_object;
             std::function<void()> m_delete_function;
         };
+
     }
 }

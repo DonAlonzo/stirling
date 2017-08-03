@@ -97,7 +97,7 @@ namespace stirling {
 
 				auto& buffer = map.vertex_buffers.back();
 
-				buffer.map().memcpy(model.second.vertices.data(), buffer.memory.size);
+				buffer.memory.map().memcpy(model.second.vertices.data(), buffer.memory.size);
 
 				vertex_buffers.emplace(model.first, buffer);
             }
@@ -113,7 +113,7 @@ namespace stirling {
 
 				auto& buffer = map.index_buffers.back();
 
-				buffer.map().memcpy(model.second.indices.data(), buffer.memory.size);
+				buffer.memory.map().memcpy(model.second.indices.data(), buffer.memory.size);
 
 				index_buffers.emplace(model.first, buffer);
 				index_counts.emplace(model.first, model.second.indices.size());
@@ -315,8 +315,8 @@ namespace stirling {
 	Map::Map(vulkan::Buffer&& static_uniform_buffer, vulkan::Buffer&& dynamic_uniform_buffer) :
 		static_uniform_buffer          (std::move(static_uniform_buffer)),
 		dynamic_uniform_buffer         (std::move(dynamic_uniform_buffer)),
-		static_uniform_buffer_mapping  (this->static_uniform_buffer.map()),
-		dynamic_uniform_buffer_mapping (this->dynamic_uniform_buffer.map()) {
+		static_uniform_buffer_mapping  (this->static_uniform_buffer.memory.map()),
+		dynamic_uniform_buffer_mapping (this->dynamic_uniform_buffer.memory.map()) {
 	}
 
 }

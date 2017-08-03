@@ -6,8 +6,7 @@
 #include <memory>
 #include <iostream>
 
-class StirlingDemo {
-public:
+struct StirlingDemo {
     StirlingDemo() :
         m_window (1680, 1050, createMapBlueprint()) {
     }
