@@ -7,11 +7,15 @@ namespace stirling {
     namespace vulkan {
 
         Pipeline::Pipeline(VkDevice device, std::vector<VkDescriptorSetLayout> descriptor_set_layouts, VkRenderPass render_pass, VkExtent2D extent, std::vector<VkPipelineShaderStageCreateInfo> shader_stages) :
-            layout   (initPipelineLayout(device, descriptor_set_layouts)),
-            pipeline (initPipeline(device, render_pass, extent, shader_stages)) {
+            Pipeline(initPipelineLayout(device, descriptor_set_layouts), device, render_pass, extent, shader_stages) {
         }
 
-        Deleter<VkPipelineLayout> Pipeline::initPipelineLayout(VkDevice device, std::vector<VkDescriptorSetLayout> descriptor_set_layouts) const {
+        Pipeline::Pipeline(VkPipelineLayout pipeline_layout, VkDevice device, VkRenderPass render_pass, VkExtent2D extent, std::vector<VkPipelineShaderStageCreateInfo> shader_stages) :
+            Deleter<VkPipeline>(init(pipeline_layout, device, render_pass, extent, shader_stages), device, vkDestroyPipeline),
+            layout (pipeline_layout, device, vkDestroyPipelineLayout) {
+        }
+
+        VkPipelineLayout Pipeline::initPipelineLayout(VkDevice device, std::vector<VkDescriptorSetLayout> descriptor_set_layouts) const {
             VkPipelineLayoutCreateInfo pipeline_layout_info = {};
             pipeline_layout_info.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
             pipeline_layout_info.setLayoutCount         = descriptor_set_layouts.size();
@@ -23,10 +27,10 @@ namespace stirling {
             if (vkCreatePipelineLayout(device, &pipeline_layout_info, nullptr, &pipeline_layout) != VK_SUCCESS) {
                 throw std::runtime_error("Failed to create pipeline layout.");
             }
-            return Deleter<VkPipelineLayout>(pipeline_layout, device, vkDestroyPipelineLayout);
+            return pipeline_layout;
         }
 
-        Deleter<VkPipeline> Pipeline::initPipeline(VkDevice device, VkRenderPass render_pass, VkExtent2D extent, std::vector<VkPipelineShaderStageCreateInfo> shader_stages) const {
+        VkPipeline Pipeline::init(VkPipelineLayout pipeline_layout, VkDevice device, VkRenderPass render_pass, VkExtent2D extent, std::vector<VkPipelineShaderStageCreateInfo> shader_stages) const {
             auto binding_description = Vertex::getBindingDescription();
             auto attribute_descriptions = Vertex::getAttributeDescriptions();
 
@@ -124,7 +128,7 @@ namespace stirling {
             create_info.pDepthStencilState  = &depth_stencil;
             create_info.pColorBlendState    = &color_blending;
             create_info.pDynamicState       = nullptr;
-            create_info.layout              = layout;
+            create_info.layout              = pipeline_layout;
             create_info.renderPass          = render_pass;
             create_info.subpass             = 0;
             create_info.basePipelineHandle  = VK_NULL_HANDLE;
@@ -134,10 +138,6 @@ namespace stirling {
             if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &create_info, nullptr, &pipeline) != VK_SUCCESS) {
                 throw std::runtime_error("Failed to create graphics pipeline.");
             }
-            return Deleter<VkPipeline>(pipeline, device, vkDestroyPipeline);
-        }
-
-        Pipeline::operator VkPipeline() const {
             return pipeline;
         }
 

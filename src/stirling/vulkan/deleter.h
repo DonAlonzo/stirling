@@ -8,7 +8,6 @@
 
 namespace stirling {
     namespace vulkan {
-
         template <typename T>
         struct Deleter {
             Deleter() :
@@ -72,6 +71,5 @@ namespace stirling {
             T m_object;
             std::function<void()> m_delete_function;
         };
-
     }
 }

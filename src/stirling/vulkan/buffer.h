@@ -22,5 +22,6 @@ namespace stirling {
             Memory                  initMemory(const Device& device, VkMemoryPropertyFlags properties) const;
             VkDescriptorBufferInfo  initDescriptor(VkDeviceSize size) const;
         };
+
     }
 }
