@@ -41,8 +41,8 @@ namespace stirling {
         vulkan::DepthImage            m_depth_image;
         vulkan::RenderPass            m_render_pass;
         std::vector<VkFramebuffer>    m_framebuffers;
-        vulkan::Semaphore             m_image_available_semaphore;
-        vulkan::Semaphore             m_render_finished_semaphore;
+        vulkan::Deleter<VkSemaphore>  m_image_available_semaphore;
+        vulkan::Deleter<VkSemaphore>  m_render_finished_semaphore;
 
         Camera                        m_camera;
         World                         m_world;

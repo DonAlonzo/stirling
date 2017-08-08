@@ -1,5 +1,6 @@
 #include "map.h"
 
+#include "vulkan/buffer.h"
 #include "vulkan/device.h"
 #include "vulkan/initializers.h"
 #include "vulkan/model.h"
@@ -51,9 +52,9 @@ namespace stirling {
 		// Map instance
 		Map map(
 			// Static uniform buffer
-			device.createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, sizeof(StaticUniformBufferObject)),
+            vulkan::Buffer(device, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, sizeof(StaticUniformBufferObject)),
 			// Dynamic uniform buffer
-			device.createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, buffer_size)
+            vulkan::Buffer(device, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, buffer_size)
 		);
 
 		// Dynamic uniform buffer object + index counter

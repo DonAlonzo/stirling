@@ -168,7 +168,6 @@
     <ClCompile Include="src\stirling\vulkan\command_pool.cpp" />
     <ClCompile Include="src\stirling\vulkan\render_pass.cpp" />
     <ClCompile Include="src\stirling\vulkan\pipeline.cpp" />
-    <ClCompile Include="src\stirling\vulkan\semaphore.cpp" />
     <ClCompile Include="src\stirling\vulkan\shader_module.cpp" />
     <ClCompile Include="src\stirling\vulkan\queue.cpp" />
     <ClCompile Include="src\stirling\vulkan\device.cpp" />
@@ -203,7 +202,6 @@
     <ClInclude Include="src\stirling\vulkan\command_pool.h" />
     <ClInclude Include="src\stirling\vulkan\render_pass.h" />
     <ClInclude Include="src\stirling\vulkan\pipeline.h" />
-    <ClInclude Include="src\stirling\vulkan\semaphore.h" />
     <ClInclude Include="src\stirling\vulkan\shader_module.h" />
     <ClInclude Include="src\stirling\vulkan\queue.h" />
     <ClInclude Include="src\stirling\vulkan\device.h" />

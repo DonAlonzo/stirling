@@ -8,7 +8,6 @@ namespace stirling {
     namespace vulkan {
         struct Buffer;
         struct PhysicalDevice;
-        struct Semaphore;
         struct QueueFamilyIndices;
     }
 }
@@ -30,15 +29,14 @@ namespace stirling {
             Queue getGraphicsQueue() const;
             Queue getPresentQueue() const;
 
-            Buffer createBuffer(VkBufferUsageFlags usage_flags, VkMemoryPropertyFlags memory_property_flags, VkDeviceSize size, void* data = nullptr) const;
-            Semaphore createSemaphore() const;
+            Deleter<VkSemaphore> createSemaphore() const;
 
         private:
-            const PhysicalDevice& m_physical_device;
+            const PhysicalDevice& physical_device;
 
-            Deleter<VkDevice>     m_device;
-            Queue                 m_graphics_queue;
-            Queue                 m_present_queue;
+            Deleter<VkDevice>     device;
+            Queue                 graphics_queue;
+            Queue                 present_queue;
 
             Queue                 initQueue(int queue_family_index);
         };
