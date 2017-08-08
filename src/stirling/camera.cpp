@@ -43,10 +43,6 @@ namespace stirling {
         projection_matrix[1][1] *= -1;
     }
 
-    const glm::mat4& Camera::getProjectionMatrix() const {
-        return projection_matrix;
-    }
-
 	void Camera::moveTo(const glm::vec3& position) {
 		this->position = position;
 	}

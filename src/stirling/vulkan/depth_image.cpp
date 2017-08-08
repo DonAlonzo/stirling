@@ -22,7 +22,7 @@ namespace stirling {
 
             for (VkFormat format : candidates) {
                 VkFormatProperties properties;
-                vkGetPhysicalDeviceFormatProperties(device.getPhysicalDevice(), format, &properties);
+                vkGetPhysicalDeviceFormatProperties(device.physical_device, format, &properties);
 
                 if ((properties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) == VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) {
                     return format;

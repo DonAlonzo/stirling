@@ -32,11 +32,7 @@ namespace stirling {
         }
 
         Validator::Validator(const VkInstance& instance) :
-            m_debug_callback (initDebugCallback(instance)) {
-        }
-
-        Validator Validator::nullValidator() {
-            return Validator();
+            debug_callback (initDebugCallback(instance)) {
         }
 
         Deleter<VkDebugReportCallbackEXT> Validator::initDebugCallback(const VkInstance& instance) const {

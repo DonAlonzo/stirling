@@ -55,17 +55,17 @@ namespace stirling {
         window                    {initWindow(width, height)},
         instance                  {getRequiredExtensions()},
         surface                   {initSurface()},
-        physical_device           {choosePhysicalDevice(instance.getPhysicalDevices())},
+        physical_device           {choosePhysicalDevice(instance.physical_devices)},
         device                    {physical_device.createDevice(surface, g_device_extensions)},
         swapchain                 {device, surface, getSize()},
-        depth_image               {device, swapchain.getExtent()},
-        render_pass               {device, swapchain.getImageFormat(), depth_image.image_format},
+        depth_image               {device, swapchain.extent},
+        render_pass               {device, swapchain.image_format, depth_image.image_format},
         framebuffers              {swapchain.createFramebuffers(render_pass, depth_image.image_view)},
         image_available_semaphore {device.createSemaphore()},
         render_finished_semaphore {device.createSemaphore()},
-        camera                    {glm::radians(60.0f), swapchain.getExtent().width / (float)swapchain.getExtent().height, 0.01f, 100.0f},
-        map                       {map_blueprint.instantiate(device, render_pass, swapchain.getExtent())},
-        command_pool              {device.getGraphicsQueue().createCommandPool()},
+        camera                    {glm::radians(60.0f), swapchain.extent.width / (float)swapchain.extent.height, 0.01f, 100.0f},
+        map                       {map_blueprint.instantiate(device, render_pass, swapchain.extent)},
+        command_pool              {device.graphics_queue.createCommandPool()},
         command_buffers           {initCommandBuffers()} {
         
         // Add map entities to world
@@ -167,7 +167,7 @@ namespace stirling {
             render_pass_info.renderPass        = render_pass;
             render_pass_info.framebuffer       = framebuffers[i];
             render_pass_info.renderArea.offset = { 0, 0 };
-            render_pass_info.renderArea.extent = swapchain.getExtent();
+            render_pass_info.renderArea.extent = swapchain.extent;
             render_pass_info.clearValueCount   = clear_values.size();
             render_pass_info.pClearValues      = clear_values.data();
 
@@ -240,8 +240,8 @@ namespace stirling {
         vkDeviceWaitIdle(device);
 
         swapchain    = vulkan::Swapchain{device, surface, getSize(), swapchain};
-        depth_image  = vulkan::DepthImage{device, swapchain.getExtent()};
-        render_pass  = vulkan::RenderPass{device, swapchain.getImageFormat(), depth_image.image_format};
+        depth_image  = vulkan::DepthImage{device, swapchain.extent};
+        render_pass  = vulkan::RenderPass{device, swapchain.image_format, depth_image.image_format};
         framebuffers = swapchain.createFramebuffers(render_pass, depth_image.image_view);
 
 		/*
@@ -253,7 +253,7 @@ namespace stirling {
         vkFreeCommandBuffers(device, command_pool, command_buffers.size(), command_buffers.data());
         command_buffers = initCommandBuffers();
 
-        camera.setAspectRatio(swapchain.getExtent().width / (float)swapchain.getExtent().height);
+        camera.setAspectRatio(swapchain.extent.width / (float)swapchain.extent.height);
     }
 
     VkExtent2D Window::getSize() const {
@@ -281,7 +281,7 @@ namespace stirling {
 
         { // Update static uniform buffer
             map.static_uniform_buffer_object.view       = camera.transform;
-            map.static_uniform_buffer_object.projection = camera.getProjectionMatrix();
+            map.static_uniform_buffer_object.projection = camera.projection_matrix;
             map.static_uniform_buffer_mapping.memcpy(&map.static_uniform_buffer_object, map.static_uniform_buffer.memory.size);
         }
 
@@ -330,7 +330,7 @@ namespace stirling {
         submit_info.signalSemaphoreCount = 1;
         submit_info.pSignalSemaphores    = signal_semaphores;
 
-        if (vkQueueSubmit(device.getGraphicsQueue(), 1, &submit_info, VK_NULL_HANDLE) != VK_SUCCESS) {
+        if (vkQueueSubmit(device.graphics_queue, 1, &submit_info, VK_NULL_HANDLE) != VK_SUCCESS) {
             throw std::runtime_error("Failed to submit draw command buffer.");
         }
 
@@ -347,7 +347,7 @@ namespace stirling {
         present_info.pImageIndices      = &image_index;
         present_info.pResults           = nullptr;
 
-        switch (vkQueuePresentKHR(device.getPresentQueue(), &present_info)) {
+        switch (vkQueuePresentKHR(device.present_queue, &present_info)) {
         case VK_SUCCESS:
             break;
         case VK_ERROR_OUT_OF_DATE_KHR:

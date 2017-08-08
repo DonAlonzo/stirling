@@ -45,7 +45,7 @@ namespace stirling {
     Map MapBlueprint::instantiate(const vulkan::Device& device, VkRenderPass render_pass, VkExtent2D extent) const {
 		// Calculate size and alignment of dynamic buffer
         uint32_t number_of_dynamic_buffer_objects = create_info_list.size();
-        size_t ubo_alignment = device.getPhysicalDevice().properties.limits.minUniformBufferOffsetAlignment;
+        size_t ubo_alignment = device.physical_device.properties.limits.minUniformBufferOffsetAlignment;
         size_t dynamic_alignment = (sizeof(glm::mat4) / ubo_alignment) * ubo_alignment + ((sizeof(glm::mat4) % ubo_alignment) > 0 ? ubo_alignment : 0);
         size_t buffer_size = number_of_dynamic_buffer_objects * dynamic_alignment;
 

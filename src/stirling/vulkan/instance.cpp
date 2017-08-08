@@ -18,7 +18,9 @@ namespace stirling {
 
         Instance::Instance(const std::vector<const char*>& extensions) :
             Deleter<VkInstance>(init(extensions), vkDestroyInstance),
-            m_validator (initValidator()) {
+            validator        {initValidator()},
+            layer_properties {getLayerProperties()},
+            physical_devices {getPhysicalDevices()}{
         }
 
         VkInstance Instance::init(std::vector<const char*> extensions) const {
@@ -53,7 +55,7 @@ namespace stirling {
         }
 
         Validator Instance::initValidator() const {
-            return ENABLE_VALIDATION_LAYERS ? Validator(*this) : Validator::nullValidator();
+            return ENABLE_VALIDATION_LAYERS ? Validator{*this} : Validator{};
         }
 
         std::vector<VkLayerProperties> Instance::getLayerProperties() const {

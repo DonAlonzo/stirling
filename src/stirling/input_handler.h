@@ -26,13 +26,13 @@ namespace stirling {
         bool operator[](Action action) const;
         
     private:
-        InputHandler();
-        
-        static InputHandler& getInstance();
-
         std::unordered_map<int, Action> key_bindings;
         std::unordered_map<Action, bool> action_states;
         std::unordered_map<Action, std::vector<std::function<void()>>> commands;
+
+        InputHandler();
+        
+        static InputHandler& getInstance();
 
     public:
         InputHandler(const InputHandler&) = delete;

@@ -26,31 +26,33 @@ namespace stirling {
         };
 
         struct Swapchain {
-            Swapchain(const vulkan::Device& device, VkSurfaceKHR surface, VkExtent2D actual_extent, VkSwapchainKHR old_swapchain = VK_NULL_HANDLE);
-            
-            std::vector<VkFramebuffer> createFramebuffers(const RenderPass& render_pass, VkImageView depth_image_view) const;
-
-            operator VkSwapchainKHR() const;
-            const VkExtent2D& getExtent() const;
-            const VkFormat&   getImageFormat() const;
-            uint32_t          getImageCount() const;
-
         private:
             VkDevice                          device;
+        public:
             SwapchainSupportDetails           support_details;
-            VkExtent2D                        swapchain_extent;
+            VkExtent2D                        extent;
             VkSurfaceFormatKHR                surface_format;
+        private:
             Deleter<VkSwapchainKHR>           swapchain;
-            std::vector<VkImage>              swapchain_images;
-            VkFormat                          swapchain_image_format;
-            std::vector<Deleter<VkImageView>> swapchain_image_views;
+        public:
+            std::vector<VkImage>              images;
+            VkFormat                          image_format;
+            std::vector<Deleter<VkImageView>> image_views;
 
+            Swapchain(const vulkan::Device& device, VkSurfaceKHR surface, VkExtent2D actual_extent, VkSwapchainKHR old_swapchain = VK_NULL_HANDLE);
+            
+            operator VkSwapchainKHR() const;
+
+            std::vector<VkFramebuffer> createFramebuffers(const RenderPass& render_pass, VkImageView depth_image_view) const;
+
+        private:
             Deleter<VkSwapchainKHR>           initSwapchain(const Device& device, VkSurfaceKHR surface, VkSwapchainKHR old_swapchain);
             SwapchainSupportDetails           fetchSupportDetails(const PhysicalDevice& physical_device, VkSurfaceKHR surface) const;
             VkSurfaceFormatKHR                chooseSwapSurfaceFormat(std::vector<VkSurfaceFormatKHR> available_formats) const;
             VkPresentModeKHR                  chooseSwapPresentMode(const std::vector<VkPresentModeKHR> available_present_modes) const;
             VkExtent2D                        chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, VkExtent2D actual_extent) const;
             std::vector<Deleter<VkImageView>> initImageViews(uint32_t image_count) const;
+            uint32_t                          getImageCount() const;
         };
 
     }

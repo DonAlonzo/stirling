@@ -11,14 +11,14 @@ namespace stirling {
     namespace vulkan {
 
         Swapchain::Swapchain(const vulkan::Device& device, VkSurfaceKHR surface, VkExtent2D actual_extent, VkSwapchainKHR old_swapchain) :
-            device                 (device),
-            support_details        (fetchSupportDetails(device.getPhysicalDevice(), surface)),
-            swapchain_extent       (chooseSwapExtent(support_details.capabilities, actual_extent)),
-            surface_format         (chooseSwapSurfaceFormat(device.getPhysicalDevice().getSurfaceFormats(surface))),
-            swapchain              (initSwapchain(device, surface, old_swapchain)),
-            swapchain_images       (device.getSwapchainImages(swapchain, getImageCount())),
-            swapchain_image_format (surface_format.format),
-            swapchain_image_views  (initImageViews(getImageCount())) {
+            device          {device},
+            support_details {fetchSupportDetails(device.physical_device, surface)},
+            extent          {chooseSwapExtent(support_details.capabilities, actual_extent)},
+            surface_format  {chooseSwapSurfaceFormat(device.physical_device.getSurfaceFormats(surface))},
+            swapchain       {initSwapchain(device, surface, old_swapchain)},
+            images          {device.getSwapchainImages(swapchain, getImageCount())},
+            image_format    {surface_format.format},
+            image_views     {initImageViews(getImageCount())} {
         }
 
         Deleter<VkSwapchainKHR> Swapchain::initSwapchain(const Device& device, VkSurfaceKHR surface, VkSwapchainKHR old_swapchain) {
@@ -28,11 +28,11 @@ namespace stirling {
             create_info.minImageCount    = getImageCount();
             create_info.imageFormat      = surface_format.format;
             create_info.imageColorSpace  = surface_format.colorSpace;
-            create_info.imageExtent      = swapchain_extent;
+            create_info.imageExtent      = extent;
             create_info.imageArrayLayers = 1;
             create_info.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-            auto indices = device.getPhysicalDevice().findQueueFamilies(surface);
+            auto indices = device.physical_device.findQueueFamilies(surface);
             if (indices.graphics_family_index != indices.present_family_index) {
                 uint32_t queue_family_indices[] = {
                     (uint32_t)indices.graphics_family_index,
@@ -47,7 +47,7 @@ namespace stirling {
 
             create_info.preTransform   = support_details.capabilities.currentTransform;
             create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-            create_info.presentMode    = chooseSwapPresentMode(device.getPhysicalDevice().getSurfacePresentModes(surface));
+            create_info.presentMode    = chooseSwapPresentMode(device.physical_device.getSurfacePresentModes(surface));
             create_info.clipped        = VK_TRUE;
             create_info.oldSwapchain   = old_swapchain;
 
@@ -110,14 +110,14 @@ namespace stirling {
 
         std::vector<Deleter<VkImageView>> Swapchain::initImageViews(uint32_t image_count) const {
             std::vector<Deleter<VkImageView>> image_views;
-            image_views.reserve(swapchain_images.size());
+            image_views.reserve(images.size());
 
-            for (uint32_t i = 0; i < swapchain_images.size(); ++i) {
+            for (uint32_t i = 0; i < images.size(); ++i) {
                 VkImageViewCreateInfo create_info = {};
                 create_info.sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-                create_info.image                           = swapchain_images[i];
+                create_info.image                           = images[i];
                 create_info.viewType                        = VK_IMAGE_VIEW_TYPE_2D;
-                create_info.format                          = swapchain_image_format;
+                create_info.format                          = image_format;
                 create_info.components.r                    = VK_COMPONENT_SWIZZLE_IDENTITY;
                 create_info.components.g                    = VK_COMPONENT_SWIZZLE_IDENTITY;
                 create_info.components.b                    = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -140,11 +140,11 @@ namespace stirling {
 
         std::vector<VkFramebuffer> Swapchain::createFramebuffers(const RenderPass& render_pass, VkImageView depth_image_view) const {
             std::vector<VkFramebuffer> framebuffers;
-            framebuffers.reserve(swapchain_image_views.size());
+            framebuffers.reserve(image_views.size());
 
-            for (size_t i = 0; i < swapchain_image_views.size(); ++i) {
+            for (size_t i = 0; i < image_views.size(); ++i) {
                 std::array<VkImageView, 2> attachments = {
-                    swapchain_image_views[i],
+                    image_views[i],
                     depth_image_view
                 };
 
@@ -153,8 +153,8 @@ namespace stirling {
                 create_info.renderPass      = render_pass;
                 create_info.attachmentCount = attachments.size();
                 create_info.pAttachments    = attachments.data();
-                create_info.width           = swapchain_extent.width;
-                create_info.height          = swapchain_extent.height;
+                create_info.width           = extent.width;
+                create_info.height          = extent.height;
                 create_info.layers          = 1;
 
                 VkFramebuffer framebuffer;
@@ -168,14 +168,6 @@ namespace stirling {
 
         Swapchain::operator VkSwapchainKHR() const {
             return swapchain;
-        }
-
-        const VkExtent2D& Swapchain::getExtent() const {
-            return swapchain_extent;
-        }
-
-        const VkFormat& Swapchain::getImageFormat() const {
-            return swapchain_image_format;
         }
 
         uint32_t Swapchain::getImageCount() const {

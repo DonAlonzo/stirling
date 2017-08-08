@@ -8,8 +8,6 @@
 namespace stirling {
 
     struct World {
-        World();
-
         void addEntity(Entity* entity);
         void update(float delta_seconds);
 
@@ -17,7 +15,7 @@ namespace stirling {
         static const size_t MAX_NUMBER_OF_ENTITIES = 65536;
 
         Entity* entities[MAX_NUMBER_OF_ENTITIES];
-		size_t  number_of_entities;
+		size_t  number_of_entities = 0;
     };
 
 }

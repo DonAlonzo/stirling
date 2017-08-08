@@ -20,24 +20,21 @@ namespace stirling {
     namespace vulkan {
 
         struct Device {
+            const PhysicalDevice& physical_device;
+        private:
+            Deleter<VkDevice>     device;
+        public:
+            Queue                 graphics_queue;
+            Queue                 present_queue;
+
             Device(const PhysicalDevice& physical_device, VkDevice device, QueueFamilyIndices indices);
 
             operator VkDevice() const;
 
-            const PhysicalDevice& getPhysicalDevice() const;
             std::vector<VkImage> getSwapchainImages(VkSwapchainKHR swapchain, uint32_t count) const;
-            Queue getGraphicsQueue() const;
-            Queue getPresentQueue() const;
-
             Deleter<VkSemaphore> createSemaphore() const;
 
         private:
-            const PhysicalDevice& physical_device;
-
-            Deleter<VkDevice>     device;
-            Queue                 graphics_queue;
-            Queue                 present_queue;
-
             Queue                 initQueue(int queue_family_index);
         };
     }

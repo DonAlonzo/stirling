@@ -95,7 +95,7 @@ namespace stirling {
 
         uint32_t Image::findMemoryType(const Device& device, uint32_t type_filter, VkMemoryPropertyFlags properties) const {
             VkPhysicalDeviceMemoryProperties memory_properties;
-            vkGetPhysicalDeviceMemoryProperties(device.getPhysicalDevice(), &memory_properties);
+            vkGetPhysicalDeviceMemoryProperties(device.physical_device, &memory_properties);
 
             for (uint32_t i = 0; i < memory_properties.memoryTypeCount; ++i) {
                 if ((type_filter & (1 << i)) && (memory_properties.memoryTypes[i].propertyFlags & properties) == properties) {

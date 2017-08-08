@@ -16,7 +16,7 @@ namespace stirling {
             VkMemoryAllocateInfo allocate_info = {};
             allocate_info.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
             allocate_info.allocationSize  = memory_requirements.size;
-            allocate_info.memoryTypeIndex = findMemoryType(device.getPhysicalDevice(), memory_requirements.memoryTypeBits, properties);
+            allocate_info.memoryTypeIndex = findMemoryType(device.physical_device, memory_requirements.memoryTypeBits, properties);
 
             VkDeviceMemory memory;
             if (vkAllocateMemory(device, &allocate_info, nullptr, &memory) != VK_SUCCESS) {

@@ -17,16 +17,18 @@ namespace stirling {
     namespace vulkan {
 
         struct Instance : Deleter<VkInstance> {
+            std::vector<VkLayerProperties> layer_properties;
+            std::vector<PhysicalDevice>    physical_devices;
+
             Instance(const std::vector<const char*>& extensions);
 
-            std::vector<VkLayerProperties> getLayerProperties() const;
-            std::vector<PhysicalDevice> getPhysicalDevices() const;
-
         private:
-            Validator m_validator;
+            Validator validator;
 
-            VkInstance init(std::vector<const char*> extensions) const;
-            Validator  initValidator() const;
+            VkInstance                     init(std::vector<const char*> extensions) const;
+            Validator                      initValidator() const;
+            std::vector<VkLayerProperties> getLayerProperties() const;
+            std::vector<PhysicalDevice>    getPhysicalDevices() const;
 
             bool checkValidationLayerSupport() const;
         };

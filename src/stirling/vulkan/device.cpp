@@ -22,18 +22,6 @@ namespace stirling {
             return device;
         }
 
-        const PhysicalDevice& Device::getPhysicalDevice() const {
-            return physical_device;
-        }
-
-        Queue Device::getGraphicsQueue() const {
-            return graphics_queue;
-        }
-
-        Queue Device::getPresentQueue() const {
-            return present_queue;
-        }
-
         std::vector<VkImage> Device::getSwapchainImages(VkSwapchainKHR swapchain, uint32_t image_count) const {
             vkGetSwapchainImagesKHR(device, swapchain, &image_count, nullptr);
             std::vector<VkImage> images{image_count};
