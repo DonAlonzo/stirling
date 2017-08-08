@@ -36,14 +36,14 @@ namespace stirling {
             uint32_t          getImageCount() const;
 
         private:
-            VkDevice                          m_device;
-            SwapchainSupportDetails           m_support_details;
-            VkExtent2D                        m_swapchain_extent;
-            VkSurfaceFormatKHR                m_surface_format;
-            Deleter<VkSwapchainKHR>           m_swapchain;
-            std::vector<VkImage>              m_swapchain_images;
-            VkFormat                          m_swapchain_image_format;
-            std::vector<Deleter<VkImageView>> m_swapchain_image_views;
+            VkDevice                          device;
+            SwapchainSupportDetails           support_details;
+            VkExtent2D                        swapchain_extent;
+            VkSurfaceFormatKHR                surface_format;
+            Deleter<VkSwapchainKHR>           swapchain;
+            std::vector<VkImage>              swapchain_images;
+            VkFormat                          swapchain_image_format;
+            std::vector<Deleter<VkImageView>> swapchain_image_views;
 
             Deleter<VkSwapchainKHR>           initSwapchain(const Device& device, VkSurfaceKHR surface, VkSwapchainKHR old_swapchain);
             SwapchainSupportDetails           fetchSupportDetails(const PhysicalDevice& physical_device, VkSurfaceKHR surface) const;

@@ -28,9 +28,9 @@ namespace stirling {
     private:
         InputHandler();
 
-        std::unordered_map<int, Action> m_key_bindings;
-        std::unordered_map<Action, bool> m_action_states;
-        std::unordered_map<Action, std::vector<std::function<void()>>> m_commands;
+        std::unordered_map<int, Action> key_bindings;
+        std::unordered_map<Action, bool> action_states;
+        std::unordered_map<Action, std::vector<std::function<void()>>> commands;
 
     public:
         InputHandler(const InputHandler&) = delete;

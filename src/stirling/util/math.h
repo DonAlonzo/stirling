@@ -1,7 +1,6 @@
 #pragma once
 
 namespace stirling {
-
 	namespace util {
 
 		constexpr float clamp(float v, float min, float max) {

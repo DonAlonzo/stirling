@@ -14,15 +14,11 @@ namespace stirling { namespace vulkan {
 namespace stirling {
     namespace vulkan {
 
-        struct ShaderModule {
+        struct ShaderModule : Deleter<VkShaderModule> {
             ShaderModule(VkDevice device, const std::string& file_name);
 
-            operator const VkShaderModule&() const;
-
         private:
-            Deleter<VkShaderModule> m_shader_module;
-
-            Deleter<VkShaderModule> createShaderModule(VkDevice device, const std::vector<char>& code) const;
+            VkShaderModule createShaderModule(VkDevice device, const std::vector<char>& code) const;
         };
 
     }

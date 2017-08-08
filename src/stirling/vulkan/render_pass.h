@@ -9,15 +9,13 @@ namespace stirling { namespace vulkan {
 
 namespace stirling {
     namespace vulkan {
-        struct RenderPass {
+
+        struct RenderPass : Deleter<VkRenderPass> {
             RenderPass(const Device& device, const VkFormat& image_format, const VkFormat& depth_format);
 
-            operator VkRenderPass() const;
-
         private:
-            Deleter<VkRenderPass> m_render_pass;
-
-            Deleter<VkRenderPass> initRenderPass(const Device& device, const VkFormat& image_format, const VkFormat& depth_format) const;
+            VkRenderPass initRenderPass(const Device& device, const VkFormat& image_format, const VkFormat& depth_format) const;
         };
+
     }
 }

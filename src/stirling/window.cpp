@@ -3,8 +3,8 @@
 #include "vulkan/instance.h"
 #include "vulkan/physical_device.h"
 
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLFORCE_RADIANS
+#define GLFORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
@@ -52,33 +52,33 @@ namespace stirling {
 namespace stirling {
 
     Window::Window(int width, int height, MapBlueprint map_blueprint) :
-        m_window                    (initWindow(width, height)),
-        m_instance                  (getRequiredExtensions()),
-        m_surface                   (initSurface()),
-        m_physical_device           (choosePhysicalDevice(m_instance.getPhysicalDevices())),
-        m_device                    (m_physical_device.createDevice(m_surface, g_device_extensions)),
-        m_swapchain                 (m_device, m_surface, getSize()),
-        m_depth_image               (m_device, m_swapchain.getExtent()),
-        m_render_pass               (m_device, m_swapchain.getImageFormat(), m_depth_image.image_format),
-        m_framebuffers              (m_swapchain.createFramebuffers(m_render_pass, m_depth_image.image_view)),
-        m_image_available_semaphore (m_device.createSemaphore()),
-        m_render_finished_semaphore (m_device.createSemaphore()),
-        m_camera                    (glm::radians(60.0f), m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height, 0.01f, 100.0f),
-        m_map                       (map_blueprint.instantiate(m_device, m_render_pass, m_swapchain.getExtent())),
-        m_command_pool              (m_device.getGraphicsQueue().createCommandPool()),
-        m_command_buffers           (initCommandBuffers()) {
+        window                    {initWindow(width, height)},
+        instance                  {getRequiredExtensions()},
+        surface                   {initSurface()},
+        physical_device           {choosePhysicalDevice(instance.getPhysicalDevices())},
+        device                    {physical_device.createDevice(surface, g_device_extensions)},
+        swapchain                 {device, surface, getSize()},
+        depth_image               {device, swapchain.getExtent()},
+        render_pass               {device, swapchain.getImageFormat(), depth_image.image_format},
+        framebuffers              {swapchain.createFramebuffers(render_pass, depth_image.image_view)},
+        image_available_semaphore {device.createSemaphore()},
+        render_finished_semaphore {device.createSemaphore()},
+        camera                    {glm::radians(60.0f), swapchain.getExtent().width / (float)swapchain.getExtent().height, 0.01f, 100.0f},
+        map                       {map_blueprint.instantiate(device, render_pass, swapchain.getExtent())},
+        command_pool              {device.getGraphicsQueue().createCommandPool()},
+        command_buffers           {initCommandBuffers()} {
         
         // Add map entities to world
-        for (auto& entity : m_map.entities) {
-            m_world.addEntity(&entity);
+        for (auto& entity : map.entities) {
+            world.addEntity(&entity);
         }
 
         addControls();
 
         // Add camera
-        m_camera.moveTo(glm::vec3(2.f, -2.f, -2.f));
-        m_camera.lookAt(glm::vec3(0.f, 0.f, 0.f));
-        m_world.addEntity(&m_camera);
+        camera.moveTo(glm::vec3(2.f, -2.f, -2.f));
+        camera.lookAt(glm::vec3(0.f, 0.f, 0.f));
+        world.addEntity(&camera);
     }
 
     GLFWwindow* Window::initWindow(int width, int height) {
@@ -118,10 +118,10 @@ namespace stirling {
 
     vulkan::Deleter<VkSurfaceKHR> Window::initSurface() const {
         VkSurfaceKHR surface;
-        if (glfwCreateWindowSurface(m_instance, m_window, nullptr, &surface) != VK_SUCCESS) {
+        if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create window surface.");
         }
-        return vulkan::Deleter<VkSurfaceKHR>(surface, m_instance, vkDestroySurfaceKHR);
+        return vulkan::Deleter<VkSurfaceKHR>(surface, instance, vkDestroySurfaceKHR);
     }
 
     vulkan::PhysicalDevice Window::choosePhysicalDevice(const std::vector<vulkan::PhysicalDevice>& physical_devices) const {
@@ -134,7 +134,7 @@ namespace stirling {
     }
 
     bool Window::isPhysicalDeviceSuitable(const vulkan::PhysicalDevice& physical_device) const {
-        auto indices = physical_device.findQueueFamilies(m_surface);
+        auto indices = physical_device.findQueueFamilies(surface);
         if (!indices.isComplete()) return false;
 
         std::set<std::string> required_extensions(g_device_extensions.begin(), g_device_extensions.end());
@@ -143,13 +143,13 @@ namespace stirling {
         }
         if (!required_extensions.empty()) return false;
 
-        auto formats = physical_device.getSurfaceFormats(m_surface);
-        auto present_modes = physical_device.getSurfacePresentModes(m_surface);
+        auto formats = physical_device.getSurfaceFormats(surface);
+        auto present_modes = physical_device.getSurfacePresentModes(surface);
         return !formats.empty() && !present_modes.empty();
     }
 
     std::vector<VkCommandBuffer> Window::initCommandBuffers() const {
-        auto command_buffers = m_command_pool.allocateCommandBuffers(m_framebuffers.size());
+        auto command_buffers = command_pool.allocateCommandBuffers(framebuffers.size());
         for (int i = 0; i < command_buffers.size(); ++i) {
 			std::cout << "Creating command buffer (" << std::to_string(i + 1) << "/" << std::to_string(command_buffers.size()) << ")" << std::endl;
 
@@ -164,15 +164,15 @@ namespace stirling {
 
             VkRenderPassBeginInfo render_pass_info = {};
             render_pass_info.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            render_pass_info.renderPass        = m_render_pass;
-            render_pass_info.framebuffer       = m_framebuffers[i];
+            render_pass_info.renderPass        = render_pass;
+            render_pass_info.framebuffer       = framebuffers[i];
             render_pass_info.renderArea.offset = { 0, 0 };
-            render_pass_info.renderArea.extent = m_swapchain.getExtent();
+            render_pass_info.renderArea.extent = swapchain.getExtent();
             render_pass_info.clearValueCount   = clear_values.size();
             render_pass_info.pClearValues      = clear_values.data();
 
             vkCmdBeginRenderPass(command_buffers[i], &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
-            for (auto& render_instruction : m_map.render_instructions) {
+            for (auto& render_instruction : map.render_instructions) {
                 vkCmdBindPipeline(
                     command_buffers[i],
                     VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -215,89 +215,89 @@ namespace stirling {
     }
 
     Window::~Window() {
-        vkDeviceWaitIdle(m_device);
+        vkDeviceWaitIdle(device);
 
-        glfwDestroyWindow(m_window);
+        glfwDestroyWindow(window);
         glfwTerminate();
     }
 
     void Window::addControls() {
         InputHandler::getInstance().addCommand(Action::EXIT, [this]() {
-            glfwSetWindowShouldClose(m_window, GLFW_TRUE);
+            glfwSetWindowShouldClose(window, GLFW_TRUE);
         });
 
         InputHandler::getInstance().addCommand(Action::FULL_SCREEN, [this]() {
-            if (glfwGetWindowAttrib(m_window, GLFW_MAXIMIZED)) {
-                glfwRestoreWindow(m_window);
+            if (glfwGetWindowAttrib(window, GLFW_MAXIMIZED)) {
+                glfwRestoreWindow(window);
             } else {
-                glfwMaximizeWindow(m_window);
+                glfwMaximizeWindow(window);
             }
         });
     }
 
     void Window::recreateSwapchain() {
         throw std::runtime_error("Window::recreateSwapchain hasn't been implemented yet.");
-        vkDeviceWaitIdle(m_device);
+        vkDeviceWaitIdle(device);
 
-        m_swapchain    = vulkan::Swapchain{m_device, m_surface, getSize(), m_swapchain};
-        m_depth_image  = vulkan::DepthImage{m_device, m_swapchain.getExtent()};
-        m_render_pass  = vulkan::RenderPass{m_device, m_swapchain.getImageFormat(), m_depth_image.image_format};
-        m_framebuffers = m_swapchain.createFramebuffers(m_render_pass, m_depth_image.image_view);
+        swapchain    = vulkan::Swapchain{device, surface, getSize(), swapchain};
+        depth_image  = vulkan::DepthImage{device, swapchain.getExtent()};
+        render_pass  = vulkan::RenderPass{device, swapchain.getImageFormat(), depth_image.image_format};
+        framebuffers = swapchain.createFramebuffers(render_pass, depth_image.image_view);
 
 		/*
-		pipeline.recreate(m_render_pass, m_swapchain.getExtent());
+		pipeline.recreate(render_pass, swapchain.getExtent());
 
-        m_pipeline = vulkan::Pipeline(m_device, { m_descriptor_set_layout }, m_render_pass, m_swapchain.getExtent(), "shaders/vert.spv", "shaders/frag.spv");
+        pipeline = vulkan::Pipeline(device, { descriptor_set_layout }, render_pass, swapchain.getExtent(), "shaders/vert.spv", "shaders/frag.spv");
 		*/
 
-        vkFreeCommandBuffers(m_device, m_command_pool, m_command_buffers.size(), m_command_buffers.data());
-        m_command_buffers = initCommandBuffers();
+        vkFreeCommandBuffers(device, command_pool, command_buffers.size(), command_buffers.data());
+        command_buffers = initCommandBuffers();
 
-        m_camera.setAspectRatio(m_swapchain.getExtent().width / (float)m_swapchain.getExtent().height);
+        camera.setAspectRatio(swapchain.getExtent().width / (float)swapchain.getExtent().height);
     }
 
     VkExtent2D Window::getSize() const {
         int width, height;
-        glfwGetWindowSize(m_window, &width, &height);
+        glfwGetWindowSize(window, &width, &height);
         return VkExtent2D{(uint32_t)width, (uint32_t)height};
     }
 
     bool Window::isRunning() const {
         glfwPollEvents();
-        return !glfwWindowShouldClose(m_window);
+        return !glfwWindowShouldClose(window);
     }
 
     void Window::update() {
         // Game loop
         static auto last_time = std::chrono::high_resolution_clock::now();
         auto current_time = std::chrono::high_resolution_clock::now();
-        m_world.update(std::chrono::duration_cast<std::chrono::microseconds>(current_time - last_time).count() / 1E6f);
+        world.update(std::chrono::duration_cast<std::chrono::microseconds>(current_time - last_time).count() / 1E6f);
         last_time = current_time;
     }
 
     void Window::render() {
 		// Calculate FPS
-		glfwSetWindowTitle(m_window, ("Stirling Engine - FPS: " + std::to_string(calculateFPS())).c_str());
+		glfwSetWindowTitle(window, ("Stirling Engine - FPS: " + std::to_string(calculateFPS())).c_str());
 
         { // Update static uniform buffer
-            m_map.static_uniform_buffer_object.view       = m_camera.transform();
-            m_map.static_uniform_buffer_object.projection = m_camera.getProjectionMatrix();
-            m_map.static_uniform_buffer_mapping.memcpy(&m_map.static_uniform_buffer_object, m_map.static_uniform_buffer.memory.size);
+            map.static_uniform_buffer_object.view       = camera.transform();
+            map.static_uniform_buffer_object.projection = camera.getProjectionMatrix();
+            map.static_uniform_buffer_mapping.memcpy(&map.static_uniform_buffer_object, map.static_uniform_buffer.memory.size);
         }
 
         { // Update dynamic uniform buffer
-            m_map.dynamic_uniform_buffer_mapping.memcpy(m_map.dynamic_uniform_buffer_object.model, m_map.dynamic_uniform_buffer.memory.size);
+            map.dynamic_uniform_buffer_mapping.memcpy(map.dynamic_uniform_buffer_object.model, map.dynamic_uniform_buffer.memory.size);
 
             // Flush dynamic uniform buffer memory
             VkMappedMemoryRange mapped_memory_range = {};
             mapped_memory_range.sType  = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-            mapped_memory_range.memory = m_map.dynamic_uniform_buffer.memory;
-            mapped_memory_range.size   = m_map.dynamic_uniform_buffer.memory.size;
-            vkFlushMappedMemoryRanges(m_device, 1, &mapped_memory_range);
+            mapped_memory_range.memory = map.dynamic_uniform_buffer.memory;
+            mapped_memory_range.size   = map.dynamic_uniform_buffer.memory.size;
+            vkFlushMappedMemoryRanges(device, 1, &mapped_memory_range);
         }
 
         uint32_t image_index;
-        switch (vkAcquireNextImageKHR(m_device, m_swapchain, std::numeric_limits<uint64_t>::max(), m_image_available_semaphore, VK_NULL_HANDLE, &image_index)) {
+        switch (vkAcquireNextImageKHR(device, swapchain, std::numeric_limits<uint64_t>::max(), image_available_semaphore, VK_NULL_HANDLE, &image_index)) {
         case VK_SUBOPTIMAL_KHR:
         case VK_SUCCESS:
             break;
@@ -309,7 +309,7 @@ namespace stirling {
         }
 
         VkSemaphore wait_semaphores[] = {
-            m_image_available_semaphore
+            image_available_semaphore
         };
 
         VkPipelineStageFlags wait_stages[] = {
@@ -317,7 +317,7 @@ namespace stirling {
         };
 
         VkSemaphore signal_semaphores[] = {
-            m_render_finished_semaphore
+            render_finished_semaphore
         };
 
         VkSubmitInfo submit_info = {};
@@ -326,16 +326,16 @@ namespace stirling {
         submit_info.pWaitSemaphores      = wait_semaphores;
         submit_info.pWaitDstStageMask    = wait_stages;
         submit_info.commandBufferCount   = 1;
-        submit_info.pCommandBuffers      = &m_command_buffers[image_index];
+        submit_info.pCommandBuffers      = &command_buffers[image_index];
         submit_info.signalSemaphoreCount = 1;
         submit_info.pSignalSemaphores    = signal_semaphores;
 
-        if (vkQueueSubmit(m_device.getGraphicsQueue(), 1, &submit_info, VK_NULL_HANDLE) != VK_SUCCESS) {
+        if (vkQueueSubmit(device.getGraphicsQueue(), 1, &submit_info, VK_NULL_HANDLE) != VK_SUCCESS) {
             throw std::runtime_error("Failed to submit draw command buffer.");
         }
 
         VkSwapchainKHR swap_chains[] = {
-            m_swapchain
+            swapchain
         };
 
         VkPresentInfoKHR present_info = {};
@@ -347,7 +347,7 @@ namespace stirling {
         present_info.pImageIndices      = &image_index;
         present_info.pResults           = nullptr;
 
-        switch (vkQueuePresentKHR(m_device.getPresentQueue(), &present_info)) {
+        switch (vkQueuePresentKHR(device.getPresentQueue(), &present_info)) {
         case VK_SUCCESS:
             break;
         case VK_ERROR_OUT_OF_DATE_KHR:
@@ -392,8 +392,8 @@ namespace stirling {
     void Window::onMouseMovementInput(double x, double y) {
         double delta_x = last_x - x;
         double delta_y = last_y - y;
-        m_camera.rotate(delta_y * 0.001f, m_camera.transform().right());
-        m_camera.rotate(-delta_x * 0.001f, glm::vec3(0.0f, 0.0f, 1.0f));
+        camera.rotate(delta_y * 0.001f, camera.transform().right());
+        camera.rotate(-delta_x * 0.001f, glm::vec3(0.0f, 0.0f, 1.0f));
         last_x = x;
         last_y = y;
     }

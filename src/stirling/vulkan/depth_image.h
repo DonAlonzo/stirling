@@ -19,7 +19,6 @@ namespace stirling {
             DepthImage(const Device& device, const VkExtent2D& extent);
 
         private:
-
             VkFormat             findImageFormat(const Device& device);
             Image                createImage(const Device& device, const VkExtent2D& extent);
             Deleter<VkImageView> createImageView(const Device& device);

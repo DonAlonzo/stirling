@@ -25,13 +25,13 @@ namespace stirling {
         void update(float delta_seconds) override;
 
     private:
-		glm::vec3 m_position;
-		glm::quat m_rotation;
-        glm::mat4 m_projection_matrix;
-        float     m_aspect_ratio;
-        float     m_field_of_view;
-        float     m_near_plane;
-        float     m_far_plane;
+		glm::vec3 position;
+		glm::quat rotation;
+        glm::mat4 projection_matrix;
+        float     aspect_ratio;
+        float     field_of_view;
+        float     near_plane;
+        float     far_plane;
 
         void updateProjectionMatrix();
     };

@@ -16,8 +16,8 @@ namespace stirling {
     private:
         static const size_t MAX_NUMBER_OF_ENTITIES = 65536;
 
-        Entity* m_entities[MAX_NUMBER_OF_ENTITIES];
-		size_t  m_number_of_entities;
+        Entity* entities[MAX_NUMBER_OF_ENTITIES];
+		size_t  number_of_entities;
     };
 
 }

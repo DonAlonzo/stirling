@@ -183,6 +183,7 @@
     <ClCompile Include="src\stirling\world.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\stirling\util\math.h" />
     <ClInclude Include="src\stirling\util\memory.h" />
     <ClInclude Include="src\stirling\component.h" />
     <ClInclude Include="src\stirling\entity.h" />

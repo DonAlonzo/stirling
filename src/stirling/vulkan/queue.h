@@ -16,14 +16,14 @@ namespace stirling {
         struct Queue {
             Queue(const Device& device, int family_index);
 
-            operator const VkQueue&() const;
+            operator VkQueue() const;
 
             CommandPool createCommandPool() const;
 
         private:
-            const Device& m_device;
-            int           m_family_index;
-            VkQueue       m_queue;
+            const Device& device;
+            int           family_index;
+            VkQueue       queue;
 
             VkQueue       initQueue() const;
         };

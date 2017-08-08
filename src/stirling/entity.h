@@ -21,9 +21,9 @@ namespace stirling {
     protected:
         static constexpr int MAX_NUMBER_OF_COMPONENTS = 8;
 
-        vulkan::Transform m_transform;
-        Component*        m_components[MAX_NUMBER_OF_COMPONENTS];
-        int               m_number_of_components = 0;
+        vulkan::Transform transform;
+        Component*        components[MAX_NUMBER_OF_COMPONENTS];
+        int               number_of_components = 0;
     };
 
 }

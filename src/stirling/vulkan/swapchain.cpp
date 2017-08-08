@@ -11,14 +11,14 @@ namespace stirling {
     namespace vulkan {
 
         Swapchain::Swapchain(const vulkan::Device& device, VkSurfaceKHR surface, VkExtent2D actual_extent, VkSwapchainKHR old_swapchain) :
-            m_device                 (device),
-            m_support_details        (fetchSupportDetails(device.getPhysicalDevice(), surface)),
-            m_swapchain_extent       (chooseSwapExtent(m_support_details.capabilities, actual_extent)),
-            m_surface_format         (chooseSwapSurfaceFormat(device.getPhysicalDevice().getSurfaceFormats(surface))),
-            m_swapchain              (initSwapchain(device, surface, old_swapchain)),
-            m_swapchain_images       (device.getSwapchainImages(m_swapchain, getImageCount())),
-            m_swapchain_image_format (m_surface_format.format),
-            m_swapchain_image_views  (initImageViews(getImageCount())) {
+            device                 (device),
+            support_details        (fetchSupportDetails(device.getPhysicalDevice(), surface)),
+            swapchain_extent       (chooseSwapExtent(support_details.capabilities, actual_extent)),
+            surface_format         (chooseSwapSurfaceFormat(device.getPhysicalDevice().getSurfaceFormats(surface))),
+            swapchain              (initSwapchain(device, surface, old_swapchain)),
+            swapchain_images       (device.getSwapchainImages(swapchain, getImageCount())),
+            swapchain_image_format (surface_format.format),
+            swapchain_image_views  (initImageViews(getImageCount())) {
         }
 
         Deleter<VkSwapchainKHR> Swapchain::initSwapchain(const Device& device, VkSurfaceKHR surface, VkSwapchainKHR old_swapchain) {
@@ -26,9 +26,9 @@ namespace stirling {
             create_info.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
             create_info.surface          = surface;
             create_info.minImageCount    = getImageCount();
-            create_info.imageFormat      = m_surface_format.format;
-            create_info.imageColorSpace  = m_surface_format.colorSpace;
-            create_info.imageExtent      = m_swapchain_extent;
+            create_info.imageFormat      = surface_format.format;
+            create_info.imageColorSpace  = surface_format.colorSpace;
+            create_info.imageExtent      = swapchain_extent;
             create_info.imageArrayLayers = 1;
             create_info.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
@@ -45,17 +45,17 @@ namespace stirling {
                 create_info.imageSharingMode      = VK_SHARING_MODE_EXCLUSIVE;
             }
 
-            create_info.preTransform   = m_support_details.capabilities.currentTransform;
+            create_info.preTransform   = support_details.capabilities.currentTransform;
             create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
             create_info.presentMode    = chooseSwapPresentMode(device.getPhysicalDevice().getSurfacePresentModes(surface));
             create_info.clipped        = VK_TRUE;
             create_info.oldSwapchain   = old_swapchain;
 
             VkSwapchainKHR swapchain;
-            if (vkCreateSwapchainKHR(m_device, &create_info, nullptr, &swapchain) != VK_SUCCESS) {
+            if (vkCreateSwapchainKHR(device, &create_info, nullptr, &swapchain) != VK_SUCCESS) {
                 throw std::runtime_error("Failed to create swap chain.");
             }
-            return Deleter<VkSwapchainKHR>(swapchain, m_device, vkDestroySwapchainKHR);
+            return Deleter<VkSwapchainKHR>(swapchain, device, vkDestroySwapchainKHR);
         }
 
         SwapchainSupportDetails Swapchain::fetchSupportDetails(const PhysicalDevice& physical_device, VkSurfaceKHR surface) const {
@@ -110,14 +110,14 @@ namespace stirling {
 
         std::vector<Deleter<VkImageView>> Swapchain::initImageViews(uint32_t image_count) const {
             std::vector<Deleter<VkImageView>> image_views;
-            image_views.reserve(m_swapchain_images.size());
+            image_views.reserve(swapchain_images.size());
 
-            for (uint32_t i = 0; i < m_swapchain_images.size(); ++i) {
+            for (uint32_t i = 0; i < swapchain_images.size(); ++i) {
                 VkImageViewCreateInfo create_info = {};
                 create_info.sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-                create_info.image                           = m_swapchain_images[i];
+                create_info.image                           = swapchain_images[i];
                 create_info.viewType                        = VK_IMAGE_VIEW_TYPE_2D;
-                create_info.format                          = m_swapchain_image_format;
+                create_info.format                          = swapchain_image_format;
                 create_info.components.r                    = VK_COMPONENT_SWIZZLE_IDENTITY;
                 create_info.components.g                    = VK_COMPONENT_SWIZZLE_IDENTITY;
                 create_info.components.b                    = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -129,10 +129,10 @@ namespace stirling {
                 create_info.subresourceRange.layerCount     = 1;
 
                 VkImageView image_view;
-                if (vkCreateImageView(m_device, &create_info, nullptr, &image_view) != VK_SUCCESS) {
+                if (vkCreateImageView(device, &create_info, nullptr, &image_view) != VK_SUCCESS) {
                     throw std::runtime_error("Failed to create image views.");
                 }
-                image_views.push_back(Deleter<VkImageView>(image_view, m_device, vkDestroyImageView));
+                image_views.push_back(Deleter<VkImageView>(image_view, device, vkDestroyImageView));
             }
 
             return image_views;
@@ -140,11 +140,11 @@ namespace stirling {
 
         std::vector<VkFramebuffer> Swapchain::createFramebuffers(const RenderPass& render_pass, VkImageView depth_image_view) const {
             std::vector<VkFramebuffer> framebuffers;
-            framebuffers.reserve(m_swapchain_image_views.size());
+            framebuffers.reserve(swapchain_image_views.size());
 
-            for (size_t i = 0; i < m_swapchain_image_views.size(); ++i) {
+            for (size_t i = 0; i < swapchain_image_views.size(); ++i) {
                 std::array<VkImageView, 2> attachments = {
-                    m_swapchain_image_views[i],
+                    swapchain_image_views[i],
                     depth_image_view
                 };
 
@@ -153,12 +153,12 @@ namespace stirling {
                 create_info.renderPass      = render_pass;
                 create_info.attachmentCount = attachments.size();
                 create_info.pAttachments    = attachments.data();
-                create_info.width           = m_swapchain_extent.width;
-                create_info.height          = m_swapchain_extent.height;
+                create_info.width           = swapchain_extent.width;
+                create_info.height          = swapchain_extent.height;
                 create_info.layers          = 1;
 
                 VkFramebuffer framebuffer;
-                if (vkCreateFramebuffer(m_device, &create_info, nullptr, &framebuffer) != VK_SUCCESS) {
+                if (vkCreateFramebuffer(device, &create_info, nullptr, &framebuffer) != VK_SUCCESS) {
                     throw std::runtime_error("Failed to create framebuffer.");
                 }
                 framebuffers.push_back(framebuffer);
@@ -167,21 +167,21 @@ namespace stirling {
         }
 
         Swapchain::operator VkSwapchainKHR() const {
-            return m_swapchain;
+            return swapchain;
         }
 
         const VkExtent2D& Swapchain::getExtent() const {
-            return m_swapchain_extent;
+            return swapchain_extent;
         }
 
         const VkFormat& Swapchain::getImageFormat() const {
-            return m_swapchain_image_format;
+            return swapchain_image_format;
         }
 
         uint32_t Swapchain::getImageCount() const {
-            uint32_t image_count = m_support_details.capabilities.minImageCount + 1;
-            if (m_support_details.capabilities.maxImageCount > 0 && image_count > m_support_details.capabilities.maxImageCount) {
-                image_count = m_support_details.capabilities.maxImageCount;
+            uint32_t image_count = support_details.capabilities.minImageCount + 1;
+            if (support_details.capabilities.maxImageCount > 0 && image_count > support_details.capabilities.maxImageCount) {
+                image_count = support_details.capabilities.maxImageCount;
             }
             return image_count;
         }

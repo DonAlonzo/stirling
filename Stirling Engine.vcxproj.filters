@@ -212,6 +212,9 @@
     <ClInclude Include="src\stirling\vulkan\memory.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="src\stirling\util\math.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

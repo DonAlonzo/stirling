@@ -32,40 +32,33 @@ namespace stirling {
         void update();
 
     private:
-        GLFWwindow*                   m_window;
-        vulkan::Instance              m_instance;
-        vulkan::Deleter<VkSurfaceKHR> m_surface;
-        vulkan::PhysicalDevice        m_physical_device;
-        vulkan::Device                m_device;
-        vulkan::Swapchain             m_swapchain;
-        vulkan::DepthImage            m_depth_image;
-        vulkan::RenderPass            m_render_pass;
-        std::vector<VkFramebuffer>    m_framebuffers;
-        vulkan::Deleter<VkSemaphore>  m_image_available_semaphore;
-        vulkan::Deleter<VkSemaphore>  m_render_finished_semaphore;
-
-        Camera                        m_camera;
-        World                         m_world;
-        Map                           m_map;
-        
-        vulkan::CommandPool           m_command_pool;
-        std::vector<VkCommandBuffer>  m_command_buffers;
-
-        // Initializer methods
+        GLFWwindow*                   window;
+        vulkan::Instance              instance;
+        vulkan::Deleter<VkSurfaceKHR> surface;
+        vulkan::PhysicalDevice        physical_device;
+        vulkan::Device                device;
+        vulkan::Swapchain             swapchain;
+        vulkan::DepthImage            depth_image;
+        vulkan::RenderPass            render_pass;
+        std::vector<VkFramebuffer>    framebuffers;
+        vulkan::Deleter<VkSemaphore>  image_available_semaphore;
+        vulkan::Deleter<VkSemaphore>  render_finished_semaphore;
+        Camera                        camera;
+        World                         world;
+        Map                           map;
+        vulkan::CommandPool           command_pool;
+        std::vector<VkCommandBuffer>  command_buffers;
 
         GLFWwindow*                   initWindow(int width, int height);
         vulkan::Deleter<VkSurfaceKHR> initSurface() const;
         vulkan::PhysicalDevice        choosePhysicalDevice(const std::vector<vulkan::PhysicalDevice>& physical_devices) const;
         bool                          isPhysicalDeviceSuitable(const vulkan::PhysicalDevice& physical_device) const;
         std::vector<VkCommandBuffer>  initCommandBuffers() const;
-
         void                          addControls();
         void                          recreateSwapchain();
         std::vector<const char*>      getRequiredExtensions() const;
         VkExtent2D                    getSize() const;
-
 		size_t                        calculateFPS() const;
-
         void                          onResized(int width, int height);
         void                          onKeyInput(int key, int scancode, int action, int mods);
         void                          onMouseMovementInput(double x, double y);

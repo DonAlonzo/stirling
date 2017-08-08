@@ -6,23 +6,23 @@ namespace stirling {
 	namespace vulkan {
 
 		Queue::Queue(const Device& device, int family_index) :
-			m_device       (device),
-			m_family_index (family_index),
-			m_queue        (initQueue()) {
+			device       (device),
+			family_index (family_index),
+			queue        (initQueue()) {
 		}
 
 		VkQueue Queue::initQueue() const {
 			VkQueue queue;
-			vkGetDeviceQueue(m_device, m_family_index, 0, &queue);
+			vkGetDeviceQueue(device, family_index, 0, &queue);
 			return queue;
 		}
 
-		Queue::operator const VkQueue&() const {
-			return m_queue;
+		Queue::operator VkQueue() const {
+			return queue;
 		}
 
 		CommandPool Queue::createCommandPool() const {
-			return CommandPool(m_device, m_family_index);
+			return CommandPool(device, family_index);
 		}
 
 	}

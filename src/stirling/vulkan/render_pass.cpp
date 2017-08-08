@@ -7,10 +7,10 @@ namespace stirling {
     namespace vulkan {
 
         RenderPass::RenderPass(const Device& device, const VkFormat& image_format, const VkFormat& depth_format) :
-            m_render_pass (initRenderPass(device, image_format, depth_format)) {
+            Deleter<VkRenderPass>(initRenderPass(device, image_format, depth_format), device, vkDestroyRenderPass) {
         }
 
-        Deleter<VkRenderPass> RenderPass::initRenderPass(const Device& device, const VkFormat& image_format, const VkFormat& depth_format) const {
+        VkRenderPass RenderPass::initRenderPass(const Device& device, const VkFormat& image_format, const VkFormat& depth_format) const {
             VkAttachmentDescription color_attachment = {};
             color_attachment.format         = image_format;
             color_attachment.samples        = VK_SAMPLE_COUNT_1_BIT;
@@ -71,13 +71,8 @@ namespace stirling {
             if (vkCreateRenderPass(device, &create_info, nullptr, &render_pass) != VK_SUCCESS) {
                 throw std::runtime_error("Failed to create render pass.");
             }
-            return Deleter<VkRenderPass>(render_pass, device, vkDestroyRenderPass);
+            return render_pass;
         }
-
-
-        RenderPass::operator VkRenderPass() const {
-            return m_render_pass;
-        }
-
+        
     }
 }
