@@ -13,10 +13,6 @@ namespace stirling {
         transform (std::move(transform)) {
     }
 
-    vulkan::Transform& Entity::transform() {
-        return transform;
-    }
-
     void Entity::addComponent(Component* component) {
         assert(number_of_components < MAX_NUMBER_OF_COMPONENTS);
         components[number_of_components++] = component;

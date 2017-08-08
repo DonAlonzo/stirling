@@ -222,11 +222,11 @@ namespace stirling {
     }
 
     void Window::addControls() {
-        InputHandler::getInstance().addCommand(Action::EXIT, [this]() {
+        InputHandler::instance.addCommand(Action::EXIT, [this]() {
             glfwSetWindowShouldClose(window, GLFW_TRUE);
         });
 
-        InputHandler::getInstance().addCommand(Action::FULL_SCREEN, [this]() {
+        InputHandler::instance.addCommand(Action::FULL_SCREEN, [this]() {
             if (glfwGetWindowAttrib(window, GLFW_MAXIMIZED)) {
                 glfwRestoreWindow(window);
             } else {
@@ -280,7 +280,7 @@ namespace stirling {
 		glfwSetWindowTitle(window, ("Stirling Engine - FPS: " + std::to_string(calculateFPS())).c_str());
 
         { // Update static uniform buffer
-            map.static_uniform_buffer_object.view       = camera.transform();
+            map.static_uniform_buffer_object.view       = camera.transform;
             map.static_uniform_buffer_object.projection = camera.getProjectionMatrix();
             map.static_uniform_buffer_mapping.memcpy(&map.static_uniform_buffer_object, map.static_uniform_buffer.memory.size);
         }
@@ -385,15 +385,15 @@ namespace stirling {
     }
 
     void Window::onKeyInput(int key, int scancode, int action, int mods) {
-        InputHandler::getInstance().onKeyInput(key, scancode, action, mods);
+        InputHandler::instance.onKeyInput(key, scancode, action, mods);
     }
 
     double last_x, last_y;
     void Window::onMouseMovementInput(double x, double y) {
-        double delta_x = last_x - x;
-        double delta_y = last_y - y;
-        camera.rotate(delta_y * 0.001f, camera.transform().right());
-        camera.rotate(-delta_x * 0.001f, glm::vec3(0.0f, 0.0f, 1.0f));
+        float delta_x = last_x - x;
+        float delta_y = last_y - y;
+        camera.rotation *= glm::angleAxis(delta_y * 0.001f, camera.transform.right());
+        camera.rotation *= glm::angleAxis(-delta_x * 0.001f, glm::vec3(0.0f, 0.0f, 1.0f));
         last_x = x;
         last_y = y;
     }

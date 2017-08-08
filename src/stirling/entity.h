@@ -9,10 +9,10 @@ namespace stirling { struct Component; }
 namespace stirling {
 
     struct Entity {
+        vulkan::Transform transform;
+
         Entity();
         Entity(vulkan::Transform&& transform);
-
-        vulkan::Transform& transform();
 
         void addComponent(Component* component);
 
@@ -21,7 +21,6 @@ namespace stirling {
     protected:
         static constexpr int MAX_NUMBER_OF_COMPONENTS = 8;
 
-        vulkan::Transform transform;
         Component*        components[MAX_NUMBER_OF_COMPONENTS];
         int               number_of_components = 0;
     };

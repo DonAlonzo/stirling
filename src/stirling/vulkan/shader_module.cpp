@@ -14,7 +14,7 @@ namespace stirling {
             VkShaderModuleCreateInfo create_info = {};
             create_info.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
             create_info.codeSize = code.size();
-            create_info.pCode    = (uint32_t*) code.data();
+            create_info.pCode    = (uint32_t*)code.data();
 
             VkShaderModule shader_module;
             if (vkCreateShaderModule(device, &create_info, nullptr, &shader_module) != VK_SUCCESS) {

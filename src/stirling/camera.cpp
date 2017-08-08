@@ -47,12 +47,8 @@ namespace stirling {
         return projection_matrix;
     }
 
-	void Camera::rotate(float angle, const glm::vec3& axis) {
-		rotation *= glm::angleAxis(angle, axis);
-	}
-
 	void Camera::moveTo(const glm::vec3& position) {
-		position = position;
+		this->position = position;
 	}
 
 	void Camera::lookAt(const glm::vec3& target, const glm::vec3& up) {
@@ -63,12 +59,12 @@ namespace stirling {
         float meters_per_second = 1.5f;
 
         glm::vec3 direction;
-        if (InputHandler::getInstance()[Action::MOVE_FORWARD])  direction += transform.forward();
-        if (InputHandler::getInstance()[Action::MOVE_BACKWARD]) direction += transform.backward();
-        if (InputHandler::getInstance()[Action::STRAFE_LEFT])   direction += transform.left();
-        if (InputHandler::getInstance()[Action::STRAFE_RIGHT])  direction += transform.right();
-        if (InputHandler::getInstance()[Action::JUMP])          direction += glm::vec3(0.0f, 0.0f, -1.0f);
-        if (InputHandler::getInstance()[Action::CROUCH])        direction += glm::vec3(0.0f, 0.0f, 1.0f);
+        if (InputHandler::instance[Action::MOVE_FORWARD])  direction += transform.forward();
+        if (InputHandler::instance[Action::MOVE_BACKWARD]) direction += transform.backward();
+        if (InputHandler::instance[Action::STRAFE_LEFT])   direction += transform.left();
+        if (InputHandler::instance[Action::STRAFE_RIGHT])  direction += transform.right();
+        if (InputHandler::instance[Action::JUMP])          direction += glm::vec3(0.0f, 0.0f, -1.0f);
+        if (InputHandler::instance[Action::CROUCH])        direction += glm::vec3(0.0f, 0.0f, 1.0f);
         
         if (glm::length(direction) > 0.0f) {
 			position += glm::normalize(direction) * meters_per_second * delta_seconds;

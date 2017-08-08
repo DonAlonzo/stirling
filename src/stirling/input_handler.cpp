@@ -14,6 +14,8 @@ namespace stirling {
         return instance;
     }
 
+    InputHandler& const InputHandler::instance = getInstance();
+
     InputHandler::InputHandler() {
         key_bindings[GLFW_KEY_W]            = Action::MOVE_FORWARD;
         key_bindings[GLFW_KEY_S]            = Action::MOVE_BACKWARD;

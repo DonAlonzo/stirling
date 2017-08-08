@@ -10,15 +10,15 @@ namespace stirling {
     namespace vulkan {
 
         Transform::Transform() :
-			m_transform (new glm::mat4()) {
+			m_transform {new glm::mat4()} {
 		}
 
         Transform::Transform(glm::mat4* transform) :
-			m_transform (transform) {
+			m_transform {transform} {
 		}
 
 		Transform::Transform(const glm::mat4& transform) :
-			m_transform (new glm::mat4(transform)) {
+			m_transform {new glm::mat4(transform)} {
 		}
 
         Transform::operator const glm::mat4&() {
@@ -60,7 +60,7 @@ namespace stirling {
         }
 
         glm::vec3 Transform::left() const {
-            return glm::vec3((*m_transform)[0][0], (*m_transform)[1][0], (*m_transform)[2][0]) ;
+            return {(*m_transform)[0][0], (*m_transform)[1][0], (*m_transform)[2][0]};
         }
 
         glm::vec3 Transform::right() const {
@@ -68,7 +68,7 @@ namespace stirling {
         }
 
         glm::vec3 Transform::down() const {
-            return glm::vec3((*m_transform)[0][1], (*m_transform)[1][1], (*m_transform)[2][1]) ;
+            return {(*m_transform)[0][1], (*m_transform)[1][1], (*m_transform)[2][1]};
         }
 
         glm::vec3 Transform::up() const {
@@ -76,7 +76,7 @@ namespace stirling {
         }
 
         glm::vec3 Transform::forward() const {
-            return glm::vec3((*m_transform)[0][2], (*m_transform)[1][2], (*m_transform)[2][2]);
+            return {(*m_transform)[0][2], (*m_transform)[1][2], (*m_transform)[2][2]};
         }
 
         glm::vec3 Transform::backward() const {

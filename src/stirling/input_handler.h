@@ -19,14 +19,16 @@ namespace stirling {
     };
 
     struct InputHandler {
-        static InputHandler& getInstance();
+        static InputHandler& instance;
 
         void addCommand(Action action, std::function<void()> command);
         void onKeyInput(int key, int scancode, int action, int mods);
         bool operator[](Action action) const;
-
+        
     private:
         InputHandler();
+        
+        static InputHandler& getInstance();
 
         std::unordered_map<int, Action> key_bindings;
         std::unordered_map<Action, bool> action_states;
