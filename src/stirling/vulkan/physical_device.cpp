@@ -63,7 +63,7 @@ namespace stirling {
                     indices.present_family_index = i;
                 }
 
-                if (indices.isComplete()) break;
+                if (indices) break;
             }
             return indices;
         }
@@ -130,7 +130,7 @@ namespace stirling {
             return present_modes;
         }
 
-        bool QueueFamilyIndices::isComplete() const {
+        QueueFamilyIndices::operator bool() const {
             return graphics_family_index >= 0 && present_family_index >= 0;
         }
 

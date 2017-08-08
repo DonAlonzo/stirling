@@ -135,7 +135,7 @@ namespace stirling {
 
     bool Window::isPhysicalDeviceSuitable(const vulkan::PhysicalDevice& physical_device) const {
         auto indices = physical_device.findQueueFamilies(surface);
-        if (!indices.isComplete()) return false;
+        if (!indices) return false;
 
         std::set<std::string> required_extensions(g_device_extensions.begin(), g_device_extensions.end());
         for (const auto& available_extension : physical_device.extensions) {

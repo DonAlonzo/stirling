@@ -21,7 +21,7 @@ namespace stirling {
             int graphics_family_index;
             int present_family_index;
 
-            bool isComplete() const;
+            operator bool() const;
         };
 
         struct PhysicalDevice {
