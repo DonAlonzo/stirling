@@ -10,8 +10,8 @@
 
 namespace stirling {
     namespace vulkan {
-        class DepthImage {
-        public:
+
+        struct DepthImage {
             VkFormat             image_format;
             Image                image;
             Deleter<VkImageView> image_view;
@@ -24,5 +24,6 @@ namespace stirling {
             Image                createImage(const Device& device, const VkExtent2D& extent);
             Deleter<VkImageView> createImageView(const Device& device);
         };
+
     }
 }

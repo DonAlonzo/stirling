@@ -9,6 +9,7 @@
 
 namespace stirling {
     namespace vulkan {
+
         struct Vertex {
             glm::vec3 position;
             glm::vec3 color;
@@ -19,10 +20,12 @@ namespace stirling {
             static VkVertexInputBindingDescription getBindingDescription();
             static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions();
         };
+
     }
 }
 
 namespace std {
+
     template<> struct hash<stirling::vulkan::Vertex> {
         size_t operator()(stirling::vulkan::Vertex const& vertex) const {
             return ((hash<glm::vec3>()(vertex.position) ^
@@ -30,4 +33,5 @@ namespace std {
                     (hash<glm::vec2>()(vertex.texture_coordinate) << 1);
         }
     };
+
 }

@@ -6,7 +6,7 @@
 // Stirling
 #include "validator.h"
 namespace stirling { namespace vulkan {
-    class PhysicalDevice;
+    struct PhysicalDevice;
 }}
 #include "deleter.h"
 
@@ -15,23 +15,21 @@ namespace stirling { namespace vulkan {
 
 namespace stirling {
     namespace vulkan {
-        class Instance {
-        public:
-            Instance(const std::vector<const char*>& extensions);
 
-            operator VkInstance() const;
+        struct Instance : Deleter<VkInstance> {
+            Instance(const std::vector<const char*>& extensions);
 
             std::vector<VkLayerProperties> getLayerProperties() const;
             std::vector<PhysicalDevice> getPhysicalDevices() const;
 
         private:
-            Deleter<VkInstance> m_instance;
-            Validator           m_validator;
+            Validator m_validator;
 
-            Deleter<VkInstance> initInstance(std::vector<const char*> extensions) const;
-            Validator           initValidator() const;
+            VkInstance init(std::vector<const char*> extensions) const;
+            Validator  initValidator() const;
 
             bool checkValidationLayerSupport() const;
         };
+
     }
 }

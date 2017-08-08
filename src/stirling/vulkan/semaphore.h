@@ -3,14 +3,15 @@
 #include "vulkan/vulkan.h"
 
 namespace stirling { namespace vulkan {
-    class Device;
+    struct Device;
 }}
 #include "deleter.h"
 
 namespace stirling {
     namespace vulkan {
-        class Semaphore {
-            friend class Device;
+
+        struct Semaphore {
+            friend struct Device;
 
         public:
             operator VkSemaphore() const;
@@ -22,5 +23,6 @@ namespace stirling {
 
             Deleter<VkSemaphore> initSemaphore(const Device& device) const;
         };
+
     }
 }

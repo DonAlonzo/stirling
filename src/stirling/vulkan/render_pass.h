@@ -3,14 +3,13 @@
 #include "vulkan/vulkan.h"
 
 namespace stirling { namespace vulkan {
-    class Device;
+    struct Device;
 }}
 #include "deleter.h"
 
 namespace stirling {
     namespace vulkan {
-        class RenderPass {
-        public:
+        struct RenderPass {
             RenderPass(const Device& device, const VkFormat& image_format, const VkFormat& depth_format);
 
             operator VkRenderPass() const;

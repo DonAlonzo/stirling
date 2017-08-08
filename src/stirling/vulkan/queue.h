@@ -5,16 +5,15 @@
 
 namespace stirling {
     namespace vulkan {
-        class CommandPool;
-        class Device;
+        struct CommandPool;
+        struct Device;
     }
 }
 
 namespace stirling {
     namespace vulkan {
 
-        class Queue {
-        public:
+        struct Queue {
             Queue(const Device& device, int family_index);
 
             operator const VkQueue&() const;

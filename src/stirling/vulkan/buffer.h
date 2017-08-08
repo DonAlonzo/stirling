@@ -3,7 +3,7 @@
 #include "vulkan/vulkan.h"
 
 namespace stirling { namespace vulkan {
-    class Device;
+    struct Device;
 }}
 #include "deleter.h"
 #include "memory.h"

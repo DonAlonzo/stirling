@@ -8,6 +8,7 @@
 
 namespace stirling {
     namespace vulkan {
+
         struct DescriptorPool : Deleter<VkDescriptorPool> {
             DescriptorPool(VkDevice device, const std::vector<VkDescriptorPoolSize>& pool_sizes, uint32_t max_sets);
 
@@ -18,5 +19,6 @@ namespace stirling {
 
             VkDescriptorPool init(VkDevice device, const std::vector<VkDescriptorPoolSize>& pool_sizes, uint32_t max_sets) const;
         };
+
     }
 }

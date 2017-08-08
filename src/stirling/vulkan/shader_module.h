@@ -3,7 +3,7 @@
 #include "vulkan/vulkan.h"
 
 namespace stirling { namespace vulkan {
-    class Device;
+    struct Device;
 }}
 #include "deleter.h"
 #include "../util/io.h"
@@ -13,8 +13,8 @@ namespace stirling { namespace vulkan {
 
 namespace stirling {
     namespace vulkan {
-        class ShaderModule {
-        public:
+
+        struct ShaderModule {
             ShaderModule(VkDevice device, const std::string& file_name);
 
             operator const VkShaderModule&() const;
@@ -24,5 +24,6 @@ namespace stirling {
 
             Deleter<VkShaderModule> createShaderModule(VkDevice device, const std::vector<char>& code) const;
         };
+
     }
 }

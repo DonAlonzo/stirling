@@ -1,6 +1,6 @@
 #pragma once
 
-namespace stirling { namespace vulkan { class Device; } }
+namespace stirling { namespace vulkan { struct Device; } }
 #include "vulkan/buffer.h"
 #include "vulkan/descriptor_pool.h"
 #include "vulkan/pipeline.h"
@@ -80,8 +80,7 @@ namespace stirling {
 		Map(vulkan::Buffer&& static_uniform_buffer, vulkan::Buffer&& dynamic_uniform_buffer);
     };
 
-    class MapBlueprint {
-    public:
+    struct MapBlueprint {
         Map instantiate(const vulkan::Device& device, VkRenderPass render_pass, VkExtent2D extent) const;
 
         Material* createMaterial();

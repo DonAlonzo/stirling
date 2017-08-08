@@ -9,8 +9,7 @@
 namespace stirling {
     namespace vulkan {
 
-        class Validator {
-        public:
+        struct Validator {
             Validator(const VkInstance& instance);
 
             static Validator nullValidator();

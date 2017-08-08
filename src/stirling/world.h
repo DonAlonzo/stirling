@@ -6,12 +6,11 @@
 #include <vector>
 
 namespace stirling {
-    class World {
-    public:
+
+    struct World {
         World();
 
         void addEntity(Entity* entity);
-
         void update(float delta_seconds);
 
     private:
@@ -20,4 +19,5 @@ namespace stirling {
         Entity* m_entities[MAX_NUMBER_OF_ENTITIES];
 		size_t  m_number_of_entities;
     };
+
 }

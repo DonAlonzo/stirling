@@ -15,11 +15,11 @@
 
 namespace stirling {
     
-    class WindowListener;
-    class Window {
+    struct WindowListener;
+
+    struct Window {
         friend WindowListener;
 
-    public:
         Window(int width, int height, MapBlueprint map);
         ~Window();
         Window(Window&&) = default;

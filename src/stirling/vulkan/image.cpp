@@ -63,22 +63,23 @@ namespace stirling {
         }
 
         Image::Image(const Device& device, const VkImageCreateInfo& create_info, const VkMemoryPropertyFlags& properties) :
-            image  (initImage(device, create_info)),
+            Deleter<VkImage>(init(device, create_info), device, vkDestroyImage),
             memory (allocateMemory(device, properties)) {
-            vkBindImageMemory(device, image, memory, 0);
+
+            vkBindImageMemory(device, *this, memory, 0);
         }
 
-        Deleter<VkImage> Image::initImage(const Device& device, const VkImageCreateInfo& create_info) const {
+        VkImage Image::init(const Device& device, const VkImageCreateInfo& create_info) const {
             VkImage image;
             if (vkCreateImage(device, &create_info, nullptr, &image) != VK_SUCCESS) {
                 throw std::runtime_error("Failed to create image.");
             }
-            return Deleter<VkImage>(image, device, vkDestroyImage);
+            return image;
         }
 
         Deleter<VkDeviceMemory> Image::allocateMemory(const Device& device, const VkMemoryPropertyFlags& properties) const {
             VkMemoryRequirements memory_requirements;
-            vkGetImageMemoryRequirements(device, image, &memory_requirements);
+            vkGetImageMemoryRequirements(device, *this, &memory_requirements);
 
             VkMemoryAllocateInfo allocate_info = {};
             allocate_info.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -102,10 +103,6 @@ namespace stirling {
                 }
             }
             throw std::runtime_error("Failed to find suitable memory type.");
-        }
-
-        Image::operator VkImage() const {
-            return image;
         }
 
     }

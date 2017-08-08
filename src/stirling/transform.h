@@ -5,8 +5,8 @@
 
 namespace stirling {
     namespace vulkan {
-        class Transform {
-        public:
+
+        struct Transform {
             Transform();
 			Transform(const glm::mat4& transform);
             Transform(glm::mat4* transform);
@@ -41,5 +41,6 @@ namespace stirling {
 
             void update();
         };
+
     }
 }

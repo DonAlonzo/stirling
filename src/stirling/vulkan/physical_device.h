@@ -6,7 +6,7 @@
 // Stirling
 namespace stirling {
     namespace vulkan {
-        class Surface;
+        struct Surface;
     }
 }
 #include "device.h"
@@ -24,8 +24,7 @@ namespace stirling {
             bool isComplete() const;
         };
 
-        class PhysicalDevice {
-        public:
+        struct PhysicalDevice {
             std::vector<VkExtensionProperties>   extensions;
             VkPhysicalDeviceProperties           properties;
             std::vector<VkQueueFamilyProperties> queue_family_properties;

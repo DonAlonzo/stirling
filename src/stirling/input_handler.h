@@ -5,6 +5,7 @@
 #include <vector>
 
 namespace stirling {
+
     enum class Action{
         NO_ACTION,
         MOVE_FORWARD,
@@ -17,8 +18,7 @@ namespace stirling {
         FULL_SCREEN
     };
 
-    class InputHandler {
-    public:
+    struct InputHandler {
         static InputHandler& getInstance();
 
         void addCommand(Action action, std::function<void()> command);
@@ -36,4 +36,5 @@ namespace stirling {
         InputHandler(const InputHandler&) = delete;
         InputHandler& operator=(const InputHandler&) = delete;
     };
+
 }

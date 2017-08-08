@@ -7,8 +7,8 @@ namespace stirling { struct Component; }
 #include <vector>
 
 namespace stirling {
-    class Entity {
-    public:
+
+    struct Entity {
         Entity();
         Entity(vulkan::Transform&& transform);
 
@@ -25,4 +25,5 @@ namespace stirling {
         Component*        m_components[MAX_NUMBER_OF_COMPONENTS];
         int               m_number_of_components = 0;
     };
+
 }

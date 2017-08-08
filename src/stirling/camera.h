@@ -5,6 +5,7 @@
 #include "entity.h"
 
 namespace stirling {
+
     struct Camera : public Entity {
         Camera(float field_of_view, float aspect_ratio, float near_plane, float far_plane);
 
@@ -34,4 +35,5 @@ namespace stirling {
 
         void updateProjectionMatrix();
     };
+
 }

@@ -7,8 +7,8 @@
 namespace stirling {
     namespace vulkan {
         struct Buffer;
-        class PhysicalDevice;
-        class Semaphore;
+        struct PhysicalDevice;
+        struct Semaphore;
         struct QueueFamilyIndices;
     }
 }
@@ -19,8 +19,8 @@ namespace stirling {
 
 namespace stirling {
     namespace vulkan {
-        class Device {
-        public:
+
+        struct Device {
             Device(const PhysicalDevice& physical_device, VkDevice device, QueueFamilyIndices indices);
 
             operator VkDevice() const;

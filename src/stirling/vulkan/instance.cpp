@@ -17,11 +17,11 @@ namespace stirling {
     namespace vulkan {
 
         Instance::Instance(const std::vector<const char*>& extensions) :
-            m_instance  (initInstance(extensions)),
+            Deleter<VkInstance>(init(extensions), vkDestroyInstance),
             m_validator (initValidator()) {
         }
 
-        Deleter<VkInstance> Instance::initInstance(std::vector<const char*> extensions) const {
+        VkInstance Instance::init(std::vector<const char*> extensions) const {
             if (ENABLE_VALIDATION_LAYERS) {
                 if (!checkValidationLayerSupport()) {
                     throw std::runtime_error("Validation layers requested, but not available.");
@@ -49,15 +49,11 @@ namespace stirling {
             if (vkCreateInstance(&create_info, nullptr, &instance) != VK_SUCCESS) {
                 throw std::runtime_error("Failed to create instance.");
             }
-            return Deleter<VkInstance>(instance, vkDestroyInstance);
+            return instance;
         }
 
         Validator Instance::initValidator() const {
             return ENABLE_VALIDATION_LAYERS ? Validator(*this) : Validator::nullValidator();
-        }
-
-        Instance::operator VkInstance() const {
-            return m_instance;
         }
 
         std::vector<VkLayerProperties> Instance::getLayerProperties() const {
@@ -70,9 +66,9 @@ namespace stirling {
 
         std::vector<PhysicalDevice> Instance::getPhysicalDevices() const {
             uint32_t physical_device_count = 0;
-            vkEnumeratePhysicalDevices(m_instance, &physical_device_count, nullptr);
+            vkEnumeratePhysicalDevices(*this, &physical_device_count, nullptr);
             std::vector<VkPhysicalDevice> physical_devices{physical_device_count};
-            vkEnumeratePhysicalDevices(m_instance, &physical_device_count, physical_devices.data());
+            vkEnumeratePhysicalDevices(*this, &physical_device_count, physical_devices.data());
 
             std::vector<PhysicalDevice> vulkan_physical_devices;
             for (unsigned int i = 0; i < physical_device_count; ++i) {

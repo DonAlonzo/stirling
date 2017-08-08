@@ -4,7 +4,7 @@
 
 namespace stirling {
     namespace vulkan {
-        class Device;
+        struct Device;
     }
 }
 #include "deleter.h"
@@ -13,8 +13,8 @@ namespace stirling {
 
 namespace stirling {
     namespace vulkan {
-        class CommandPool {
-        public:
+
+        struct CommandPool {
             CommandPool(const Device& device, int queue_family_index);
 
             operator const VkCommandPool&() const;
@@ -27,5 +27,6 @@ namespace stirling {
 
             Deleter<VkCommandPool> initCommandPool(int queue_family_index) const;
         };
+
     }
 }

@@ -8,7 +8,7 @@
 
 namespace stirling {
     namespace vulkan {
-        
+
 		struct MemoryMapping {
 			VkDevice       device;
 			VkDeviceMemory memory;

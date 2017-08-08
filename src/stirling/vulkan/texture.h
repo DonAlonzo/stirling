@@ -8,6 +8,7 @@
 
 namespace stirling {
     namespace vulkan {
+
         struct Texture {
             Deleter<VkImageView> image_view;
             Deleter<VkSampler>   sampler;
@@ -18,5 +19,6 @@ namespace stirling {
             Deleter<VkImageView> initImageView(VkDevice device, VkImage image) const;
             Deleter<VkSampler>   initSampler(VkDevice device) const;
         };
+
     }
 }

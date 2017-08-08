@@ -6,9 +6,9 @@
 // Stirling
 namespace stirling {
     namespace vulkan {
-        class Device;
-        class RenderPass;
-        class Surface;
+        struct Device;
+        struct RenderPass;
+        struct Surface;
     }
 }
 #include "deleter.h"
@@ -25,8 +25,7 @@ namespace stirling {
             std::vector<VkPresentModeKHR>   present_modes;
         };
 
-        class Swapchain {
-        public:
+        struct Swapchain {
             Swapchain(const vulkan::Device& device, VkSurfaceKHR surface, VkExtent2D actual_extent, VkSwapchainKHR old_swapchain = VK_NULL_HANDLE);
             
             std::vector<VkFramebuffer> createFramebuffers(const RenderPass& render_pass, VkImageView depth_image_view) const;
