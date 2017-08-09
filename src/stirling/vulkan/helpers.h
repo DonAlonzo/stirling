@@ -28,6 +28,14 @@ namespace stirling {
             vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, surface, &present_mode_count, present_modes.data());
             return present_modes;
         }
+        
+        inline std::vector<VkQueueFamilyProperties> getQueueFamilyProperties(VkPhysicalDevice physical_device) {
+            uint32_t queue_family_count;
+            vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, nullptr);
+            std::vector<VkQueueFamilyProperties> queue_family_properties(queue_family_count);
+            vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, queue_family_properties.data());
+            return queue_family_properties;
+        }
 
     }
 }

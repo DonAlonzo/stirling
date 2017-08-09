@@ -55,7 +55,7 @@ namespace stirling {
         window                    (initWindow(width, height)),
         instance                  (getRequiredExtensions()),
         surface                   (initSurface()),
-        device                    {choosePhysicalDevice(instance.physical_devices), surface, g_device_extensions},
+        device                    (choosePhysicalDevice(instance.physical_devices), surface, g_device_extensions),
         swapchain                 (device, surface, getSize()),
         depth_image               (device, swapchain.extent),
         render_pass               (device, swapchain.image_format, depth_image.image_format),
@@ -78,6 +78,13 @@ namespace stirling {
         camera.moveTo(glm::vec3(2.f, -2.f, -2.f));
         camera.lookAt(glm::vec3(0.f, 0.f, 0.f));
         world.addEntity(&camera);
+    }
+    
+    Window::~Window() {
+        vkDeviceWaitIdle(device);
+
+        glfwDestroyWindow(window);
+        glfwTerminate();
     }
 
     GLFWwindow* Window::initWindow(int width, int height) {
@@ -218,13 +225,6 @@ namespace stirling {
             }
         }
         return command_buffers;
-    }
-
-    Window::~Window() {
-        vkDeviceWaitIdle(device);
-
-        glfwDestroyWindow(window);
-        glfwTerminate();
     }
 
     void Window::addControls() {

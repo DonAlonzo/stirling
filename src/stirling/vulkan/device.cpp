@@ -1,5 +1,6 @@
 #include "device.h"
 #include "buffer.h"
+#include "helpers.h"
 
 #include <assert.h>
 #include <vector>
@@ -32,11 +33,8 @@ namespace stirling {
             vkGetPhysicalDeviceProperties(physical_device, &properties);
 
             // Queue family properties
-            uint32_t queue_family_count;
-            vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, nullptr);
-            assert(queue_family_count > 0);
-            queue_family_properties.resize(queue_family_count);
-            vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_count, queue_family_properties.data());
+            queue_family_properties = getQueueFamilyProperties(physical_device);
+            assert(queue_family_properties.size() > 0);
         }
 
         VkDevice Device::initDevice(VkPhysicalDevice physical_device, QueueFamilyIndices indices, const std::vector<const char*> enabled_extensions) const {
