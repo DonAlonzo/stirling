@@ -4,7 +4,6 @@
 
 #include "deleter.h"
 #include "device.h"
-#include "physical_device.h"
 
 namespace stirling {
     namespace vulkan {

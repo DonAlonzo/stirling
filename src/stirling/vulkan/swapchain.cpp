@@ -1,8 +1,7 @@
-#include "swapchain.h"
-
+#include "helpers.h"
 #include "device.h"
-#include "physical_device.h"
 #include "render_pass.h"
+#include "swapchain.h"
 
 #include <algorithm>
 #include <array>
@@ -14,7 +13,7 @@ namespace stirling {
             device          {device},
             support_details {fetchSupportDetails(device.physical_device, surface)},
             extent          {chooseSwapExtent(support_details.capabilities, actual_extent)},
-            surface_format  {chooseSwapSurfaceFormat(device.physical_device.getSurfaceFormats(surface))},
+            surface_format  {chooseSwapSurfaceFormat(vulkan::getSurfaceFormats(device.physical_device, surface))},
             swapchain       {initSwapchain(device, surface, old_swapchain)},
             images          {device.getSwapchainImages(swapchain, getImageCount())},
             image_format    {surface_format.format},
@@ -32,7 +31,7 @@ namespace stirling {
             create_info.imageArrayLayers = 1;
             create_info.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-            auto indices = device.physical_device.findQueueFamilies(surface);
+            auto indices = device.findQueueFamilies(surface);
             if (indices.graphics_family_index != indices.present_family_index) {
                 uint32_t queue_family_indices[] = {
                     (uint32_t)indices.graphics_family_index,
@@ -47,7 +46,7 @@ namespace stirling {
 
             create_info.preTransform   = support_details.capabilities.currentTransform;
             create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-            create_info.presentMode    = chooseSwapPresentMode(device.physical_device.getSurfacePresentModes(surface));
+            create_info.presentMode    = chooseSwapPresentMode(vulkan::getSurfacePresentModes(device.physical_device, surface));
             create_info.clipped        = VK_TRUE;
             create_info.oldSwapchain   = old_swapchain;
 
@@ -58,11 +57,11 @@ namespace stirling {
             return Deleter<VkSwapchainKHR>(swapchain, device, vkDestroySwapchainKHR);
         }
 
-        SwapchainSupportDetails Swapchain::fetchSupportDetails(const PhysicalDevice& physical_device, VkSurfaceKHR surface) const {
+        SwapchainSupportDetails Swapchain::fetchSupportDetails(VkPhysicalDevice physical_device, VkSurfaceKHR surface) const {
             SwapchainSupportDetails support_details = {};
-            support_details.capabilities  = physical_device.getSurfaceCapabilities(surface);
-            support_details.formats       = physical_device.getSurfaceFormats(surface);
-            support_details.present_modes = physical_device.getSurfacePresentModes(surface);
+            support_details.capabilities  = vulkan::getSurfaceCapabilities(physical_device, surface);
+            support_details.formats       = vulkan::getSurfaceFormats(physical_device, surface);
+            support_details.present_modes = vulkan::getSurfacePresentModes(physical_device, surface);
             return support_details;
         }
     

@@ -33,9 +33,6 @@
     <ClCompile Include="src\stirling\vulkan\instance.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="src\stirling\vulkan\physical_device.cpp">
-      <Filter>Source Files\vulkan</Filter>
-    </ClCompile>
     <ClCompile Include="src\stirling\vulkan\validator.cpp">
       <Filter>Source Files\vulkan</Filter>
     </ClCompile>
@@ -111,9 +108,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\stirling\vulkan\instance.h">
-      <Filter>Header Files\vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\stirling\vulkan\physical_device.h">
       <Filter>Header Files\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\stirling\vulkan\validator.h">
@@ -214,6 +208,9 @@
     </ClInclude>
     <ClInclude Include="src\stirling\util\math.h">
       <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stirling\vulkan\helpers.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

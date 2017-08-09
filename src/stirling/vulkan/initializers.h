@@ -46,7 +46,6 @@ namespace stirling {
                 return create_info;
             }
 
-
         }
     }
 }

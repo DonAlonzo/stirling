@@ -18,7 +18,7 @@ namespace stirling {
 
         struct Instance : Deleter<VkInstance> {
             std::vector<VkLayerProperties> layer_properties;
-            std::vector<PhysicalDevice>    physical_devices;
+            std::vector<VkPhysicalDevice>  physical_devices;
 
             Instance(const std::vector<const char*>& extensions);
 
@@ -28,7 +28,7 @@ namespace stirling {
             VkInstance                     init(std::vector<const char*> extensions) const;
             Validator                      initValidator() const;
             std::vector<VkLayerProperties> getLayerProperties() const;
-            std::vector<PhysicalDevice>    getPhysicalDevices() const;
+            std::vector<VkPhysicalDevice>  getPhysicalDevices() const;
 
             bool checkValidationLayerSupport() const;
         };

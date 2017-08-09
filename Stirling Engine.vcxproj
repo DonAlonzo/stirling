@@ -173,7 +173,6 @@
     <ClCompile Include="src\stirling\vulkan\device.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\stirling\vulkan\instance.cpp" />
-    <ClCompile Include="src\stirling\vulkan\physical_device.cpp" />
     <ClCompile Include="src\stirling\vulkan\swapchain.cpp" />
     <ClCompile Include="src\stirling\window.cpp" />
     <ClCompile Include="src\stirling\vulkan\validator.cpp" />
@@ -195,6 +194,7 @@
     <ClInclude Include="src\stirling\util\io.h" />
     <ClInclude Include="src\stirling\vulkan\deleter.h" />
     <ClInclude Include="src\stirling\vulkan\depth_image.h" />
+    <ClInclude Include="src\stirling\vulkan\helpers.h" />
     <ClInclude Include="src\stirling\vulkan\memory.h" />
     <ClInclude Include="src\stirling\vulkan\model.h" />
     <ClInclude Include="src\stirling\vulkan\image.h" />
@@ -207,7 +207,6 @@
     <ClInclude Include="src\stirling\vulkan\queue.h" />
     <ClInclude Include="src\stirling\vulkan\device.h" />
     <ClInclude Include="src\stirling\vulkan\instance.h" />
-    <ClInclude Include="src\stirling\vulkan\physical_device.h" />
     <ClInclude Include="src\stirling\stirling.h" />
     <ClInclude Include="src\stirling\vulkan\initializers.h" />
     <ClInclude Include="src\stirling\vulkan\swapchain.h" />

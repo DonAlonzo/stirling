@@ -13,7 +13,6 @@
 #include "vulkan/instance.h"
 #include "vulkan/model.h"
 #include "vulkan/pipeline.h"
-#include "vulkan/physical_device.h"
 #include "vulkan/render_pass.h"
 #include "vulkan/swapchain.h"
 #include "vulkan/texture.h"

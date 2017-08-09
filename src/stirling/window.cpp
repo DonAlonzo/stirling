@@ -1,7 +1,7 @@
 #include "window.h"
+#include "vulkan/helpers.h"
 #include "vulkan/initializers.h"
 #include "vulkan/instance.h"
-#include "vulkan/physical_device.h"
 
 #define GLFORCE_RADIANS
 #define GLFORCE_DEPTH_ZERO_TO_ONE
@@ -52,21 +52,20 @@ namespace stirling {
 namespace stirling {
 
     Window::Window(int width, int height, MapBlueprint map_blueprint) :
-        window                    {initWindow(width, height)},
-        instance                  {getRequiredExtensions()},
-        surface                   {initSurface()},
-        physical_device           {choosePhysicalDevice(instance.physical_devices)},
-        device                    {physical_device.createDevice(surface, g_device_extensions)},
-        swapchain                 {device, surface, getSize()},
-        depth_image               {device, swapchain.extent},
-        render_pass               {device, swapchain.image_format, depth_image.image_format},
-        framebuffers              {swapchain.createFramebuffers(render_pass, depth_image.image_view)},
-        image_available_semaphore {device.createSemaphore()},
-        render_finished_semaphore {device.createSemaphore()},
-        camera                    {glm::radians(60.0f), swapchain.extent.width / (float)swapchain.extent.height, 0.01f, 100.0f},
-        map                       {map_blueprint.instantiate(device, render_pass, swapchain.extent)},
-        command_pool              {device.graphics_queue.createCommandPool()},
-        command_buffers           {initCommandBuffers()} {
+        window                    (initWindow(width, height)),
+        instance                  (getRequiredExtensions()),
+        surface                   (initSurface()),
+        device                    {choosePhysicalDevice(instance.physical_devices), surface, g_device_extensions},
+        swapchain                 (device, surface, getSize()),
+        depth_image               (device, swapchain.extent),
+        render_pass               (device, swapchain.image_format, depth_image.image_format),
+        framebuffers              (swapchain.createFramebuffers(render_pass, depth_image.image_view)),
+        image_available_semaphore (device.createSemaphore()),
+        render_finished_semaphore (device.createSemaphore()),
+        camera                    (glm::radians(60.0f), swapchain.extent.width / (float)swapchain.extent.height, 0.01f, 100.0f),
+        map                       (map_blueprint.instantiate(device, render_pass, swapchain.extent)),
+        command_pool              (device.graphics_queue.createCommandPool()),
+        command_buffers           (initCommandBuffers()) {
         
         // Add map entities to world
         for (auto& entity : map.entities) {
@@ -124,7 +123,7 @@ namespace stirling {
         return vulkan::Deleter<VkSurfaceKHR>(surface, instance, vkDestroySurfaceKHR);
     }
 
-    vulkan::PhysicalDevice Window::choosePhysicalDevice(const std::vector<vulkan::PhysicalDevice>& physical_devices) const {
+    VkPhysicalDevice Window::choosePhysicalDevice(const std::vector<VkPhysicalDevice>& physical_devices) const {
         for (const auto& physical_device : physical_devices) {
             if (isPhysicalDeviceSuitable(physical_device)) {
                 return physical_device;
@@ -133,18 +132,25 @@ namespace stirling {
         throw std::runtime_error("Failed to find a suitable GPU.");
     }
 
-    bool Window::isPhysicalDeviceSuitable(const vulkan::PhysicalDevice& physical_device) const {
-        auto indices = physical_device.findQueueFamilies(surface);
+    bool Window::isPhysicalDeviceSuitable(VkPhysicalDevice physical_device) const {
+        auto indices = vulkan::Device::findQueueFamilies(surface, physical_device);
         if (!indices) return false;
+        
+        // Extensions
+        uint32_t extension_count;
+        vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, nullptr);
+        std::vector<VkExtensionProperties> extensions(extension_count);
+        vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, extensions.data());
 
         std::set<std::string> required_extensions(g_device_extensions.begin(), g_device_extensions.end());
-        for (const auto& available_extension : physical_device.extensions) {
+        for (const auto& available_extension : extensions) {
             required_extensions.erase(available_extension.extensionName);
         }
         if (!required_extensions.empty()) return false;
 
-        auto formats = physical_device.getSurfaceFormats(surface);
-        auto present_modes = physical_device.getSurfacePresentModes(surface);
+        auto formats = vulkan::getSurfaceFormats(physical_device, surface);
+        auto present_modes = vulkan::getSurfacePresentModes(physical_device, surface);
+        
         return !formats.empty() && !present_modes.empty();
     }
 

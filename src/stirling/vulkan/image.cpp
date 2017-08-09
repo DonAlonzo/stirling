@@ -1,7 +1,6 @@
 #include "image.h"
 
 #include "device.h"
-#include "physical_device.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "../stb_image.h"

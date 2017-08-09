@@ -1,5 +1,4 @@
 #include "instance.h"
-#include "physical_device.h"
 
 #include <stdexcept>
 
@@ -18,9 +17,9 @@ namespace stirling {
 
         Instance::Instance(const std::vector<const char*>& extensions) :
             Deleter<VkInstance>(init(extensions), vkDestroyInstance),
-            validator        {initValidator()},
-            layer_properties {getLayerProperties()},
-            physical_devices {getPhysicalDevices()}{
+            validator        (initValidator()),
+            layer_properties (getLayerProperties()),
+            physical_devices (getPhysicalDevices()) {
         }
 
         VkInstance Instance::init(std::vector<const char*> extensions) const {
@@ -66,17 +65,12 @@ namespace stirling {
             return instance_layers;
         }
 
-        std::vector<PhysicalDevice> Instance::getPhysicalDevices() const {
+        std::vector<VkPhysicalDevice> Instance::getPhysicalDevices() const {
             uint32_t physical_device_count = 0;
             vkEnumeratePhysicalDevices(*this, &physical_device_count, nullptr);
             std::vector<VkPhysicalDevice> physical_devices{physical_device_count};
             vkEnumeratePhysicalDevices(*this, &physical_device_count, physical_devices.data());
-
-            std::vector<PhysicalDevice> vulkan_physical_devices;
-            for (unsigned int i = 0; i < physical_device_count; ++i) {
-                vulkan_physical_devices.emplace_back(PhysicalDevice(physical_devices[i]));
-            }
-            return vulkan_physical_devices;
+            return physical_devices;
         }
 
         bool Instance::checkValidationLayerSupport() const {

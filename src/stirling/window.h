@@ -35,7 +35,6 @@ namespace stirling {
         GLFWwindow*                   window;
         vulkan::Instance              instance;
         vulkan::Deleter<VkSurfaceKHR> surface;
-        vulkan::PhysicalDevice        physical_device;
         vulkan::Device                device;
         vulkan::Swapchain             swapchain;
         vulkan::DepthImage            depth_image;
@@ -51,8 +50,8 @@ namespace stirling {
 
         GLFWwindow*                   initWindow(int width, int height);
         vulkan::Deleter<VkSurfaceKHR> initSurface() const;
-        vulkan::PhysicalDevice        choosePhysicalDevice(const std::vector<vulkan::PhysicalDevice>& physical_devices) const;
-        bool                          isPhysicalDeviceSuitable(const vulkan::PhysicalDevice& physical_device) const;
+        VkPhysicalDevice              choosePhysicalDevice(const std::vector<VkPhysicalDevice>& physical_devices) const;
+        bool                          isPhysicalDeviceSuitable(VkPhysicalDevice physical_device) const;
         std::vector<VkCommandBuffer>  initCommandBuffers() const;
         void                          addControls();
         void                          recreateSwapchain();

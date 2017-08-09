@@ -47,7 +47,7 @@ namespace stirling {
 
         private:
             Deleter<VkSwapchainKHR>           initSwapchain(const Device& device, VkSurfaceKHR surface, VkSwapchainKHR old_swapchain);
-            SwapchainSupportDetails           fetchSupportDetails(const PhysicalDevice& physical_device, VkSurfaceKHR surface) const;
+            SwapchainSupportDetails           fetchSupportDetails(VkPhysicalDevice physical_device, VkSurfaceKHR surface) const;
             VkSurfaceFormatKHR                chooseSwapSurfaceFormat(std::vector<VkSurfaceFormatKHR> available_formats) const;
             VkPresentModeKHR                  chooseSwapPresentMode(const std::vector<VkPresentModeKHR> available_present_modes) const;
             VkExtent2D                        chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, VkExtent2D actual_extent) const;
