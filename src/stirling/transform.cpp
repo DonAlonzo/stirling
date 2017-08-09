@@ -4,7 +4,7 @@
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-#include <iostream>
+#include <algorithm>
 
 namespace stirling {
     namespace vulkan {
@@ -16,6 +16,10 @@ namespace stirling {
         Transform::Transform(glm::mat4* transform) :
             transform (transform, [](glm::mat4*) { /* don't delete when referenceless */ }) {
 		}
+        
+        Transform::Transform(glm::mat4&& transform) :
+            transform (new glm::mat4(std::move(transform))) {
+        }
 
 		Transform::Transform(const glm::mat4& transform) :
 			transform (new glm::mat4(transform)) {

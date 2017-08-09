@@ -15,6 +15,7 @@ namespace stirling {
 
             Transform();
             Transform(const glm::mat4& transform);
+            Transform(glm::mat4&& transform);
             Transform(glm::mat4* transform);
 
             operator const glm::mat4&();
