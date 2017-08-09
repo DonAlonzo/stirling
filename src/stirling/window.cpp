@@ -394,8 +394,8 @@ namespace stirling {
         InputHandler::instance.onKeyInput(key, scancode, action, mods);
     }
 
-    double last_x, last_y;
     void Window::onMouseMovementInput(double x, double y) {
+        static double last_x, last_y;
         camera.pitch += (y - last_y) * .001f;
         camera.yaw   += (x - last_x) * .001f;
         last_x = x;
