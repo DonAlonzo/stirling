@@ -22,7 +22,7 @@ namespace stirling {
 
         void addComponent(Component* component) = delete;
 
-        void lookAt(const glm::vec3& target, const glm::vec3& up = { 0.f, 0.f, 1.f });
+        void lookAt(const glm::vec3& target);
 
         void update(float delta_seconds) override;
 

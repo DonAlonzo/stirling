@@ -44,10 +44,10 @@ namespace stirling {
         projection_matrix[1][1] *= -1;
     }
 
-	void Camera::lookAt(const glm::vec3& target, const glm::vec3& up) {
+	void Camera::lookAt(const glm::vec3& target) {
         const auto direction = glm::normalize(target - position);
         pitch = asin(direction.y);
-        yaw = atan2(direction.x, direction.z);
+        yaw = -atan2(direction.z, direction.x);
 	}
 
     void Camera::update(float delta_seconds) {
@@ -67,7 +67,7 @@ namespace stirling {
 
         pitch = util::clamp(pitch, -glm::radians(85.f), glm::radians(85.f));
         yaw = fmod(yaw, glm::radians(360.f));
-        
+
         rotation  = glm::angleAxis(yaw, glm::vec3{ 0.f, 1.f, 0.f });
         rotation *= glm::angleAxis(pitch, glm::vec3{ 1.f, 0.f, 0.f } * rotation);
         rotation *= glm::angleAxis(roll, glm::vec3{ 0.f, 0.f, 1.f } * rotation);

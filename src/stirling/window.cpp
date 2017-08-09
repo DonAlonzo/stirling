@@ -75,7 +75,7 @@ namespace stirling {
         addControls();
 
         // Add camera
-        camera.position = { 2.f, -2.f, -2.f };
+        camera.position = { 3.f, -2.2f, 2.3f };
         camera.lookAt({ 0.f, 0.f, 0.f });
         world.addEntity(&camera);
     }
