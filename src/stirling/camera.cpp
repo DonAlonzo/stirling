@@ -19,22 +19,22 @@ namespace stirling {
     }
 
     void Camera::setAspectRatio(float aspect_ratio) {
-        aspect_ratio = aspect_ratio;
+        this->aspect_ratio = aspect_ratio;
         updateProjectionMatrix();
     }
 
     void Camera::setFieldOfView(float field_of_view) {
-        field_of_view = field_of_view;
+        this->field_of_view = field_of_view;
         updateProjectionMatrix();
     }
 
     void Camera::setNearPlane(float near_plane) {
-        near_plane = near_plane;
+        this->near_plane = near_plane;
         updateProjectionMatrix();
     }
 
     void Camera::setFarPlane(float far_plane) {
-        far_plane = far_plane;
+        this->far_plane = far_plane;
         updateProjectionMatrix();
     }
 
