@@ -21,9 +21,9 @@ struct StirlingDemo {
         for (int x = -1; x <= 1; ++x) {
 			for (int y = 0; y <= 0; ++y) {
 				stirling::EntityCreateInfo create_info = {};
-                create_info.position     = glm::vec3(x * 2.f, y * 2.f, 0.f);
-                create_info.rotation     = glm::vec3(0.f, 0.f, 0.f);
-                create_info.scale        = glm::vec3(1.f, 1.f, 1.f);
+                create_info.position     = { x * 2.f, 0.f, y * 2.f };
+                create_info.rotation     = { glm::radians(-90.f), 0.f, 0.f };
+                create_info.scale        = { 1.f, 1.f, 1.f };
                 create_info.model_file   = "models/chalet.obj";
                 create_info.texture_file = "textures/chalet.jpg";
                 create_info.material     = material;
@@ -34,9 +34,9 @@ struct StirlingDemo {
 		for (int x = -1; x <= 1; ++x) {
 			for (int y = 0; y <= 0; ++y) {
 				stirling::EntityCreateInfo create_info = {};
-				create_info.position     = glm::vec3(x * -2.f, y * -1.f, 0.f);
-				create_info.rotation     = glm::vec3(0.f, 0.f, glm::radians(180.f));
-				create_info.scale        = glm::vec3(0.1f, 0.1f, 0.1f);
+				create_info.position     = { x * -2.f, -.5f, y * -1.f };
+				create_info.rotation     = { 0.f, glm::radians(90.f), glm::radians(90.f) };
+				create_info.scale        = { .1f, .1f, .1f };
 				create_info.model_file   = "models/gladiators.obj";
 				create_info.texture_file = "textures/gladiators.jpg";
 				create_info.material     = material;

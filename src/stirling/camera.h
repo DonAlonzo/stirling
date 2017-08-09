@@ -8,8 +8,10 @@ namespace stirling {
 
     struct Camera : Entity {
 		glm::vec3 position;
-		glm::quat rotation;
         glm::mat4 projection_matrix;
+        float pitch = 0.f;
+        float yaw   = 0.;
+        float roll  = 0.f;
 
         Camera(float field_of_view, float aspect_ratio, float near_plane, float far_plane);
 
@@ -25,6 +27,8 @@ namespace stirling {
         void update(float delta_seconds) override;
 
     private:
+		glm::quat rotation;
+
         float aspect_ratio;
         float field_of_view;
         float near_plane;
