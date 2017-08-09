@@ -62,7 +62,7 @@ namespace stirling {
         framebuffers              (swapchain.createFramebuffers(render_pass, depth_image.image_view)),
         image_available_semaphore (device.createSemaphore()),
         render_finished_semaphore (device.createSemaphore()),
-        camera                    (glm::radians(60.0f), swapchain.extent.width / (float)swapchain.extent.height, 0.01f, 100.0f),
+        camera                    (glm::radians(60.f), swapchain.extent.width / (float)swapchain.extent.height, .01f, 100.f),
         map                       (map_blueprint.instantiate(device, render_pass, swapchain.extent)),
         command_pool              (device.graphics_queue.createCommandPool()),
         command_buffers           (initCommandBuffers()) {
@@ -75,8 +75,8 @@ namespace stirling {
         addControls();
 
         // Add camera
-        camera.moveTo(glm::vec3(2.f, -2.f, -2.f));
-        camera.lookAt(glm::vec3(0.f, 0.f, 0.f));
+        camera.position = { 2.f, -2.f, -2.f };
+        camera.lookAt({ 0.f, 0.f, 0.f });
         world.addEntity(&camera);
     }
     

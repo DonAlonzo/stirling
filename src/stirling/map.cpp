@@ -253,9 +253,9 @@ namespace stirling {
             map.entities.emplace_back(Entity{transform});
             auto& entity = map.entities.back();
 
-            entity.transform.moveTo(create_info.position);
-            entity.transform.setRotation(create_info.rotation);
-            entity.transform.setScale(create_info.scale);
+            entity.transform.position = create_info.position;
+            entity.transform.rotation = create_info.rotation;
+            entity.transform.scale    = create_info.scale;
 
             entity.addComponent(physics_component);
         }

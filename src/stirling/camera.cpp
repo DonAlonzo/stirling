@@ -43,10 +43,6 @@ namespace stirling {
         projection_matrix[1][1] *= -1;
     }
 
-	void Camera::moveTo(const glm::vec3& position) {
-		this->position = position;
-	}
-
 	void Camera::lookAt(const glm::vec3& target, const glm::vec3& up) {
 		rotation = glm::lookAt(target, position, up);
 	}

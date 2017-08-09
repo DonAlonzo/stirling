@@ -19,6 +19,7 @@ namespace stirling {
     }
 
     void Entity::update(float delta_seconds) {
+        transform.update();
         for (int i = 0; i < number_of_components; ++i) {
             components[i]->update(this, delta_seconds);
         }

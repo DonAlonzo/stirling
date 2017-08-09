@@ -22,7 +22,7 @@ namespace stirling {
 		}
 
 		CommandPool Queue::createCommandPool() const {
-			return CommandPool(device, family_index);
+			return CommandPool{device, family_index};
 		}
 
 	}

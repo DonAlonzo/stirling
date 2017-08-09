@@ -35,10 +35,10 @@ namespace stirling {
 
             Device(VkPhysicalDevice physical_device, VkSurfaceKHR surface, const std::vector<const char*> enabled_extensions);
             
-            uint32_t                        findQueueFamilyIndex(VkQueueFlagBits queue_flags) const;
-            QueueFamilyIndices              findQueueFamilies(VkSurfaceKHR surface) const;
-            std::vector<VkImage>            getSwapchainImages(VkSwapchainKHR swapchain, uint32_t count) const;
-            Deleter<VkSemaphore>            createSemaphore() const;
+            uint32_t             findQueueFamilyIndex(VkQueueFlagBits queue_flags) const;
+            QueueFamilyIndices   findQueueFamilies(VkSurfaceKHR surface) const;
+            std::vector<VkImage> getSwapchainImages(VkSwapchainKHR swapchain, uint32_t count) const;
+            Deleter<VkSemaphore> createSemaphore() const;
 
             static QueueFamilyIndices findQueueFamilies(VkSurfaceKHR surface, VkPhysicalDevice physical_device);
 
