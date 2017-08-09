@@ -47,7 +47,7 @@ namespace stirling {
 	void Camera::lookAt(const glm::vec3& target) {
         const auto direction = glm::normalize(target - position);
         pitch = asin(direction.y);
-        yaw = -atan2(direction.z, direction.x);
+        yaw = -atan2(direction.x, direction.z);
 	}
 
     void Camera::update(float delta_seconds) {

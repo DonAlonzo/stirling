@@ -143,11 +143,7 @@ namespace stirling {
         auto indices = vulkan::Device::findQueueFamilies(surface, physical_device);
         if (!indices) return false;
         
-        // Extensions
-        uint32_t extension_count;
-        vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, nullptr);
-        std::vector<VkExtensionProperties> extensions(extension_count);
-        vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, extensions.data());
+        auto extensions = vulkan::helpers::getExtensions(physical_device);
 
         std::set<std::string> required_extensions(g_device_extensions.begin(), g_device_extensions.end());
         for (const auto& available_extension : extensions) {
@@ -155,8 +151,8 @@ namespace stirling {
         }
         if (!required_extensions.empty()) return false;
 
-        auto formats = vulkan::getSurfaceFormats(physical_device, surface);
-        auto present_modes = vulkan::getSurfacePresentModes(physical_device, surface);
+        auto formats = vulkan::helpers::getSurfaceFormats(physical_device, surface);
+        auto present_modes = vulkan::helpers::getSurfacePresentModes(physical_device, surface);
         
         return !formats.empty() && !present_modes.empty();
     }

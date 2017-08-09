@@ -13,7 +13,7 @@ namespace stirling {
             device          {device},
             support_details {fetchSupportDetails(device.physical_device, surface)},
             extent          {chooseSwapExtent(support_details.capabilities, actual_extent)},
-            surface_format  {chooseSwapSurfaceFormat(vulkan::getSurfaceFormats(device.physical_device, surface))},
+            surface_format  {chooseSwapSurfaceFormat(helpers::getSurfaceFormats(device.physical_device, surface))},
             swapchain       {initSwapchain(device, surface, old_swapchain)},
             images          {device.getSwapchainImages(swapchain, getImageCount())},
             image_format    {surface_format.format},
@@ -46,7 +46,7 @@ namespace stirling {
 
             create_info.preTransform   = support_details.capabilities.currentTransform;
             create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-            create_info.presentMode    = chooseSwapPresentMode(vulkan::getSurfacePresentModes(device.physical_device, surface));
+            create_info.presentMode    = chooseSwapPresentMode(helpers::getSurfacePresentModes(device.physical_device, surface));
             create_info.clipped        = VK_TRUE;
             create_info.oldSwapchain   = old_swapchain;
 
@@ -59,9 +59,9 @@ namespace stirling {
 
         SwapchainSupportDetails Swapchain::fetchSupportDetails(VkPhysicalDevice physical_device, VkSurfaceKHR surface) const {
             SwapchainSupportDetails support_details = {};
-            support_details.capabilities  = vulkan::getSurfaceCapabilities(physical_device, surface);
-            support_details.formats       = vulkan::getSurfaceFormats(physical_device, surface);
-            support_details.present_modes = vulkan::getSurfacePresentModes(physical_device, surface);
+            support_details.capabilities  = helpers::getSurfaceCapabilities(physical_device, surface);
+            support_details.formats       = helpers::getSurfaceFormats(physical_device, surface);
+            support_details.present_modes = helpers::getSurfacePresentModes(physical_device, surface);
             return support_details;
         }
     

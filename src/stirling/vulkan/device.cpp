@@ -33,7 +33,7 @@ namespace stirling {
             vkGetPhysicalDeviceProperties(physical_device, &properties);
 
             // Queue family properties
-            queue_family_properties = getQueueFamilyProperties(physical_device);
+            queue_family_properties = helpers::getQueueFamilyProperties(physical_device);
             assert(queue_family_properties.size() > 0);
         }
 
