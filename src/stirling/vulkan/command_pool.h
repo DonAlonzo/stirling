@@ -15,12 +15,12 @@ namespace stirling {
     namespace vulkan {
 
         struct CommandPool : Deleter<VkCommandPool>{
-            CommandPool(const Device& device, int queue_family_index);
+            CommandPool(VkDevice device, int queue_family_index);
 
             std::vector<VkCommandBuffer> allocateCommandBuffers(uint32_t count) const;
 
         private:
-            const Device& device;
+            VkDevice device;
 
             VkCommandPool initCommandPool(VkDevice device, int queue_family_index) const;
         };

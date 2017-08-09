@@ -4,7 +4,7 @@
 namespace stirling {
     namespace vulkan {
 
-        CommandPool::CommandPool(const Device& device, int queue_family_index) :
+        CommandPool::CommandPool(VkDevice device, int queue_family_index) :
             Deleter<VkCommandPool>{initCommandPool(device, queue_family_index), device, vkDestroyCommandPool},
             device {device} {
         }

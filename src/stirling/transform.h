@@ -11,7 +11,7 @@ namespace stirling {
         struct Transform {
             glm::vec3 position;
             glm::quat rotation;
-            glm::vec3 scale{ 1.0f };
+            glm::vec3 scale{ 1.f };
 
             Transform();
             Transform(const glm::mat4& transform);
@@ -21,7 +21,7 @@ namespace stirling {
             operator const glm::mat4&();
 			Transform operator*(const Transform&) const;
 
-            void lookAt(const glm::vec3& target, const glm::vec3& center, const glm::vec3& up = glm::vec3(0.0f, 0.0f, 1.0f));
+            void lookAt(const glm::vec3& target, const glm::vec3& center, const glm::vec3& up = { 0.f, 0.f, 1.f });
 
             glm::vec3 left() const;
             glm::vec3 right() const;
